@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
+import { PureScoringEngine } from './pure-scoring.engine';
+import { SCORING_ENGINE } from './scoring-engine.port';
 
-// Scaffolded in Task 1.0. Implemented in Task 6.0 — see
-// tasks/prd-territory-rush-mvp/6_task.md.
-@Module({})
+@Module({
+  providers: [{ provide: SCORING_ENGINE, useClass: PureScoringEngine }],
+  exports: [SCORING_ENGINE],
+})
 export class ScoringModule {}

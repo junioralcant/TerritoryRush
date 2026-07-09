@@ -7,6 +7,7 @@ import {
 } from '../../modules/activities/ports/provider-activity-gateway.port';
 import { toGpsTrace } from '../../modules/matching/matching-aggregation';
 import { MapMatchingService } from '../../modules/matching/matching.service';
+import { TerritoryService } from '../../modules/territory/territory.service';
 
 @Injectable()
 export class ActivityIngestionService {
@@ -14,6 +15,7 @@ export class ActivityIngestionService {
     @Inject(ACTIVITY_REPOSITORY) private readonly activities: ActivityRepository,
     @Inject(PROVIDER_ACTIVITY_GATEWAY) private readonly gateway: ProviderActivityGateway,
     private readonly matching: MapMatchingService,
+    private readonly territory: TerritoryService,
   ) {}
 
   async ingest(job: IngestActivityJob): Promise<void> {
@@ -28,11 +30,26 @@ export class ActivityIngestionService {
     await this.activities.updateStatus(activity.id, 'processing');
     const data = await this.gateway.fetchIngestData(job.userId, job.providerActivityId);
     await this.activities.saveIngestedData(activity.id, data);
-    await this.matching.matchActivityStreets({
+
+    const resolvedStreets = await this.matching.matchActivityStreets({
       activityId: activity.id,
       userId: job.userId,
       trace: toGpsTrace(data.streams),
     });
+
+    const now = new Date().toISOString();
+    await this.territory.scoreAndApply({
+      activityId: activity.id,
+      userId: job.userId,
+      activityDate: data.metrics.startedAt ?? now,
+      now,
+      streets: resolvedStreets.map((street) => ({
+        streetId: street.streetId,
+        cityId: street.cityId,
+        isFirstVisit: street.isFirstVisit,
+      })),
+    });
+
     await this.activities.updateStatus(activity.id, 'processed');
   }
 }

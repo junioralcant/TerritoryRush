@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ScoringModule } from '../scoring/scoring.module';
+import { TerritoryService } from './territory.service';
 
-// Scaffolded in Task 1.0. Implemented in Task 6.0 — see
-// tasks/prd-territory-rush-mvp/6_task.md.
-@Module({})
+@Module({
+  imports: [ScoringModule],
+  providers: [TerritoryService],
+  exports: [TerritoryService],
+})
 export class TerritoryModule {}

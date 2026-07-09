@@ -22,10 +22,10 @@ Implementar o coração do jogo: o motor de pontuação puro (exploração, nova
 
 ## Subtarefas
 
-- [ ] 6.1 Módulo `scoring`: `ScoringEngine` puro cobrindo as quatro categorias de pontos.
-- [ ] 6.2 Persistência de `street_score` e derivação do ranking por rua.
-- [ ] 6.3 Módulo `territory`: `TerritoryService` com transição de posse, histórico e disputas em transação.
-- [ ] 6.4 Integrar scoring + território ao worker (após map-matching) e preencher `points_awarded` em `activity_street`.
+- [x] 6.1 Módulo `scoring`: `ScoringEngine` puro cobrindo as quatro categorias de pontos.
+- [x] 6.2 Persistência de `street_score` e derivação do ranking por rua.
+- [x] 6.3 Módulo `territory`: `TerritoryService` com transição de posse, histórico e disputas em transação.
+- [x] 6.4 Integrar scoring + território ao worker (após map-matching) e preencher `points_awarded` em `activity_street`.
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Interfaces Principais" (`ScoringEngine`, `TerritoryService`)
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — motor puro: primeira vez vs conhecida, bairro/cidade novos, streak 7/30/90, defesa 1sem/1mês/3meses, empate.
-- [ ] Testes de integração — atividade processada → `street_score`/ranking/posse/histórico corretos, em transação.
+- [x] Testes de unidade — motor puro: primeira vez vs conhecida, bairro/cidade novos, streak 7/30/90, defesa 1sem/1mês/3meses, empate.
+- [x] Testes de integração — atividade processada → `street_score`/ranking/posse/histórico corretos, em transação.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>
