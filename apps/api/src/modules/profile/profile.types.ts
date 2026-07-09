@@ -16,6 +16,16 @@ export type CreateRunnerProfileInput = {
   name?: string | null;
 };
 
+export type RunnerProfileAggregates = {
+  totalPoints: number;
+  streetsOwned: number;
+  streetsExplored: number;
+  cityRank: number | null;
+  nationalRank: number;
+};
+
+export type RunnerProfileDetail = RunnerProfile & RunnerProfileAggregates;
+
 export type RunnerProfileRow = {
   id: string;
   user_id: string;

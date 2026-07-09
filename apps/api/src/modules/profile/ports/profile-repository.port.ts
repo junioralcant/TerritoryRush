@@ -1,4 +1,4 @@
-import { CreateRunnerProfileInput, RunnerProfile } from '../profile.types';
+import { CreateRunnerProfileInput, RunnerProfile, RunnerProfileAggregates } from '../profile.types';
 
 export const PROFILE_REPOSITORY = Symbol('PROFILE_REPOSITORY');
 
@@ -10,4 +10,5 @@ export const PROFILE_REPOSITORY = Symbol('PROFILE_REPOSITORY');
 export interface ProfileRepository {
   findByUserId(userId: string): Promise<RunnerProfile | null>;
   create(input: CreateRunnerProfileInput): Promise<RunnerProfile>;
+  loadAggregates(userId: string): Promise<RunnerProfileAggregates>;
 }

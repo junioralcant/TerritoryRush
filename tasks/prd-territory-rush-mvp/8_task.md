@@ -22,10 +22,10 @@ Expor as APIs de leitura que o app consome para mostrar o estado do jogo: detalh
 
 ## Subtarefas
 
-- [ ] 8.1 Endpoint `GET /streets/:id` com detalhe completo da rua.
-- [ ] 8.2 Enriquecer `GET /me/profile` com os agregados do corredor.
-- [ ] 8.3 Módulo `rankings`: materialized views + endpoints de cidade e exploradores.
-- [ ] 8.4 Estratégia de atualização/refresh das materialized views.
+- [x] 8.1 Endpoint `GET /streets/:id` com detalhe completo da rua.
+- [x] 8.2 Enriquecer `GET /me/profile` com os agregados do corredor.
+- [x] 8.3 Módulo `rankings`: materialized views + endpoints de cidade e exploradores.
+- [x] 8.4 Estratégia de atualização/refresh das materialized views.
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Endpoints de API" (`/streets/:id`, `/me/profile`, `/rankings
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — montagem dos contratos de resposta e cálculo dos agregados/ordenções.
-- [ ] Testes de integração — endpoints contra dados semeados no Postgres de teste, incluindo refresh das materialized views.
+- [x] Testes de unidade — montagem dos contratos de resposta e cálculo dos agregados/ordenções.
+- [x] Testes de integração — endpoints contra dados semeados no Postgres de teste, incluindo refresh das materialized views.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa (telas cobertas em 10.0/11.0).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

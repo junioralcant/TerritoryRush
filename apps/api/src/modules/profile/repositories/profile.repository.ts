@@ -2,7 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../../../database/database.constants';
 import { ProfileRepository } from '../ports/profile-repository.port';
-import { CreateRunnerProfileInput, RunnerProfile, RunnerProfileRow } from '../profile.types';
+import {
+  CreateRunnerProfileInput,
+  RunnerProfile,
+  RunnerProfileAggregates,
+  RunnerProfileRow,
+} from '../profile.types';
 
 const SELECT_COLUMNS = `id, user_id, name, city, photo_url, total_distance_m, streak_days, last_active_on, created_at, updated_at`;
 
@@ -49,5 +54,53 @@ export class PgProfileRepository implements ProfileRepository {
       throw new Error(`Failed to create or load runner profile for user ${input.userId}`);
     }
     return existing;
+  }
+
+  async loadAggregates(userId: string): Promise<RunnerProfileAggregates> {
+    const [owned, explored, total, national, primaryCity] = await Promise.all([
+      this.pool.query<{ count: number }>(
+        `select count(*)::int as count from public.street where owner_user_id = $1`,
+        [userId],
+      ),
+      this.pool.query<{ count: number }>(
+        `select count(distinct street_id)::int as count from public.street_score where user_id = $1`,
+        [userId],
+      ),
+      this.pool.query<{ total_points: string }>(
+        `select total_points from public.runner_profile where user_id = $1`,
+        [userId],
+      ),
+      this.pool.query<{ rank: number }>(
+        `select 1 + count(*)::int as rank from public.runner_profile
+         where total_points > coalesce((select total_points from public.runner_profile where user_id = $1), 0)`,
+        [userId],
+      ),
+      this.pool.query<{ city_id: string; count: number }>(
+        `select city_id, count(*)::int as count from public.street
+         where owner_user_id = $1 group by city_id order by count desc limit 1`,
+        [userId],
+      ),
+    ]);
+
+    let cityRank: number | null = null;
+    if (primaryCity.rows[0]) {
+      const { city_id, count } = primaryCity.rows[0];
+      const rankResult = await this.pool.query<{ rank: number }>(
+        `select 1 + count(*)::int as rank from (
+           select owner_user_id, count(*) as owned from public.street
+           where city_id = $1 and owner_user_id is not null group by owner_user_id
+         ) ranked where ranked.owned > $2`,
+        [city_id, count],
+      );
+      cityRank = rankResult.rows[0].rank;
+    }
+
+    return {
+      totalPoints: Number(total.rows[0]?.total_points ?? 0),
+      streetsOwned: owned.rows[0].count,
+      streetsExplored: explored.rows[0].count,
+      cityRank,
+      nationalRank: national.rows[0].rank,
+    };
   }
 }

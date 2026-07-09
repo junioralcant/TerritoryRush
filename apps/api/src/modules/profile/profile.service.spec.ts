@@ -20,6 +20,13 @@ const makeProfile = (overrides: Partial<RunnerProfile> = {}): RunnerProfile => (
 const makeRepository = (): jest.Mocked<ProfileRepository> => ({
   findByUserId: jest.fn(),
   create: jest.fn(),
+  loadAggregates: jest.fn().mockResolvedValue({
+    totalPoints: 0,
+    streetsOwned: 0,
+    streetsExplored: 0,
+    cityRank: null,
+    nationalRank: 1,
+  }),
 });
 
 const USER: AuthUser = { id: 'user-1', email: 'junior@example.com' };

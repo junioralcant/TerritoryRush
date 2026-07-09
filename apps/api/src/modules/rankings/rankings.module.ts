@@ -1,6 +1,15 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
+import { RankingsController } from './rankings.controller';
+import { RankingsService } from './rankings.service';
 
-// Scaffolded in Task 1.0. Implemented in Task 8.0 — see
-// tasks/prd-territory-rush-mvp/8_task.md.
-@Module({})
+// Leaderboards read from materialized views. RankingsService.refresh() must be
+// wired to a scheduled job (cron/worker) to keep the views current; it is not
+// refreshed per-activity to avoid the refresh cost on the hot ingestion path.
+@Module({
+  imports: [AuthModule],
+  controllers: [RankingsController],
+  providers: [RankingsService],
+  exports: [RankingsService],
+})
 export class RankingsModule {}
