@@ -2,6 +2,7 @@ import {
   Global,
   Inject,
   Injectable,
+  Logger,
   Module,
   OnModuleDestroy,
   Provider,
@@ -14,11 +15,16 @@ import { PG_POOL } from './database.constants';
 const pgPoolProvider: Provider = {
   provide: PG_POOL,
   inject: [ConfigService],
-  useFactory: (config: ConfigService<AppConfig, true>): Pool =>
-    new Pool({
+  useFactory: (config: ConfigService<AppConfig, true>): Pool => {
+    const pool = new Pool({
       connectionString: config.get('databaseUrl', { infer: true }),
       max: 10,
-    }),
+    });
+    pool.on('error', (error) => {
+      Logger.error(`Idle Postgres client error: ${error.message}`, error.stack, 'DatabaseModule');
+    });
+    return pool;
+  },
 };
 
 @Injectable()
