@@ -53,3 +53,51 @@ export type Bbox = {
   maxLng: number;
   maxLat: number;
 };
+
+export type RunnerProfileDetail = {
+  id: string;
+  userId: string;
+  name: string | null;
+  city: string | null;
+  photoUrl: string | null;
+  totalDistanceM: number;
+  streakDays: number;
+  totalPoints: number;
+  streetsOwned: number;
+  streetsExplored: number;
+  cityId: string | null;
+  cityRank: number | null;
+  nationalRank: number;
+};
+
+export type CityRankingEntry = {
+  userId: string;
+  name: string | null;
+  rank: number;
+  streetsOwned: number;
+};
+
+export type ExplorerRankingEntry = {
+  userId: string;
+  name: string | null;
+  rank: number;
+  streetsVisited: number;
+};
+
+export type AchievementView = {
+  code: string;
+  title: string;
+  category: string;
+  threshold: number;
+  unlocked: boolean;
+  unlockedAt: string | null;
+};
+
+export type NotificationItem = {
+  id: string;
+  type: string;
+  payload: Record<string, unknown>;
+  sentAt: string | null;
+  readAt: string | null;
+  createdAt: string;
+};

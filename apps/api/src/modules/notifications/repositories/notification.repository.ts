@@ -35,6 +35,14 @@ export class PgNotificationRepository implements NotificationRepository {
     await this.pool.query(`update public.notification set sent_at = now() where id = $1`, [id]);
   }
 
+  async markRead(userId: string, id: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `update public.notification set read_at = now() where id = $1 and user_id = $2 and read_at is null`,
+      [id, userId],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async findUnsent(limit: number): Promise<UnsentNotification[]> {
     const result = await this.pool.query<NotificationRow & { user_id: string }>(
       `select id, user_id, type, payload from public.notification

@@ -24,6 +24,7 @@ const makeRepository = (): jest.Mocked<ProfileRepository> => ({
     totalPoints: 0,
     streetsOwned: 0,
     streetsExplored: 0,
+    cityId: null,
     cityRank: null,
     nationalRank: 1,
   }),

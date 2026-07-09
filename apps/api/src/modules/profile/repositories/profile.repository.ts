@@ -85,6 +85,7 @@ export class PgProfileRepository implements ProfileRepository {
     ]);
 
     let cityRank: number | null = null;
+    const cityId = primaryCity.rows[0]?.city_id ?? null;
     if (primaryCity.rows[0]) {
       const { city_id, count } = primaryCity.rows[0];
       const rankResult = await this.pool.query<{ rank: number }>(
@@ -101,6 +102,7 @@ export class PgProfileRepository implements ProfileRepository {
       totalPoints: Number(total.rows[0]?.total_points ?? 0),
       streetsOwned: owned.rows[0].count,
       streetsExplored: explored.rows[0].count,
+      cityId,
       cityRank,
       nationalRank: national.rows[0].rank,
     };

@@ -24,10 +24,10 @@ Completar a experiência mobile com as telas de identidade e competição: perfi
 
 ## Subtarefas
 
-- [ ] 11.1 `ProfileScreen` consumindo `GET /me/profile`.
-- [ ] 11.2 `RankingScreen` (cidade + exploradores).
-- [ ] 11.3 `AchievementsScreen` consumindo `GET /me/achievements`.
-- [ ] 11.4 `NotificationsCenter` consumindo `GET /me/notifications` + recebimento de push.
+- [x] 11.1 `ProfileScreen` consumindo `GET /me/profile`.
+- [x] 11.2 `RankingScreen` (cidade + exploradores).
+- [x] 11.3 `AchievementsScreen` consumindo `GET /me/achievements`.
+- [x] 11.4 `NotificationsCenter` consumindo `GET /me/notifications` + recebimento de push.
 
 ## Detalhes de Implementação
 
@@ -41,8 +41,8 @@ Ver `techspec.md`: "Arquitetura → Mobile" (telas), "Endpoints de API" consumid
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — render de cada tela por dados de API de fixture e navegação entre elas.
-- [ ] Testes de integração — telas contra respostas de API semeadas.
+- [x] Testes de unidade — render de cada tela por dados de API de fixture e navegação entre elas.
+- [x] Testes de integração — telas contra respostas de API semeadas.
 - [ ] Testes E2E — coberto de forma consolidada na 13.0 (Playwright).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

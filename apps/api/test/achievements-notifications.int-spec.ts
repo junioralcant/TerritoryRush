@@ -152,4 +152,20 @@ describe('Achievements + notifications (integration)', () => {
 
     expect(response.body.length).toBeGreaterThan(0);
   });
+
+  it('POST /me/notifications/:id/read marks a notification as read', async () => {
+    const list = await request(app.getHttpServer())
+      .get('/me/notifications')
+      .set('Authorization', `Bearer ${token(USER)}`)
+      .expect(200);
+    const id = list.body[0].id;
+
+    await request(app.getHttpServer())
+      .post(`/me/notifications/${id}/read`)
+      .set('Authorization', `Bearer ${token(USER)}`)
+      .expect(204);
+
+    const row = await pool.query(`select read_at from public.notification where id = $1`, [id]);
+    expect(row.rows[0].read_at).not.toBeNull();
+  });
 });

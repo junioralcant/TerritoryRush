@@ -1,5 +1,15 @@
 import { ApiClient } from './api-client.port';
-import { Bbox, StravaConnectionState, StreetDetail, StreetSummary } from './types';
+import {
+  AchievementView,
+  Bbox,
+  CityRankingEntry,
+  ExplorerRankingEntry,
+  NotificationItem,
+  RunnerProfileDetail,
+  StravaConnectionState,
+  StreetDetail,
+  StreetSummary,
+} from './types';
 
 export type TokenProvider = () => Promise<string | null>;
 
@@ -37,5 +47,14 @@ export const createHttpApiClient = (baseUrl: string, getToken: TokenProvider): A
       }),
     disconnectStrava: () =>
       request<void>('/integrations/strava/disconnect', { method: 'DELETE' }),
+    getProfile: () => request<RunnerProfileDetail>('/me/profile'),
+    getCityRanking: (cityId) => request<CityRankingEntry[]>(`/rankings/city/${cityId}`),
+    getExplorerRanking: () => request<ExplorerRankingEntry[]>('/rankings/explorers'),
+    getAchievements: () => request<AchievementView[]>('/me/achievements'),
+    getNotifications: () => request<NotificationItem[]>('/me/notifications'),
+    markNotificationRead: (id) =>
+      request<void>(`/me/notifications/${id}/read`, { method: 'POST' }),
+    registerDeviceToken: (token, platform) =>
+      request<void>('/me/device-tokens', { method: 'POST', body: JSON.stringify({ token, platform }) }),
   };
 };

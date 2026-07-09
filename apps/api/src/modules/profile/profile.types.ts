@@ -20,6 +20,7 @@ export type RunnerProfileAggregates = {
   totalPoints: number;
   streetsOwned: number;
   streetsExplored: number;
+  cityId: string | null;
   cityRank: number | null;
   nationalRank: number;
 };

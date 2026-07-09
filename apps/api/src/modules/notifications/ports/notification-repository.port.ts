@@ -11,6 +11,7 @@ export const NOTIFICATION_REPOSITORY = Symbol('NOTIFICATION_REPOSITORY');
 export interface NotificationRepository {
   create(input: CreateNotificationInput): Promise<string>;
   markSent(id: string): Promise<void>;
+  markRead(userId: string, id: string): Promise<boolean>;
   findUnsent(limit: number): Promise<UnsentNotification[]>;
   listForUser(userId: string): Promise<NotificationRecord[]>;
   findDeviceTokens(userId: string): Promise<string[]>;

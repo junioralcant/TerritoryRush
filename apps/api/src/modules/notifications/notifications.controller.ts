@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
@@ -14,6 +14,12 @@ export class NotificationsController {
   @Get('notifications')
   listNotifications(@CurrentUser() user: AuthUser): Promise<NotificationRecord[]> {
     return this.notificationsService.listNotifications(user.id);
+  }
+
+  @Post('notifications/:id/read')
+  @HttpCode(204)
+  async markRead(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    await this.notificationsService.markRead(user.id, id);
   }
 
   @Post('device-tokens')

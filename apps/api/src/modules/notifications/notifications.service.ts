@@ -39,6 +39,10 @@ export class NotificationsService {
     return this.notifications.listForUser(userId);
   }
 
+  markRead(userId: string, id: string): Promise<boolean> {
+    return this.notifications.markRead(userId, id);
+  }
+
   async retryUnsent(limit = 100): Promise<void> {
     const unsent = await this.notifications.findUnsent(limit);
     for (const notification of unsent) {
