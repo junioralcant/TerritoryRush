@@ -1,8 +1,11 @@
 import { ActivityRecord, IngestActivityJob, IngestedActivityData } from '../../modules/activities/activities.types';
 import { ActivityRepository } from '../../modules/activities/ports/activity-repository.port';
 import { ProviderActivityGateway } from '../../modules/activities/ports/provider-activity-gateway.port';
+import { AchievementsService } from '../../modules/achievements/achievements.service';
 import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { MapMatchingService } from '../../modules/matching/matching.service';
+import { NotificationsService } from '../../modules/notifications/notifications.service';
+import { RankingsService } from '../../modules/rankings/rankings.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
 import { ActivityIngestionService } from './activity-ingestion.service';
 
@@ -52,6 +55,10 @@ const makeTerritory = () => ({ scoreAndApply: jest.fn().mockResolvedValue([]) })
 
 const makeAntiCheat = () => ({ evaluate: jest.fn().mockReturnValue({ approved: true }) });
 
+const makeAchievements = () => ({ unlockForRunner: jest.fn().mockResolvedValue([]) });
+const makeNotifications = () => ({ notify: jest.fn(), notifyCityOnce: jest.fn() });
+const makeRankings = () => ({ getUserCityRank: jest.fn().mockResolvedValue(null) });
+
 const makeService = (
   repo: ActivityRepository,
   gateway: ProviderActivityGateway,
@@ -65,6 +72,9 @@ const makeService = (
     antiCheat as unknown as AntiCheatService,
     matching as unknown as MapMatchingService,
     territory as unknown as TerritoryService,
+    makeAchievements() as unknown as AchievementsService,
+    makeNotifications() as unknown as NotificationsService,
+    makeRankings() as unknown as RankingsService,
   );
 
 describe('ActivityIngestionService', () => {

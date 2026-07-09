@@ -44,6 +44,23 @@ export class RankingsService {
     }));
   }
 
+  async getUserCityRank(userId: string, cityId: string): Promise<number | null> {
+    const result = await this.pool.query<{ rank: number | null }>(
+      `with my as (
+         select count(*)::int as owned from public.street where owner_user_id = $1 and city_id = $2
+       )
+       select case when (select owned from my) = 0 then null
+         else 1 + (
+           select count(*)::int from (
+             select owner_user_id, count(*) as owned from public.street
+             where city_id = $2 and owner_user_id is not null group by owner_user_id
+           ) ranked where ranked.owned > (select owned from my)
+         ) end as rank`,
+      [userId, cityId],
+    );
+    return result.rows[0]?.rank ?? null;
+  }
+
   async refresh(): Promise<void> {
     for (const view of RANKING_VIEWS) {
       await this.pool.query(`refresh materialized view concurrently ${view}`);

@@ -22,10 +22,10 @@ Fechar o loop de engajamento: desbloquear conquistas de marcos e disparar notifi
 
 ## Subtarefas
 
-- [ ] 9.1 Módulo `achievements`: catálogo + regras de desbloqueio disparadas após o processamento da atividade.
-- [ ] 9.2 Módulo `notifications`: geração de eventos + cliente Expo Push com retry não-bloqueante.
-- [ ] 9.3 Registro/atualização do device token e persistência de `notification`.
-- [ ] 9.4 `GET /me/achievements` e `GET /me/notifications`.
+- [x] 9.1 Módulo `achievements`: catálogo + regras de desbloqueio disparadas após o processamento da atividade.
+- [x] 9.2 Módulo `notifications`: geração de eventos + cliente Expo Push com retry não-bloqueante.
+- [x] 9.3 Registro/atualização do device token e persistência de `notification`.
+- [x] 9.4 `GET /me/achievements` e `GET /me/notifications`.
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Arquitetura → notifications/achievements", "Modelos de Dad
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — regras de desbloqueio (idempotência), geração de eventos e despacho de push (Expo mockado).
-- [ ] Testes de integração — atividade processada → conquista desbloqueada + notificação registrada + push enfileirado.
+- [x] Testes de unidade — regras de desbloqueio (idempotência), geração de eventos e despacho de push (Expo mockado).
+- [x] Testes de integração — atividade processada → conquista desbloqueada + notificação registrada + push enfileirado.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa (central de notificações coberta em 11.0).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

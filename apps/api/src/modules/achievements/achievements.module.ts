@@ -1,6 +1,17 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
+import { AchievementsController } from './achievements.controller';
+import { AchievementsService } from './achievements.service';
+import { ACHIEVEMENT_REPOSITORY } from './ports/achievement-repository.port';
+import { PgAchievementRepository } from './repositories/achievement.repository';
 
-// Scaffolded in Task 1.0. Implemented in Task 9.0 — see
-// tasks/prd-territory-rush-mvp/9_task.md.
-@Module({})
+@Module({
+  imports: [AuthModule],
+  controllers: [AchievementsController],
+  providers: [
+    AchievementsService,
+    { provide: ACHIEVEMENT_REPOSITORY, useClass: PgAchievementRepository },
+  ],
+  exports: [AchievementsService],
+})
 export class AchievementsModule {}
