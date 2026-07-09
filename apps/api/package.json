@@ -12,6 +12,7 @@
     "test": "jest --config jest.config.ts",
     "test:cov": "jest --config jest.config.ts --coverage",
     "test:int": "jest --config test/jest-int.config.ts --runInBand",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "geo:derive": "ts-node src/modules/geo/derive-cli.ts",
     "strava:subscribe": "ts-node src/modules/integrations/strava/webhook-subscribe-cli.ts"
   },
@@ -26,14 +27,17 @@
     "class-validator": "^0.14.1",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
+    "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@sentry/node": "^8.47.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.2",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.11",
+    "@playwright/test": "^1.49.1",
     "@testcontainers/postgresql": "^10.18.0",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.7",

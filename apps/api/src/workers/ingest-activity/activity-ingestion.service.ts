@@ -13,6 +13,7 @@ import { MapMatchingService } from '../../modules/matching/matching.service';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
 import { RankingsService } from '../../modules/rankings/rankings.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
+import { MetricsService } from '../../observability/metrics.service';
 import { TerritoryChange } from '../../modules/territory/territory.types';
 import { ResolvedStreet } from '../../modules/matching/matching.types';
 
@@ -31,6 +32,7 @@ export class ActivityIngestionService {
     private readonly achievements: AchievementsService,
     private readonly notifications: NotificationsService,
     private readonly rankings: RankingsService,
+    private readonly metrics: MetricsService,
   ) {}
 
   async ingest(job: IngestActivityJob): Promise<void> {
@@ -43,6 +45,7 @@ export class ActivityIngestionService {
       throw new Error(`No ingestion gateway for provider ${job.provider}`);
     }
 
+    const startedAt = Date.now();
     await this.activities.updateStatus(activity.id, 'processing');
     const data = await gateway.fetchIngestData(job.userId, job.providerActivityId);
     await this.activities.saveIngestedData(activity.id, data);
@@ -56,6 +59,9 @@ export class ActivityIngestionService {
     });
     if (!verdict.approved) {
       await this.activities.updateStatus(activity.id, 'rejected', verdict.reason);
+      this.metrics.incAntiCheatRejection();
+      this.metrics.observeIngestionDuration((Date.now() - startedAt) / 1000);
+      this.logger.log(`activity ${activity.id} rejected: ${verdict.reason}`);
       return;
     }
 
@@ -79,6 +85,11 @@ export class ActivityIngestionService {
     });
 
     await this.activities.updateStatus(activity.id, 'processed');
+    this.metrics.incDomainChanges(changes.length);
+    this.metrics.observeIngestionDuration((Date.now() - startedAt) / 1000);
+    this.logger.log(
+      `activity ${activity.id} processed: ${resolvedStreets.length} streets, ${changes.length} ownership changes`,
+    );
     await this.dispatchEngagement(job.userId, changes, resolvedStreets);
   }
 

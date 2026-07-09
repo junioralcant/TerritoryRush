@@ -25,4 +25,5 @@ export const loadConfiguration = (): AppConfig => ({
   garminEnabled: process.env.GARMIN_ENABLED === 'true',
   garminClientId: process.env.GARMIN_CLIENT_ID ?? '',
   garminClientSecret: process.env.GARMIN_CLIENT_SECRET ?? '',
+  sentryDsn: process.env.SENTRY_DSN ?? '',
 });

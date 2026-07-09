@@ -119,6 +119,9 @@ describe('Ingestion pipeline (integration): webhook -> BullMQ -> worker -> DB', 
     expect(Number(row.rows[0].distance_m)).toBe(5000);
     expect(row.rows[0].moving_time_s).toBe(1500);
     expect(row.rows[0].gps_streams.latlng).toHaveLength(2);
+
+    const metrics = await request(app.getHttpServer()).get('/metrics').expect(200);
+    expect(metrics.text).toMatch(/territory_rush_ingestion_job_duration_seconds_count \d/);
   });
 
   it('exposes the processed activity via GET /activities?status=processed', async () => {

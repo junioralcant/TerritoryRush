@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AppConfig } from './config/app-config.type';
+import { initSentry } from './observability/sentry';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +11,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   const config = app.get(ConfigService<AppConfig, true>);
+  initSentry(config.get('sentryDsn', { infer: true }));
   const port = config.get('port', { infer: true });
 
   await app.listen(port);

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ActivityMetrics, GpsStreams } from '../../../activities/activities.types';
+import { MetricsService } from '../../../../observability/metrics.service';
 import { StravaActivityClient } from '../ports/strava-activity-client.port';
 
 const STRAVA_API = 'https://www.strava.com/api/v3';
@@ -34,10 +35,19 @@ const ensureOk = (response: Response, action: string): void => {
 
 @Injectable()
 export class HttpStravaActivityClient implements StravaActivityClient {
+  constructor(private readonly metrics: MetricsService) {}
+
+  private recordRateLimit(response: Response): void {
+    if (response.status === 429) {
+      this.metrics.incStravaRateLimitHit();
+    }
+  }
+
   async fetchActivity(providerActivityId: string, accessToken: string): Promise<ActivityMetrics> {
     const response = await fetch(`${STRAVA_API}/activities/${providerActivityId}`, {
       headers: authHeaders(accessToken),
     });
+    this.recordRateLimit(response);
     ensureOk(response, 'fetch activity');
     const data = (await response.json()) as StravaActivityPayload;
     const distanceM = data.distance ?? null;
@@ -59,6 +69,7 @@ export class HttpStravaActivityClient implements StravaActivityClient {
       `${STRAVA_API}/activities/${providerActivityId}/streams?keys=latlng,time,heartrate&key_by_type=true`,
       { headers: authHeaders(accessToken) },
     );
+    this.recordRateLimit(response);
     ensureOk(response, 'fetch streams');
     const data = (await response.json()) as StravaStreamSet;
     return {

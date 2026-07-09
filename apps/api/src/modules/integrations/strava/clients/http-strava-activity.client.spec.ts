@@ -1,4 +1,8 @@
 import { HttpStravaActivityClient } from './http-strava-activity.client';
+import { MetricsService } from '../../../../observability/metrics.service';
+
+const metrics = { incStravaRateLimitHit: jest.fn() } as unknown as MetricsService;
+const makeClient = (): HttpStravaActivityClient => new HttpStravaActivityClient(metrics);
 
 const jsonResponse = (
   body: unknown,
@@ -19,7 +23,7 @@ describe('HttpStravaActivityClient', () => {
       jsonResponse({ distance: 5000, moving_time: 1500, average_speed: 4, start_date: '2026-07-09T10:00:00Z' }),
     );
 
-    const metrics = await new HttpStravaActivityClient().fetchActivity('555', 'token');
+    const metrics = await makeClient().fetchActivity('555', 'token');
 
     expect(metrics).toEqual({
       distanceM: 5000,
@@ -34,13 +38,13 @@ describe('HttpStravaActivityClient', () => {
       jsonResponse({ distance: 5000, moving_time: 1500, start_date: '2026-07-09T10:00:00Z' }),
     );
 
-    expect((await new HttpStravaActivityClient().fetchActivity('555', 'token')).avgPaceSKm).toBe(300);
+    expect((await makeClient().fetchActivity('555', 'token')).avgPaceSKm).toBe(300);
   });
 
   it('returns a null pace when distance is missing or zero', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({ moving_time: 1500 }));
 
-    expect((await new HttpStravaActivityClient().fetchActivity('555', 'token')).avgPaceSKm).toBeNull();
+    expect((await makeClient().fetchActivity('555', 'token')).avgPaceSKm).toBeNull();
   });
 
   it('maps the key-by-type stream set, defaulting missing streams', async () => {
@@ -48,7 +52,7 @@ describe('HttpStravaActivityClient', () => {
       jsonResponse({ latlng: { data: [[1, 2], [3, 4]] }, time: { data: [0, 60] } }),
     );
 
-    const streams = await new HttpStravaActivityClient().fetchStreams('555', 'token');
+    const streams = await makeClient().fetchStreams('555', 'token');
 
     expect(streams).toEqual({ latlng: [[1, 2], [3, 4]], time: [0, 60], heartrate: undefined });
   });
@@ -56,7 +60,7 @@ describe('HttpStravaActivityClient', () => {
   it('throws a rate-limit error surfacing retry-after on 429', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({}, { ok: false, status: 429, retryAfter: '60' }));
 
-    await expect(new HttpStravaActivityClient().fetchStreams('555', 'token')).rejects.toThrow(
+    await expect(makeClient().fetchStreams('555', 'token')).rejects.toThrow(
       'rate limited (retry-after=60)',
     );
   });
@@ -64,6 +68,6 @@ describe('HttpStravaActivityClient', () => {
   it('throws on a generic non-ok status', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({}, { ok: false, status: 404 }));
 
-    await expect(new HttpStravaActivityClient().fetchActivity('555', 'token')).rejects.toThrow('status 404');
+    await expect(makeClient().fetchActivity('555', 'token')).rejects.toThrow('status 404');
   });
 });

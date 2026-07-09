@@ -14,4 +14,4 @@
 - [x] 10.0 App mobile — Auth + conexão Strava + mapa territorial
 - [x] 11.0 App mobile — perfil, ranking, conquistas, central de notificações
 - [x] 12.0 Garmin atrás de feature flag
-- [ ] 13.0 Endurecimento: E2E (Playwright) + observabilidade
+- [x] 13.0 Endurecimento: E2E (Playwright) + observabilidade

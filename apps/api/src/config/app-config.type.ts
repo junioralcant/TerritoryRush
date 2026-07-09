@@ -13,4 +13,5 @@ export type AppConfig = {
   garminEnabled: boolean;
   garminClientId: string;
   garminClientSecret: string;
+  sentryDsn: string;
 };

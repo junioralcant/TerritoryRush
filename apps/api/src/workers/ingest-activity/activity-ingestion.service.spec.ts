@@ -8,7 +8,14 @@ import { MapMatchingService } from '../../modules/matching/matching.service';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
 import { RankingsService } from '../../modules/rankings/rankings.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
+import { MetricsService } from '../../observability/metrics.service';
 import { ActivityIngestionService } from './activity-ingestion.service';
+
+const noopMetrics = {
+  incAntiCheatRejection: jest.fn(),
+  observeIngestionDuration: jest.fn(),
+  incDomainChanges: jest.fn(),
+} as unknown as MetricsService;
 
 const JOB: IngestActivityJob = { userId: 'user-1', provider: 'strava', providerActivityId: '555' };
 
@@ -83,6 +90,7 @@ const makeService = (
     (engagement.achievements ?? makeAchievements()) as unknown as AchievementsService,
     (engagement.notifications ?? makeNotifications()) as unknown as NotificationsService,
     (engagement.rankings ?? makeRankings()) as unknown as RankingsService,
+    noopMetrics,
   );
 
 describe('ActivityIngestionService', () => {

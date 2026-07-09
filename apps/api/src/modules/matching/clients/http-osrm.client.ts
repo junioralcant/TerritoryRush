@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../../config/app-config.type';
+import { MetricsService } from '../../../observability/metrics.service';
 import { CircuitBreaker } from '../circuit-breaker';
 import { GpsPoint, MatchedEdge, OsrmMatchResponse } from '../matching.types';
 import { OsrmClient } from '../ports/osrm-client.port';
@@ -15,7 +16,10 @@ export class HttpOsrmClient implements OsrmClient {
   private readonly baseUrl: string;
   private readonly breaker = new CircuitBreaker(CIRCUIT_THRESHOLD, CIRCUIT_COOLDOWN_MS);
 
-  constructor(config: ConfigService<AppConfig, true>) {
+  constructor(
+    config: ConfigService<AppConfig, true>,
+    private readonly metrics: MetricsService,
+  ) {
     this.baseUrl = config.get('osrmUrl', { infer: true });
   }
 
@@ -42,8 +46,10 @@ export class HttpOsrmClient implements OsrmClient {
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), OSRM_TIMEOUT_MS);
+    const startedAt = Date.now();
     try {
       const response = await fetch(url, { signal: controller.signal });
+      this.metrics.observeOsrmLatency((Date.now() - startedAt) / 1000);
       if (!response.ok) {
         throw new Error(`OSRM match failed with status ${response.status}`);
       }

@@ -22,10 +22,10 @@ Consolidar a qualidade do MVP: testes ponta a ponta com Playwright cobrindo os f
 
 ## Subtarefas
 
-- [ ] 13.1 Configurar Playwright e ambiente E2E (API + app + serviços de apoio com dados semeados).
-- [ ] 13.2 Fluxos E2E dos caminhos-chave do PRD.
-- [ ] 13.3 Logs estruturados + correlação e integração com Sentry.
-- [ ] 13.4 Endpoint `/metrics` Prometheus com as métricas da techspec.
+- [x] 13.1 Configurar Playwright e ambiente E2E (API + app + serviços de apoio com dados semeados).
+- [x] 13.2 Fluxos E2E dos caminhos-chave do PRD.
+- [x] 13.3 Logs estruturados + correlação e integração com Sentry.
+- [x] 13.4 Endpoint `/metrics` Prometheus com as métricas da techspec.
 
 ## Detalhes de Implementação
 
@@ -39,9 +39,9 @@ Ver `techspec.md`: "Abordagem de Testes → Testes de E2E", "Monitoramento e Obs
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — utilitários de instrumentação/formatação de métricas e logs.
-- [ ] Testes de integração — smoke do endpoint `/metrics` e emissão de logs/erros.
-- [ ] Testes E2E — fluxos-chave em Playwright (frontend + backend).
+- [x] Testes de unidade — utilitários de instrumentação/formatação de métricas e logs.
+- [x] Testes de integração — smoke do endpoint `/metrics` e emissão de logs/erros.
+- [x] Testes E2E — fluxos-chave em Playwright (frontend + backend).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>
 
