@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -37,7 +38,15 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Map">
+          <Stack.Screen
+            name="Map"
+            options={({ navigation }) => ({
+              title: 'Território',
+              headerRight: () => (
+                <Button title="Conexões" onPress={() => navigation.navigate('Connections')} />
+              ),
+            })}
+          >
             {() => <MapScreen api={api} bbox={DEFAULT_BBOX} />}
           </Stack.Screen>
           <Stack.Screen name="Connections">

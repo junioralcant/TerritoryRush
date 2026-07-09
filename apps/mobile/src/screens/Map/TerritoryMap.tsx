@@ -1,4 +1,4 @@
-import MapLibreGL, { Camera, LineLayer, MapView, ShapeSource } from '@maplibre/maplibre-react-native';
+import { Camera, LineLayer, MapView, ShapeSource } from '@maplibre/maplibre-react-native';
 import { StreetSummary } from '../../services/api/types';
 import { toStreetFeatureCollection } from './streetFeatures';
 
@@ -10,7 +10,6 @@ export type TerritoryMapProps = {
 const OSM_STYLE_URL = 'https://demotiles.maplibre.org/style.json';
 
 export const TerritoryMap = ({ streets, onSelectStreet }: TerritoryMapProps) => {
-  void MapLibreGL;
   const features = toStreetFeatureCollection(streets);
 
   return (

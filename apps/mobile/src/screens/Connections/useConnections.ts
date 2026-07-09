@@ -9,6 +9,7 @@ export type UseConnectionsOptions = {
 export type UseConnectionsResult = {
   connection: StravaConnectionState | null;
   loading: boolean;
+  error: string | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
 };
@@ -16,11 +17,15 @@ export type UseConnectionsResult = {
 export const useConnections = (api: ApiClient, options: UseConnectionsOptions): UseConnectionsResult => {
   const [connection, setConnection] = useState<StravaConnectionState | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       setConnection(await api.getStravaConnection());
+    } catch (cause) {
+      setError((cause as Error).message);
     } finally {
       setLoading(false);
     }
@@ -31,17 +36,27 @@ export const useConnections = (api: ApiClient, options: UseConnectionsOptions): 
   }, [refresh]);
 
   const connect = useCallback(async () => {
-    const code = await options.startStravaAuth();
-    if (!code) {
-      return;
+    setError(null);
+    try {
+      const code = await options.startStravaAuth();
+      if (!code) {
+        return;
+      }
+      setConnection(await api.connectStrava(code));
+    } catch (cause) {
+      setError((cause as Error).message);
     }
-    setConnection(await api.connectStrava(code));
   }, [api, options]);
 
   const disconnect = useCallback(async () => {
-    await api.disconnectStrava();
-    await refresh();
+    setError(null);
+    try {
+      await api.disconnectStrava();
+      await refresh();
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
   }, [api, refresh]);
 
-  return { connection, loading, connect, disconnect };
+  return { connection, loading, error, connect, disconnect };
 };

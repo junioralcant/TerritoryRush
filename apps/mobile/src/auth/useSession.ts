@@ -33,7 +33,10 @@ export const useSession = (): UseSessionResult => {
         options: { redirectTo, skipBrowserRedirect: true },
       });
       if (data.url) {
-        await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+        if (result.type === 'success') {
+          await supabase.auth.exchangeCodeForSession(result.url);
+        }
       }
     } finally {
       setAuthenticating(false);

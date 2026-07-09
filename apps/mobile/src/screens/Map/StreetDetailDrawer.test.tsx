@@ -13,7 +13,7 @@ const detail: StreetDetail = {
     { userId: 'u1', name: 'Ana', points: 200, rank: 1 },
     { userId: 'u2', name: 'Bruno', points: 100, rank: 2 },
   ],
-  ownershipHistory: [],
+  ownershipHistory: [{ userId: 'u1', name: 'Ana', acquiredAt: '2026-07-01T00:00:00Z', lostAt: null }],
 };
 
 describe('StreetDetailDrawer', () => {
@@ -26,6 +26,7 @@ describe('StreetDetailDrawer', () => {
     expect(screen.getByTestId('drawer-disputes')).toHaveTextContent('Disputas: 3');
     expect(screen.getByTestId('rank-1')).toHaveTextContent(/Ana/);
     expect(screen.getByTestId('rank-2')).toHaveTextContent(/Bruno/);
+    expect(screen.getByTestId('history-0')).toHaveTextContent(/atual/);
   });
 
   it('shows the ownerless state', () => {

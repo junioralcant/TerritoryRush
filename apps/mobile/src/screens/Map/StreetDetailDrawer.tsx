@@ -22,5 +22,12 @@ export const StreetDetailDrawer = ({ detail }: StreetDetailDrawerProps) => (
         </Text>
       ))}
     </View>
+    <View accessibilityLabel="Histórico de domínio">
+      {detail.ownershipHistory.map((entry, index) => (
+        <Text key={`${entry.userId}-${entry.acquiredAt}`} testID={`history-${index}`}>
+          {`${entry.name ?? entry.userId}: ${entry.acquiredAt}${entry.lostAt ? ` → ${entry.lostAt}` : ' (atual)'}`}
+        </Text>
+      ))}
+    </View>
   </ScrollView>
 );
