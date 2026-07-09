@@ -125,4 +125,14 @@ describe('Scoring + territory flow (integration)', () => {
     );
     expect(open.rows).toHaveLength(1);
   });
+
+  it('is idempotent: reprocessing a scored activity does not double-count', async () => {
+    const changes = await apply('00000000-0000-0000-0000-0000000000b2', USER_B, false);
+
+    expect(changes).toEqual([]);
+    const scoreB = await pool.query(`select points from public.street_score where street_id = $1 and user_id = $2`, [STREET, USER_B]);
+    expect(Number(scoreB.rows[0].points)).toBe(110);
+    const street = await pool.query(`select disputes_count from public.street where id = $1`, [STREET]);
+    expect(street.rows[0].disputes_count).toBe(1);
+  });
 });

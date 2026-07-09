@@ -36,6 +36,16 @@ export class TerritoryService {
     client: PoolClient,
     input: ScoreActivityInput,
   ): Promise<TerritoryChange[]> {
+    const alreadyScored = (
+      await client.query<{ scored_at: Date | null }>(
+        `select scored_at from public.activity where id = $1 for update`,
+        [input.activityId],
+      )
+    ).rows[0]?.scored_at;
+    if (alreadyScored) {
+      return [];
+    }
+
     await client.query(
       `insert into public.runner_profile (user_id) values ($1) on conflict (user_id) do nothing`,
       [input.userId],
@@ -90,6 +100,9 @@ export class TerritoryService {
 
     const result = this.engine.compute({
       streets: scoringStreets,
+      // Neighborhood bonuses are supported by the engine but deferred: the geo
+      // model has cities, not neighborhoods. Wire newNeighborhoods when suburb
+      // boundaries land in geo (see infra/geo/import).
       newNeighborhoods: 0,
       newCities,
       streakDays: streak.streakDays,
@@ -128,6 +141,11 @@ export class TerritoryService {
         changes.push(change);
       }
     }
+
+    await client.query(`update public.activity set scored_at = $2 where id = $1`, [
+      input.activityId,
+      input.now,
+    ]);
     return changes;
   }
 
@@ -144,7 +162,7 @@ export class TerritoryService {
     ).rows.map((row) => ({ userId: row.user_id, points: Number(row.points) }));
     const currentOwner =
       (await client.query<{ owner_user_id: string | null }>(
-        `select owner_user_id from public.street where id = $1`,
+        `select owner_user_id from public.street where id = $1 for update`,
         [streetId],
       )).rows[0]?.owner_user_id ?? null;
 
