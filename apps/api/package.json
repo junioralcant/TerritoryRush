@@ -11,7 +11,8 @@
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "jest --config jest.config.ts",
     "test:cov": "jest --config jest.config.ts --coverage",
-    "test:int": "jest --config test/jest-int.config.ts --runInBand"
+    "test:int": "jest --config test/jest-int.config.ts --runInBand",
+    "geo:derive": "ts-node src/modules/geo/derive-cli.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.11",

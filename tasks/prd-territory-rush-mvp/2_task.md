@@ -22,10 +22,10 @@ Importar a rede viária do OpenStreetMap para o PostGIS e modelar a unidade terr
 
 ## Subtarefas
 
-- [ ] 2.1 Script/rotina de importação do OSM para PostGIS e derivação das ruas nomeadas agregadas por cidade.
-- [ ] 2.2 Migração das tabelas `street`, `city_ref` e schema `geo` com índices espaciais.
-- [ ] 2.3 Módulo `geo`: consulta por bbox (`ST_Intersects`/índice GIST) e resolução de rua por nome+cidade.
-- [ ] 2.4 Endpoint `GET /streets?bbox=` com contrato de resposta para o mapa.
+- [x] 2.1 Script/rotina de importação do OSM para PostGIS e derivação das ruas nomeadas agregadas por cidade.
+- [x] 2.2 Migração das tabelas `street`, `city_ref` e schema `geo` com índices espaciais.
+- [x] 2.3 Módulo `geo`: consulta por bbox (`ST_Intersects`/índice GIST) e resolução de rua por nome+cidade.
+- [x] 2.4 Endpoint `GET /streets?bbox=` com contrato de resposta para o mapa.
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Modelos de Dados" (`street`, `city_ref`, schema `geo`), "Dec
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — agregação por (nome, cidade), fallback de via sem nome, montagem do contrato de resposta.
-- [ ] Testes de integração — importação de um extrato pequeno + consulta por bbox contra PostGIS de teste.
+- [x] Testes de unidade — agregação por (nome, cidade), fallback de via sem nome, montagem do contrato de resposta.
+- [x] Testes de integração — importação de um extrato pequeno + consulta por bbox contra PostGIS de teste.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

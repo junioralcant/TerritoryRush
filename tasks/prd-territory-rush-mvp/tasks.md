@@ -3,7 +3,7 @@
 ## Tarefas
 
 - [x] 1.0 Fundações do backend + Supabase + Auth + Perfil
-- [ ] 2.0 Malha viária OSM (módulo `geo`) + `GET /streets?bbox=`
+- [x] 2.0 Malha viária OSM (módulo `geo`) + `GET /streets?bbox=`
 - [ ] 3.0 Integração Strava (OAuth + conexão/desconexão + webhook)
 - [ ] 4.0 Pipeline assíncrono de ingestão (fila + worker + streams + status)
 - [ ] 5.0 Map-matching OSRM + resolução em ruas nomeadas
