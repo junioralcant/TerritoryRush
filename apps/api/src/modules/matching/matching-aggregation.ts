@@ -1,16 +1,17 @@
 import { GpsStreams } from '../activities/activities.types';
-import { AggregatedMatch, GpsPoint, MatchedEdge } from './matching.types';
+import { AggregatedMatch, AnnotatedEdge, GpsPoint } from './matching.types';
 
 export const toGpsTrace = (streams: GpsStreams): GpsPoint[] =>
   streams.latlng.map(([lat, lng], index) => ({ lat, lng, t: streams.time[index] ?? index }));
 
 /**
- * Groups matched edges by street name, summing length so repeated segments of the
- * same street in one activity collapse into a single entry. Unnamed edges (OSRM
- * returns an empty name for unnamed ways) are dropped — they cannot be attributed
- * to a named street, which is the game's territorial unit.
+ * Groups edges (already annotated with their city) by (city, street name), summing
+ * length so repeated segments of the same street collapse into one entry while a
+ * homonymous street in another city stays separate. Unnamed edges (OSRM returns an
+ * empty name for unnamed ways) are dropped — they cannot be attributed to a named
+ * street, which is the game's territorial unit.
  */
-export const aggregateMatchedEdges = (edges: MatchedEdge[]): AggregatedMatch[] => {
+export const aggregateByCityAndName = (edges: AnnotatedEdge[]): AggregatedMatch[] => {
   const groups = new Map<string, AggregatedMatch>();
 
   for (const edge of edges) {
@@ -18,11 +19,12 @@ export const aggregateMatchedEdges = (edges: MatchedEdge[]): AggregatedMatch[] =
     if (!streetName) {
       continue;
     }
-    const existing = groups.get(streetName);
+    const key = `${edge.cityId}::${streetName}`;
+    const existing = groups.get(key);
     if (existing) {
       existing.totalLengthM += edge.lengthM;
     } else {
-      groups.set(streetName, { streetName, totalLengthM: edge.lengthM, coordinate: edge.coordinate });
+      groups.set(key, { cityId: edge.cityId, streetName, totalLengthM: edge.lengthM });
     }
   }
 

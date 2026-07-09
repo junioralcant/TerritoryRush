@@ -1,11 +1,11 @@
 import { GpsStreams } from '../activities/activities.types';
-import { aggregateMatchedEdges, toGpsTrace } from './matching-aggregation';
-import { MatchedEdge } from './matching.types';
+import { aggregateByCityAndName, toGpsTrace } from './matching-aggregation';
+import { AnnotatedEdge } from './matching.types';
 
-const edge = (overrides: Partial<MatchedEdge> = {}): MatchedEdge => ({
+const edge = (overrides: Partial<AnnotatedEdge> = {}): AnnotatedEdge => ({
+  cityId: 'city-a',
   streetName: 'Rua Maranhão',
   lengthM: 100,
-  coordinate: [-46.63, -23.55],
   ...overrides,
 });
 
@@ -26,22 +26,29 @@ describe('toGpsTrace', () => {
   });
 });
 
-describe('aggregateMatchedEdges', () => {
-  it('collapses repeated segments of the same street, summing length', () => {
-    const result = aggregateMatchedEdges([edge({ lengthM: 100 }), edge({ lengthM: 50 })]);
+describe('aggregateByCityAndName', () => {
+  it('collapses repeated segments of the same street in a city, summing length', () => {
+    const result = aggregateByCityAndName([edge({ lengthM: 100 }), edge({ lengthM: 50 })]);
 
     expect(result).toHaveLength(1);
     expect(result[0].totalLengthM).toBe(150);
   });
 
   it('keeps distinct streets separate', () => {
-    const result = aggregateMatchedEdges([edge(), edge({ streetName: 'Avenida Brasil' })]);
+    const result = aggregateByCityAndName([edge(), edge({ streetName: 'Avenida Brasil' })]);
 
     expect(result.map((match) => match.streetName).sort()).toEqual(['Avenida Brasil', 'Rua Maranhão']);
   });
 
+  it('keeps a homonymous street in another city separate', () => {
+    const result = aggregateByCityAndName([edge({ cityId: 'city-a' }), edge({ cityId: 'city-b' })]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map((match) => match.cityId).sort()).toEqual(['city-a', 'city-b']);
+  });
+
   it('drops unnamed edges (empty or whitespace names)', () => {
-    const result = aggregateMatchedEdges([edge({ streetName: '' }), edge({ streetName: '   ' }), edge()]);
+    const result = aggregateByCityAndName([edge({ streetName: '' }), edge({ streetName: '   ' }), edge()]);
 
     expect(result).toHaveLength(1);
     expect(result[0].streetName).toBe('Rua Maranhão');

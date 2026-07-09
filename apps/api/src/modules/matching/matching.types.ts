@@ -10,10 +10,16 @@ export type MatchedEdge = {
   coordinate: [number, number];
 };
 
+export type AnnotatedEdge = {
+  cityId: string;
+  streetName: string;
+  lengthM: number;
+};
+
 export type AggregatedMatch = {
+  cityId: string;
   streetName: string;
   totalLengthM: number;
-  coordinate: [number, number];
 };
 
 export type MatchActivityInput = {

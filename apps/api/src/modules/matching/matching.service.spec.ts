@@ -58,6 +58,25 @@ describe('MapMatchingService', () => {
     });
   });
 
+  it('keeps a homonymous street in another city as a distinct match', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockImplementation(async (lng: number) => (lng === 0 ? 'city-a' : 'city-b'));
+    streets.findByNameAndCity.mockImplementation(async (cityId: string) =>
+      streetRow({ id: `street-${cityId}`, city_id: cityId }),
+    );
+    const osrm = makeOsrm([
+      { streetName: 'Rua Maranhão', lengthM: 100, coordinate: [0, 0] },
+      { streetName: 'Rua Maranhão', lengthM: 40, coordinate: [10, 10] },
+    ]);
+
+    const resolved = await new MapMatchingService(osrm, streets, activityStreets).matchActivityStreets(INPUT);
+
+    expect(resolved).toHaveLength(2);
+    expect(resolved.map((street) => street.cityId).sort()).toEqual(['city-a', 'city-b']);
+    expect(activityStreets.upsert).toHaveBeenCalledTimes(2);
+  });
+
   it('marks isFirstVisit false when the user already visited the street', async () => {
     const streets = makeStreets();
     const activityStreets = makeActivityStreets();
