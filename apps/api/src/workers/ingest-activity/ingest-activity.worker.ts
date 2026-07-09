@@ -4,6 +4,7 @@ import { Job, Worker } from 'bullmq';
 import { AppConfig } from '../../config/app-config.type';
 import { IngestActivityJob } from '../../modules/activities/activities.types';
 import { buildRedisConnection, INGEST_QUEUE_NAME } from '../../modules/activities/queue/redis';
+import { captureException } from '../../observability/sentry';
 import { ActivityIngestionService } from './activity-ingestion.service';
 
 @Injectable()
@@ -29,6 +30,7 @@ export class IngestActivityWorker implements OnModuleInit, OnModuleDestroy {
     );
     this.worker.on('failed', (job, error) => {
       this.logger.error(`Ingest job ${job?.id ?? 'unknown'} failed: ${error.message}`);
+      captureException(error);
     });
   }
 

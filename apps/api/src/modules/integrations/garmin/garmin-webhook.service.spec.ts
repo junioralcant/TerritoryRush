@@ -11,6 +11,7 @@ const makeRepo = (): jest.Mocked<ProviderConnectionRepository> => ({
 
 const makeQueue = (): jest.Mocked<IngestActivityQueue> => ({
   enqueue: jest.fn().mockResolvedValue(true),
+  stats: jest.fn().mockResolvedValue({ depth: 0, oldestAgeSeconds: 0 }),
   close: jest.fn(),
 });
 

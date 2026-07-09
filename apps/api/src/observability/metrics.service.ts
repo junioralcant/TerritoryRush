@@ -43,6 +43,12 @@ export class MetricsService {
     registers: [this.registry],
   });
 
+  private readonly queueOldestAge = new Gauge({
+    name: 'territory_rush_ingest_queue_oldest_age_seconds',
+    help: 'Age of the oldest waiting job in the ingestion queue',
+    registers: [this.registry],
+  });
+
   constructor() {
     collectDefaultMetrics({ register: this.registry, prefix: 'territory_rush_' });
   }
@@ -71,6 +77,10 @@ export class MetricsService {
 
   setQueueDepth(depth: number): void {
     this.queueDepth.set(depth);
+  }
+
+  setQueueOldestAge(seconds: number): void {
+    this.queueOldestAge.set(seconds);
   }
 
   metrics(): Promise<string> {

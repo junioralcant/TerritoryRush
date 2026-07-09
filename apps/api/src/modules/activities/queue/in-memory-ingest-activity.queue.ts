@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IngestActivityJob } from '../activities.types';
+import { IngestActivityJob, QueueStats } from '../activities.types';
 import { IngestActivityQueue } from '../ports/ingest-activity-queue.port';
 
 const jobKey = (job: IngestActivityJob): string => `${job.provider}:${job.providerActivityId}`;
@@ -26,6 +26,10 @@ export class InMemoryIngestActivityQueue implements IngestActivityQueue {
 
   enqueuedJobs(): IngestActivityJob[] {
     return [...this.jobs];
+  }
+
+  async stats(): Promise<QueueStats> {
+    return { depth: this.jobs.length, oldestAgeSeconds: 0 };
   }
 
   async close(): Promise<void> {

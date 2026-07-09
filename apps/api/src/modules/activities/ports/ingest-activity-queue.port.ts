@@ -1,4 +1,4 @@
-import { IngestActivityJob } from '../activities.types';
+import { IngestActivityJob, QueueStats } from '../activities.types';
 
 export const INGEST_ACTIVITY_QUEUE = Symbol('INGEST_ACTIVITY_QUEUE');
 
@@ -10,5 +10,6 @@ export const INGEST_ACTIVITY_QUEUE = Symbol('INGEST_ACTIVITY_QUEUE');
  */
 export interface IngestActivityQueue {
   enqueue(job: IngestActivityJob): Promise<boolean>;
+  stats(): Promise<QueueStats>;
   close(): Promise<void>;
 }

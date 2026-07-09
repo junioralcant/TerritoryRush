@@ -6,6 +6,11 @@ export type IngestActivityJob = {
   providerActivityId: string;
 };
 
+export type QueueStats = {
+  depth: number;
+  oldestAgeSeconds: number;
+};
+
 export type ActivityStatus = 'imported' | 'processing' | 'processed' | 'rejected';
 
 export type ActivityMetrics = {

@@ -8,6 +8,7 @@ import { ACTIVITY_REPOSITORY } from './ports/activity-repository.port';
 import { INGEST_ACTIVITY_QUEUE, IngestActivityQueue } from './ports/ingest-activity-queue.port';
 import { BullMqIngestActivityQueue } from './queue/bullmq-ingest-activity.queue';
 import { InMemoryIngestActivityQueue } from './queue/in-memory-ingest-activity.queue';
+import { QueueMetricsScheduler } from './queue-metrics.scheduler';
 import { PgActivityRepository } from './repositories/activity.repository';
 
 const ingestQueueProvider: Provider = {
@@ -35,6 +36,7 @@ class IngestQueueCloser implements OnModuleDestroy {
     ActivitiesService,
     ingestQueueProvider,
     IngestQueueCloser,
+    QueueMetricsScheduler,
     { provide: ACTIVITY_REPOSITORY, useClass: PgActivityRepository },
   ],
   exports: [INGEST_ACTIVITY_QUEUE, ACTIVITY_REPOSITORY, ActivitiesService],

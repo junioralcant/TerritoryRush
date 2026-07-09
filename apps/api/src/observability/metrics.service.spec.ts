@@ -9,6 +9,7 @@ describe('MetricsService', () => {
     service.observeIngestionDuration(1.5);
     service.observeOsrmLatency(0.2);
     service.setQueueDepth(3);
+    service.setQueueOldestAge(120);
 
     const output = await service.metrics();
 
@@ -18,6 +19,7 @@ describe('MetricsService', () => {
     expect(output).toContain('territory_rush_ingestion_job_duration_seconds');
     expect(output).toContain('territory_rush_osrm_match_latency_seconds');
     expect(output).toContain('territory_rush_ingest_queue_depth 3');
+    expect(output).toContain('territory_rush_ingest_queue_oldest_age_seconds 120');
   });
 
   it('does not increment domain changes for a zero count', async () => {

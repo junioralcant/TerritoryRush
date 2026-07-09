@@ -7,3 +7,5 @@ coverage/
 .DS_Store
 apps/**/dist/
 apps/**/coverage/
+apps/**/test-results/
+apps/**/playwright-report/

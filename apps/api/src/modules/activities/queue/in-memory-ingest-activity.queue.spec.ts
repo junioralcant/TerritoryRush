@@ -31,4 +31,11 @@ describe('InMemoryIngestActivityQueue', () => {
     expect(await queue.enqueue(job({ providerActivityId: '200' }))).toBe(true);
     expect(queue.enqueuedJobs()).toHaveLength(2);
   });
+
+  it('reports queue stats (depth reflects enqueued jobs)', async () => {
+    const queue = new InMemoryIngestActivityQueue();
+    await queue.enqueue(job({ providerActivityId: '100' }));
+
+    expect(await queue.stats()).toEqual({ depth: 1, oldestAgeSeconds: 0 });
+  });
 });

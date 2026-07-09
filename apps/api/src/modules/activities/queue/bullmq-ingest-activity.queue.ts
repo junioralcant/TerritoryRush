@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { IngestActivityJob } from '../activities.types';
+import { IngestActivityJob, QueueStats } from '../activities.types';
 import { IngestActivityQueue } from '../ports/ingest-activity-queue.port';
 import { buildRedisConnection, INGEST_QUEUE_NAME } from './redis';
 
@@ -26,6 +26,14 @@ export class BullMqIngestActivityQueue implements IngestActivityQueue {
       removeOnFail: 1000,
     });
     return true;
+  }
+
+  async stats(): Promise<QueueStats> {
+    const counts = await this.queue.getJobCounts('waiting', 'delayed');
+    const depth = (counts.waiting ?? 0) + (counts.delayed ?? 0);
+    const [oldest] = await this.queue.getJobs(['waiting'], 0, 0);
+    const oldestAgeSeconds = oldest ? Math.max(0, (Date.now() - oldest.timestamp) / 1000) : 0;
+    return { depth, oldestAgeSeconds };
   }
 
   async close(): Promise<void> {

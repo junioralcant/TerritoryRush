@@ -19,8 +19,13 @@ const USER = '41414141-4141-4141-4141-414141414141';
 const ATHLETE = '990011';
 const CITY = '42424242-4242-4242-4242-424242424242';
 const STREET = '43434343-4343-4343-4343-434343434343';
+const USER_B = '45454545-4545-4545-4545-454545454545';
+const B_ATHLETE = '880022';
 
-const auth = { Authorization: `Bearer ${sign({ sub: USER }, JWT_SECRET, { algorithm: 'HS256', audience: 'authenticated', expiresIn: 3600 })}` };
+const bearer = (sub: string) => ({
+  Authorization: `Bearer ${sign({ sub }, JWT_SECRET, { algorithm: 'HS256', audience: 'authenticated', expiresIn: 3600 })}`,
+});
+const auth = bearer(USER);
 
 const futureSec = Math.floor(Date.parse('2026-07-09T10:00:00Z') / 1000) + 21_600;
 const fakeOauth: StravaOAuthClient = {
@@ -118,5 +123,47 @@ describe('Full territory journey (integration E2E)', () => {
 
     const notifications = await request(server).get('/me/notifications').set(auth).expect(200);
     expect(notifications.body.map((n: { type: string }) => n.type)).toContain('street_captured');
+  });
+
+  it('transfers the street to a second runner who overtakes, notifying the previous owner', async () => {
+    const server = app.getHttpServer();
+    await pool.query(
+      `insert into public.provider_connection (user_id, provider, provider_athlete_id, scopes)
+       values ($1, 'strava', $2, '{}')`,
+      [USER_B, B_ATHLETE],
+    );
+
+    const runnerBActivity = (objectId: number) => ({
+      object_type: 'activity',
+      object_id: objectId,
+      aspect_type: 'create',
+      owner_id: Number(B_ATHLETE),
+      subscription_id: 1,
+      event_time: 1_700_000_000,
+    });
+
+    const waitProcessed = async (providerActivityId: string): Promise<void> => {
+      const deadline = Date.now() + 30_000;
+      while (Date.now() < deadline) {
+        const rows = await pool.query(`select status from public.activity where provider_activity_id = $1`, [providerActivityId]);
+        if (rows.rows[0]?.status === 'processed') {
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      throw new Error(`Timed out waiting for ${providerActivityId}`);
+    };
+
+    await request(server).post('/webhooks/strava').send(runnerBActivity(801)).expect(200);
+    await waitProcessed('801');
+    await request(server).post('/webhooks/strava').send(runnerBActivity(802)).expect(200);
+    await waitProcessed('802');
+
+    const owner = await pool.query(`select owner_user_id, disputes_count from public.street where id = $1`, [STREET]);
+    expect(owner.rows[0].owner_user_id).toBe(USER_B);
+    expect(owner.rows[0].disputes_count).toBeGreaterThanOrEqual(1);
+
+    const notifications = await request(server).get('/me/notifications').set(auth).expect(200);
+    expect(notifications.body.map((n: { type: string }) => n.type)).toContain('street_lost');
   });
 });
