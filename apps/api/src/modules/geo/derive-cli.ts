@@ -12,6 +12,9 @@ const run = async (): Promise<void> => {
     throw new Error('DATABASE_URL is required to derive streets');
   }
   const pool = new Pool({ connectionString });
+  pool.on('error', (error) => {
+    process.stderr.write(`Idle Postgres client error: ${error.message}\n`);
+  });
   try {
     const repository = new PgStreetRepository(pool);
     const resolved = await repository.resolveCitiesForOsmRoads();

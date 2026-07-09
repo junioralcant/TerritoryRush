@@ -90,6 +90,18 @@ describe('Streets / geo flow (integration)', () => {
     ]);
   });
 
+  it('resolves a street by name and city, and returns null for a miss', async () => {
+    const repository = new PgStreetRepository(pool);
+
+    const found = await repository.findByNameAndCity(CITY_A, 'Rua Maranhão');
+    expect(found).not.toBeNull();
+    expect(found?.osm_name).toBe('Rua Maranhão');
+    expect(found?.city_id).toBe(CITY_A);
+
+    const miss = await repository.findByNameAndCity(CITY_A, 'Rua Inexistente');
+    expect(miss).toBeNull();
+  });
+
   it('rejects GET /streets without a token (401)', async () => {
     await request(app.getHttpServer()).get('/streets?bbox=-0.5,-0.5,1,1').expect(401);
   });

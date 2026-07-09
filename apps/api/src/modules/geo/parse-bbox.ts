@@ -1,6 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Bbox } from './geo.types';
 
+export const MAX_BBOX_SPAN_DEG = 5;
+
 export const parseBbox = (raw: string | undefined): Bbox => {
   if (!raw || raw.trim() === '') {
     throw new BadRequestException('Missing required query parameter: bbox');
@@ -20,6 +22,9 @@ export const parseBbox = (raw: string | undefined): Bbox => {
   }
   if (minLng >= maxLng || minLat >= maxLat) {
     throw new BadRequestException('bbox min must be strictly less than max');
+  }
+  if (maxLng - minLng > MAX_BBOX_SPAN_DEG || maxLat - minLat > MAX_BBOX_SPAN_DEG) {
+    throw new BadRequestException(`bbox span must not exceed ${MAX_BBOX_SPAN_DEG} degrees`);
   }
 
   return { minLng, minLat, maxLng, maxLat };

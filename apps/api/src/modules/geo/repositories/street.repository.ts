@@ -36,9 +36,17 @@ export class PgStreetRepository implements StreetRepository {
   async resolveCitiesForOsmRoads(): Promise<number> {
     const result = await this.pool.query(
       `update geo.osm_road r
-       set city_id = c.id
-       from public.city_ref c
-       where r.city_id is null and ST_Intersects(c.boundary, r.geom)`,
+       set city_id = (
+         select c.id
+         from public.city_ref c
+         where ST_Intersects(c.boundary, r.geom)
+         order by ST_Length(ST_Intersection(c.boundary, r.geom)) desc, c.id asc
+         limit 1
+       )
+       where r.city_id is null
+         and exists (
+           select 1 from public.city_ref c2 where ST_Intersects(c2.boundary, r.geom)
+         )`,
     );
     return result.rowCount ?? 0;
   }

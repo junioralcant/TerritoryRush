@@ -21,10 +21,13 @@ osm2pgsql --create --slim --latlong \
   --database "$DATABASE_URL" \
   "$EXTRACT"
 
-echo "==> [2/3] Staging planet_osm_line into geo.osm_road"
+echo "==> [2/4] Loading reference cities from administrative boundaries"
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$HERE/cities.sql"
+
+echo "==> [3/4] Staging planet_osm_line into geo.osm_road"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$HERE/staging.sql"
 
-echo "==> [3/3] Resolving cities and deriving named streets"
+echo "==> [4/4] Resolving cities and deriving named streets"
 npm --prefix "$HERE/../../../apps/api" run geo:derive
 
 echo "==> Done."

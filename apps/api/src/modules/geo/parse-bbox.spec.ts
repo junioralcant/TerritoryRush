@@ -33,4 +33,9 @@ describe('parseBbox', () => {
     expect(() => parseBbox('-46.6,-23.6,-46.7,-23.5')).toThrow('strictly less');
     expect(() => parseBbox('-46.7,-23.5,-46.6,-23.5')).toThrow('strictly less');
   });
+
+  it('rejects a bbox whose span exceeds the maximum', () => {
+    expect(() => parseBbox('-50,-23.6,-40,-23.5')).toThrow('span must not exceed');
+    expect(() => parseBbox('-46.7,-30,-46.6,-20')).toThrow('span must not exceed');
+  });
 });

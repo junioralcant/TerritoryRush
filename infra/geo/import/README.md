@@ -5,11 +5,13 @@ territorial unit: the **named road aggregated per city** (`public.street`).
 
 ## Pipeline
 
-1. **osm2pgsql** loads a `.osm.pbf` extract into `planet_osm_line` (SRID 4326 via
-   `--latlong`).
-2. **`staging.sql`** copies the highway segments into the normalized staging
+1. **osm2pgsql** loads a `.osm.pbf` extract into `planet_osm_line` /
+   `planet_osm_polygon` (SRID 4326 via `--latlong`).
+2. **`cities.sql`** populates `public.city_ref` from administrative boundaries
+   (`planet_osm_polygon`, `admin_level = 8` municipalities).
+3. **`staging.sql`** copies the highway segments into the normalized staging
    table `geo.osm_road` (splitting multilinestrings into linestrings).
-3. **`geo:derive`** (`apps/api`) resolves each road to a city by spatial join
+4. **`geo:derive`** (`apps/api`) resolves each road to a city by spatial join
    against `public.city_ref`, then aggregates segments by `(city, name)` into
    `public.street`. Unnamed ways get a deterministic `Via sem nome (<osm_id>)`
    label so distinct ways stay separate. The derivation SQL lives in
