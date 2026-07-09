@@ -8,7 +8,8 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { runMigrations } from '../src/database/migration-runner';
 import { IngestedActivityData } from '../src/modules/activities/activities.types';
-import { PROVIDER_ACTIVITY_GATEWAY, ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { STRAVA_ACTIVITY_GATEWAY } from '../src/modules/integrations/strava/strava-activity.gateway';
 import { OSRM_CLIENT, OsrmClient } from '../src/modules/matching/ports/osrm-client.port';
 
 const JWT_SECRET = 'integration-secret-value-at-least-32-chars';
@@ -88,7 +89,7 @@ describe('Ingestion pipeline (integration): webhook -> BullMQ -> worker -> DB', 
     process.env.TOKEN_ENCRYPTION_KEY = 'a'.repeat(64);
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PROVIDER_ACTIVITY_GATEWAY)
+      .overrideProvider(STRAVA_ACTIVITY_GATEWAY)
       .useValue(fakeGateway)
       .overrideProvider(OSRM_CLIENT)
       .useValue(fakeOsrm)

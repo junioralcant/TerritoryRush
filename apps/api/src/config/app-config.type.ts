@@ -10,4 +10,7 @@ export type AppConfig = {
   stravaClientSecret: string;
   stravaWebhookVerifyToken: string;
   stravaWebhookCallbackUrl: string;
+  garminEnabled: boolean;
+  garminClientId: string;
+  garminClientSecret: string;
 };

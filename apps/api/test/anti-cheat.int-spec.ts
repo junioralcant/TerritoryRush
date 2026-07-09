@@ -7,7 +7,8 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { runMigrations } from '../src/database/migration-runner';
 import { IngestedActivityData } from '../src/modules/activities/activities.types';
-import { PROVIDER_ACTIVITY_GATEWAY, ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { STRAVA_ACTIVITY_GATEWAY } from '../src/modules/integrations/strava/strava-activity.gateway';
 import { OSRM_CLIENT, OsrmClient } from '../src/modules/matching/ports/osrm-client.port';
 
 const USER = '12121212-1212-1212-1212-121212121212';
@@ -77,7 +78,7 @@ describe('Anti-cheat guard (integration)', () => {
     process.env.STRAVA_WEBHOOK_VERIFY_TOKEN = 'verify';
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PROVIDER_ACTIVITY_GATEWAY)
+      .overrideProvider(STRAVA_ACTIVITY_GATEWAY)
       .useValue(fakeGateway)
       .overrideProvider(OSRM_CLIENT)
       .useValue(fakeOsrm)

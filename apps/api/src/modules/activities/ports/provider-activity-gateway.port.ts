@@ -1,7 +1,5 @@
 import { IngestedActivityData, Provider } from '../activities.types';
 
-export const PROVIDER_ACTIVITY_GATEWAY = Symbol('PROVIDER_ACTIVITY_GATEWAY');
-
 /**
  * Provider-agnostic fetch of an activity's metrics and GPS streams. Each provider
  * (Strava now, Garmin in Task 12) implements this, encapsulating token refresh and

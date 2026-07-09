@@ -8,7 +8,8 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { runMigrations } from '../src/database/migration-runner';
 import { IngestedActivityData } from '../src/modules/activities/activities.types';
-import { PROVIDER_ACTIVITY_GATEWAY, ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { STRAVA_ACTIVITY_GATEWAY } from '../src/modules/integrations/strava/strava-activity.gateway';
 import { OSRM_CLIENT, OsrmClient } from '../src/modules/matching/ports/osrm-client.port';
 import { EXPO_PUSH_CLIENT, ExpoPushClient } from '../src/modules/notifications/ports/expo-push-client.port';
 import { ExpoPushMessage } from '../src/modules/notifications/notifications.types';
@@ -82,7 +83,7 @@ describe('Achievements + notifications (integration)', () => {
     process.env.STRAVA_WEBHOOK_VERIFY_TOKEN = 'verify';
 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PROVIDER_ACTIVITY_GATEWAY).useValue(fakeGateway)
+      .overrideProvider(STRAVA_ACTIVITY_GATEWAY).useValue(fakeGateway)
       .overrideProvider(OSRM_CLIENT).useValue(fakeOsrm)
       .overrideProvider(EXPO_PUSH_CLIENT).useValue(fakeExpo)
       .compile();

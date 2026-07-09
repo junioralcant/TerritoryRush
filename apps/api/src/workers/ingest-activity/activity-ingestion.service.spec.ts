@@ -1,6 +1,7 @@
 import { ActivityRecord, IngestActivityJob, IngestedActivityData } from '../../modules/activities/activities.types';
 import { ActivityRepository } from '../../modules/activities/ports/activity-repository.port';
 import { ProviderActivityGateway } from '../../modules/activities/ports/provider-activity-gateway.port';
+import { ProviderGatewayRegistry } from '../../modules/activities/ports/provider-gateway-registry';
 import { AchievementsService } from '../../modules/achievements/achievements.service';
 import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { MapMatchingService } from '../../modules/matching/matching.service';
@@ -75,7 +76,7 @@ const makeService = (
 ): ActivityIngestionService =>
   new ActivityIngestionService(
     repo,
-    gateway,
+    new Map([[gateway.provider, gateway]]) as ProviderGatewayRegistry,
     antiCheat as unknown as AntiCheatService,
     matching as unknown as MapMatchingService,
     territory as unknown as TerritoryService,

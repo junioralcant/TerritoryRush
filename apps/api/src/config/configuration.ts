@@ -22,4 +22,7 @@ export const loadConfiguration = (): AppConfig => ({
   stravaClientSecret: process.env.STRAVA_CLIENT_SECRET ?? '',
   stravaWebhookVerifyToken: process.env.STRAVA_WEBHOOK_VERIFY_TOKEN ?? '',
   stravaWebhookCallbackUrl: process.env.STRAVA_WEBHOOK_CALLBACK_URL ?? '',
+  garminEnabled: process.env.GARMIN_ENABLED === 'true',
+  garminClientId: process.env.GARMIN_CLIENT_ID ?? '',
+  garminClientSecret: process.env.GARMIN_CLIENT_SECRET ?? '',
 });

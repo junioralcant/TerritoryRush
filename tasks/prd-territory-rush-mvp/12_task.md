@@ -22,10 +22,10 @@ Implementar a integração Garmin (push-based) reutilizando o contrato de provid
 
 ## Subtarefas
 
-- [ ] 12.1 Contrato de provider agnóstico + normalização de atividade (`Provider`, `ProviderActivity`).
-- [ ] 12.2 Módulo `integrations/garmin`: OAuth 2.0 PKCE + connect/disconnect.
-- [ ] 12.3 `POST /webhooks/garmin` (push) validando e enfileirando no mesmo pipeline.
-- [ ] 12.4 Feature flag (default off) gateando exposição no app e no backend.
+- [x] 12.1 Contrato de provider agnóstico + normalização de atividade (`Provider`, `ProviderActivity`).
+- [x] 12.2 Módulo `integrations/garmin`: OAuth 2.0 PKCE + connect/disconnect.
+- [x] 12.3 `POST /webhooks/garmin` (push) validando e enfileirando no mesmo pipeline.
+- [x] 12.4 Feature flag (default off) gateando exposição no app e no backend.
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Pontos de Integração → Garmin", "Decisões Principais" (
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — normalização de atividade Garmin, validação do push, comportamento da flag on/off.
-- [ ] Testes de integração — push Garmin → fila → pipeline (flag on); nenhum efeito com flag off (Garmin mockado).
+- [x] Testes de unidade — normalização de atividade Garmin, validação do push, comportamento da flag on/off.
+- [x] Testes de integração — push Garmin → fila → pipeline (flag on); nenhum efeito com flag off (Garmin mockado).
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

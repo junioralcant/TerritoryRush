@@ -2,9 +2,9 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IngestActivityJob } from '../../modules/activities/activities.types';
 import { ACTIVITY_REPOSITORY, ActivityRepository } from '../../modules/activities/ports/activity-repository.port';
 import {
-  PROVIDER_ACTIVITY_GATEWAY,
-  ProviderActivityGateway,
-} from '../../modules/activities/ports/provider-activity-gateway.port';
+  PROVIDER_GATEWAY_REGISTRY,
+  ProviderGatewayRegistry,
+} from '../../modules/activities/ports/provider-gateway-registry';
 import { AchievementsService } from '../../modules/achievements/achievements.service';
 import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { averageHeartrate } from '../../modules/anti-cheat/validators';
@@ -24,7 +24,7 @@ export class ActivityIngestionService {
 
   constructor(
     @Inject(ACTIVITY_REPOSITORY) private readonly activities: ActivityRepository,
-    @Inject(PROVIDER_ACTIVITY_GATEWAY) private readonly gateway: ProviderActivityGateway,
+    @Inject(PROVIDER_GATEWAY_REGISTRY) private readonly gateways: ProviderGatewayRegistry,
     private readonly antiCheat: AntiCheatService,
     private readonly matching: MapMatchingService,
     private readonly territory: TerritoryService,
@@ -38,12 +38,13 @@ export class ActivityIngestionService {
     if (activity.status === 'processed') {
       return;
     }
-    if (this.gateway.provider !== job.provider) {
+    const gateway = this.gateways.get(job.provider);
+    if (!gateway) {
       throw new Error(`No ingestion gateway for provider ${job.provider}`);
     }
 
     await this.activities.updateStatus(activity.id, 'processing');
-    const data = await this.gateway.fetchIngestData(job.userId, job.providerActivityId);
+    const data = await gateway.fetchIngestData(job.userId, job.providerActivityId);
     await this.activities.saveIngestedData(activity.id, data);
 
     const verdict = this.antiCheat.evaluate({

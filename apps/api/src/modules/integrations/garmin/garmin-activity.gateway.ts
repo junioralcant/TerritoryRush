@@ -1,18 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IngestedActivityData, Provider } from '../../activities/activities.types';
 import { ProviderActivityGateway } from '../../activities/ports/provider-activity-gateway.port';
-import { STRAVA_ACTIVITY_CLIENT, StravaActivityClient } from './ports/strava-activity-client.port';
-import { StravaTokenService } from './strava-token.service';
+import { GARMIN_ACTIVITY_CLIENT, GarminActivityClient } from './ports/garmin-clients.port';
+import { GarminTokenService } from './garmin-token.service';
 
-export const STRAVA_ACTIVITY_GATEWAY = Symbol('STRAVA_ACTIVITY_GATEWAY');
+export const GARMIN_ACTIVITY_GATEWAY = Symbol('GARMIN_ACTIVITY_GATEWAY');
 
 @Injectable()
-export class StravaActivityGateway implements ProviderActivityGateway {
-  readonly provider: Provider = 'strava';
+export class GarminActivityGateway implements ProviderActivityGateway {
+  readonly provider: Provider = 'garmin';
 
   constructor(
-    private readonly tokenService: StravaTokenService,
-    @Inject(STRAVA_ACTIVITY_CLIENT) private readonly client: StravaActivityClient,
+    private readonly tokenService: GarminTokenService,
+    @Inject(GARMIN_ACTIVITY_CLIENT) private readonly client: GarminActivityClient,
   ) {}
 
   async fetchIngestData(userId: string, providerActivityId: string): Promise<IngestedActivityData> {
