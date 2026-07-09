@@ -1,0 +1,37 @@
+# OSRM foot-profile pipeline. Requires an OSM extract at ./${OSRM_PBF}.
+# Usage: OSRM_PBF=region.osm.pbf docker compose up
+services:
+  osrm-extract:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    command: osrm-extract -p /opt/foot.lua /data/${OSRM_PBF}
+    volumes:
+      - ./:/data
+
+  osrm-partition:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    command: osrm-partition /data/${OSRM_PBF%.osm.pbf}.osrm
+    volumes:
+      - ./:/data
+    depends_on:
+      osrm-extract:
+        condition: service_completed_successfully
+
+  osrm-customize:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    command: osrm-customize /data/${OSRM_PBF%.osm.pbf}.osrm
+    volumes:
+      - ./:/data
+    depends_on:
+      osrm-partition:
+        condition: service_completed_successfully
+
+  osrm-routed:
+    image: ghcr.io/project-osrm/osrm-backend:v5.27.1
+    command: osrm-routed --algorithm mld /data/${OSRM_PBF%.osm.pbf}.osrm
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/data
+    depends_on:
+      osrm-customize:
+        condition: service_completed_successfully

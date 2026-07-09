@@ -10,6 +10,7 @@ export const STREET_REPOSITORY = Symbol('STREET_REPOSITORY');
 export interface StreetRepository {
   findInBbox(bbox: Bbox, limit: number): Promise<StreetRow[]>;
   findByNameAndCity(cityId: string, name: string): Promise<StreetRow | null>;
+  findCityIdContaining(lng: number, lat: number): Promise<string | null>;
   resolveCitiesForOsmRoads(): Promise<number>;
   deriveStreetsFromOsmRoads(): Promise<number>;
 }

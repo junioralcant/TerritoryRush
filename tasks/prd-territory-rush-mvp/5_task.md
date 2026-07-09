@@ -22,10 +22,10 @@ Transformar o traçado GPS bruto nas ruas realmente percorridas: subir o serviç
 
 ## Subtarefas
 
-- [ ] 5.1 Empacotar/subir o OSRM (Docker + extrato OSM, perfil `foot`) em `infra/osrm/`.
-- [ ] 5.2 Módulo `matching`: cliente OSRM (`MapMatchingService`) com timeout/circuit breaker.
-- [ ] 5.3 Resolver `MatchedEdge[]` → ruas nomeadas (agregação por nome+cidade) usando o `geo`; tratar via sem nome.
-- [ ] 5.4 Persistir `activity_street` e integrar a etapa ao worker de ingestão.
+- [x] 5.1 Empacotar/subir o OSRM (Docker + extrato OSM, perfil `foot`) em `infra/osrm/`.
+- [x] 5.2 Módulo `matching`: cliente OSRM (`MapMatchingService`) com timeout/circuit breaker.
+- [x] 5.3 Resolver `MatchedEdge[]` → ruas nomeadas (agregação por nome+cidade) usando o `geo`; tratar via sem nome.
+- [x] 5.4 Persistir `activity_street` e integrar a etapa ao worker de ingestão.
 
 ## Detalhes de Implementação
 
@@ -40,8 +40,8 @@ Ver `techspec.md`: "Interfaces Principais" (`MapMatchingService`), "Pontos de In
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — agregação de edges por (nome, cidade), fallback de via sem nome, dedup de trechos (OSRM mockado).
-- [ ] Testes de integração — worker + OSRM apontando para um extrato pequeno, com traços GPS de fixture → `activity_street`.
+- [x] Testes de unidade — agregação de edges por (nome, cidade), fallback de via sem nome, dedup de trechos (OSRM mockado).
+- [x] Testes de integração — worker + OSRM apontando para um extrato pequeno, com traços GPS de fixture → `activity_street`.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

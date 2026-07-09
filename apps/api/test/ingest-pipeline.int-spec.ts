@@ -9,6 +9,7 @@ import { AppModule } from '../src/app.module';
 import { runMigrations } from '../src/database/migration-runner';
 import { IngestedActivityData } from '../src/modules/activities/activities.types';
 import { PROVIDER_ACTIVITY_GATEWAY, ProviderActivityGateway } from '../src/modules/activities/ports/provider-activity-gateway.port';
+import { OSRM_CLIENT, OsrmClient } from '../src/modules/matching/ports/osrm-client.port';
 
 const JWT_SECRET = 'integration-secret-value-at-least-32-chars';
 const JWT_AUD = 'authenticated';
@@ -31,6 +32,8 @@ const fakeGateway: ProviderActivityGateway = {
     return INGESTED;
   },
 };
+
+const fakeOsrm: OsrmClient = { match: async () => [] };
 
 const activityEvent = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
   object_type: 'activity',
@@ -87,6 +90,8 @@ describe('Ingestion pipeline (integration): webhook -> BullMQ -> worker -> DB', 
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(PROVIDER_ACTIVITY_GATEWAY)
       .useValue(fakeGateway)
+      .overrideProvider(OSRM_CLIENT)
+      .useValue(fakeOsrm)
       .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));

@@ -33,6 +33,17 @@ export class PgStreetRepository implements StreetRepository {
     return result.rows[0] ?? null;
   }
 
+  async findCityIdContaining(lng: number, lat: number): Promise<string | null> {
+    const result = await this.pool.query<{ id: string }>(
+      `select id from public.city_ref
+       where ST_Contains(boundary, ST_SetSRID(ST_MakePoint($1, $2), 4326))
+       order by id asc
+       limit 1`,
+      [lng, lat],
+    );
+    return result.rows[0]?.id ?? null;
+  }
+
   async resolveCitiesForOsmRoads(): Promise<number> {
     const result = await this.pool.query(
       `update geo.osm_road r
