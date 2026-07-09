@@ -1,0 +1,34 @@
+# Local development stack for Territory Rush.
+# Task 1 uses only the Postgres + PostGIS service; Redis is declared here for the
+# ingestion pipeline (Task 4) so the local stack grows without churn.
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: territory-rush-postgres
+    environment:
+      POSTGRES_USER: territory
+      POSTGRES_PASSWORD: territory
+      POSTGRES_DB: territory_rush
+    ports:
+      - "5433:5432"
+    volumes:
+      - territory-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U territory -d territory_rush"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: territory-rush-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  territory-pg-data:
