@@ -24,10 +24,10 @@ Entregar o primeiro fluxo ponta a ponta no app (Expo/React Native): login social
 
 ## Subtarefas
 
-- [ ] 10.1 Configuração do app Expo, cliente de API e sessão Supabase.
-- [ ] 10.2 `AuthFlow` (Google/Apple + início do OAuth Strava).
-- [ ] 10.3 `ConnectionsScreen` (conectar/desconectar Strava).
-- [ ] 10.4 `MapScreen` com ruas por bbox, cores de posse e drawer de detalhe.
+- [x] 10.1 Configuração do app Expo, cliente de API e sessão Supabase.
+- [x] 10.2 `AuthFlow` (Google/Apple + início do OAuth Strava).
+- [x] 10.3 `ConnectionsScreen` (conectar/desconectar Strava).
+- [x] 10.4 `MapScreen` com ruas por bbox, cores de posse e drawer de detalhe.
 
 ## Detalhes de Implementação
 
@@ -41,8 +41,8 @@ Ver `techspec.md`: "Arquitetura → Mobile" (`AuthFlow`, `MapScreen`, `Connectio
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — render dos três estados de rua, montagem do drawer, fluxo de conexão (API mockada na camada de rede).
-- [ ] Testes de integração — telas contra respostas de API de fixture.
+- [x] Testes de unidade — render dos três estados de rua, montagem do drawer, fluxo de conexão (API mockada na camada de rede).
+- [x] Testes de integração — telas contra respostas de API de fixture.
 - [ ] Testes E2E — coberto de forma consolidada na 13.0 (Playwright).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

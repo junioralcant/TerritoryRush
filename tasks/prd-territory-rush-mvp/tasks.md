@@ -11,7 +11,7 @@
 - [x] 7.0 Anti-cheat básico (guarda no worker)
 - [x] 8.0 APIs de leitura: detalhe da rua + perfil + rankings
 - [x] 9.0 Conquistas + notificações (Expo Push)
-- [ ] 10.0 App mobile — Auth + conexão Strava + mapa territorial
+- [x] 10.0 App mobile — Auth + conexão Strava + mapa territorial
 - [ ] 11.0 App mobile — perfil, ranking, conquistas, central de notificações
 - [ ] 12.0 Garmin atrás de feature flag
 - [ ] 13.0 Endurecimento: E2E (Playwright) + observabilidade

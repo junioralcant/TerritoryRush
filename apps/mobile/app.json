@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Territory Rush",
+    "slug": "territory-rush",
+    "scheme": "territoryrush",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.territoryrush.app" },
+    "android": { "package": "com.territoryrush.app" }
+  }
+}
