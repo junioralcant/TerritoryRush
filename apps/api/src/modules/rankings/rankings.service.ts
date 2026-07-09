@@ -3,11 +3,7 @@ import { Pool } from 'pg';
 import { PG_POOL } from '../../database/database.constants';
 import { CityRankingEntry, ExplorerRankingEntry } from './rankings.types';
 
-const RANKING_VIEWS = [
-  'public.mv_city_ranking',
-  'public.mv_explorer_ranking',
-  'public.mv_national_ranking',
-];
+const RANKING_VIEWS = ['public.mv_city_ranking', 'public.mv_explorer_ranking'];
 
 @Injectable()
 export class RankingsService {

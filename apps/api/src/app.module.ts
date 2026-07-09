@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { loadConfiguration } from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AchievementsModule } from './modules/achievements/achievements.module';
@@ -24,6 +25,7 @@ import { IngestActivityWorkerModule } from './workers/ingest-activity/ingest-act
       cache: true,
       load: [loadConfiguration],
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     AuthModule,
     ProfileModule,

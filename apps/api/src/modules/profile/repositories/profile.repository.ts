@@ -62,6 +62,8 @@ export class PgProfileRepository implements ProfileRepository {
         `select count(*)::int as count from public.street where owner_user_id = $1`,
         [userId],
       ),
+      // streetsExplored (distinct streets visited) stands in for RF-6.2's
+      // "neighborhoods explored": the geo model has cities, not neighborhoods yet.
       this.pool.query<{ count: number }>(
         `select count(distinct street_id)::int as count from public.street_score where user_id = $1`,
         [userId],
@@ -77,7 +79,7 @@ export class PgProfileRepository implements ProfileRepository {
       ),
       this.pool.query<{ city_id: string; count: number }>(
         `select city_id, count(*)::int as count from public.street
-         where owner_user_id = $1 group by city_id order by count desc limit 1`,
+         where owner_user_id = $1 group by city_id order by count desc, city_id asc limit 1`,
         [userId],
       ),
     ]);

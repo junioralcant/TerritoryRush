@@ -24,13 +24,3 @@ group by ss.user_id
 with data;
 
 create unique index if not exists ux_mv_explorer_ranking on public.mv_explorer_ranking (user_id);
-
-create materialized view if not exists public.mv_national_ranking as
-select
-  rp.user_id,
-  rp.total_points,
-  rank() over (order by rp.total_points desc) as rank
-from public.runner_profile rp
-with data;
-
-create unique index if not exists ux_mv_national_ranking on public.mv_national_ranking (user_id);
