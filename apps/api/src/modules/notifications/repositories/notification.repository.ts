@@ -8,6 +8,7 @@ import {
   RegisterDeviceTokenInput,
 } from '../notifications.types';
 import { NotificationRepository } from '../ports/notification-repository.port';
+import { UnsentNotification } from '../notifications.types';
 
 type NotificationRow = {
   id: string;
@@ -32,6 +33,21 @@ export class PgNotificationRepository implements NotificationRepository {
 
   async markSent(id: string): Promise<void> {
     await this.pool.query(`update public.notification set sent_at = now() where id = $1`, [id]);
+  }
+
+  async findUnsent(limit: number): Promise<UnsentNotification[]> {
+    const result = await this.pool.query<NotificationRow & { user_id: string }>(
+      `select id, user_id, type, payload from public.notification
+       where sent_at is null and created_at > now() - interval '1 day'
+       order by created_at asc limit $1`,
+      [limit],
+    );
+    return result.rows.map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      type: row.type,
+      payload: row.payload,
+    }));
   }
 
   async listForUser(userId: string): Promise<NotificationRecord[]> {

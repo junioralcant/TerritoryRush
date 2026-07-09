@@ -39,6 +39,13 @@ export class NotificationsService {
     return this.notifications.listForUser(userId);
   }
 
+  async retryUnsent(limit = 100): Promise<void> {
+    const unsent = await this.notifications.findUnsent(limit);
+    for (const notification of unsent) {
+      await this.dispatch(notification.userId, notification.id, notification.type, notification.payload);
+    }
+  }
+
   registerDeviceToken(input: RegisterDeviceTokenInput): Promise<void> {
     return this.notifications.upsertDeviceToken(input);
   }

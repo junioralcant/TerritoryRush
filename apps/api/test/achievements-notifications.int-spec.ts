@@ -117,8 +117,19 @@ describe('Achievements + notifications (integration)', () => {
       [USER],
     )).rows.map((row) => row.type);
 
-    expect(types).toEqual(expect.arrayContaining(['street_captured', 'achievement_unlocked']));
+    expect(types).toEqual(expect.arrayContaining(['street_captured', 'achievement_unlocked', 'top10_city']));
     expect(pushes.length).toBeGreaterThan(0);
+  });
+
+  it('POST /me/device-tokens registers a device token', async () => {
+    await request(app.getHttpServer())
+      .post('/me/device-tokens')
+      .set('Authorization', `Bearer ${token(USER)}`)
+      .send({ token: 'ExpoTok[new-device]', platform: 'android' })
+      .expect(204);
+
+    const row = await pool.query(`select platform from public.device_token where token = 'ExpoTok[new-device]'`);
+    expect(row.rows[0].platform).toBe('android');
   });
 
   it('GET /me/achievements shows unlocked and locked milestones', async () => {

@@ -59,12 +59,19 @@ const makeAchievements = () => ({ unlockForRunner: jest.fn().mockResolvedValue([
 const makeNotifications = () => ({ notify: jest.fn(), notifyCityOnce: jest.fn() });
 const makeRankings = () => ({ getUserCityRank: jest.fn().mockResolvedValue(null) });
 
+type Engagement = {
+  achievements?: { unlockForRunner: jest.Mock };
+  notifications?: { notify: jest.Mock; notifyCityOnce: jest.Mock };
+  rankings?: { getUserCityRank: jest.Mock };
+};
+
 const makeService = (
   repo: ActivityRepository,
   gateway: ProviderActivityGateway,
   matching: { matchActivityStreets: jest.Mock },
   territory: { scoreAndApply: jest.Mock },
   antiCheat: { evaluate: jest.Mock } = makeAntiCheat(),
+  engagement: Engagement = {},
 ): ActivityIngestionService =>
   new ActivityIngestionService(
     repo,
@@ -72,9 +79,9 @@ const makeService = (
     antiCheat as unknown as AntiCheatService,
     matching as unknown as MapMatchingService,
     territory as unknown as TerritoryService,
-    makeAchievements() as unknown as AchievementsService,
-    makeNotifications() as unknown as NotificationsService,
-    makeRankings() as unknown as RankingsService,
+    (engagement.achievements ?? makeAchievements()) as unknown as AchievementsService,
+    (engagement.notifications ?? makeNotifications()) as unknown as NotificationsService,
+    (engagement.rankings ?? makeRankings()) as unknown as RankingsService,
   );
 
 describe('ActivityIngestionService', () => {
@@ -115,6 +122,32 @@ describe('ActivityIngestionService', () => {
     expect(repo.updateStatus).toHaveBeenLastCalledWith('activity-1', 'rejected', 'Velocidade média incompatível com corrida');
     expect(matching.matchActivityStreets).not.toHaveBeenCalled();
     expect(territory.scoreAndApply).not.toHaveBeenCalled();
+  });
+
+  it('dispatches engagement after processing: captured/lost notifications + achievements', async () => {
+    const repo = makeRepo();
+    const gateway = makeGateway();
+    const matching = makeMatching();
+    const territory = makeTerritory();
+    territory.scoreAndApply.mockResolvedValue([
+      { streetId: 'street-1', previousOwnerId: 'user-2', newOwnerId: 'user-1' },
+    ]);
+    const achievements = { unlockForRunner: jest.fn().mockResolvedValue(['first_run']) };
+    const notifications = { notify: jest.fn(), notifyCityOnce: jest.fn() };
+    const rankings = { getUserCityRank: jest.fn().mockResolvedValue(1) };
+    repo.createIfAbsent.mockResolvedValue(activity());
+    gateway.fetchIngestData.mockResolvedValue(INGESTED);
+
+    await makeService(repo, gateway, matching, territory, makeAntiCheat(), {
+      achievements,
+      notifications,
+      rankings,
+    }).ingest(JOB);
+
+    expect(notifications.notify).toHaveBeenCalledWith('user-1', 'street_captured', { streetId: 'street-1' });
+    expect(notifications.notify).toHaveBeenCalledWith('user-2', 'street_lost', { streetId: 'street-1' });
+    expect(notifications.notify).toHaveBeenCalledWith('user-1', 'achievement_unlocked', { code: 'first_run' });
+    expect(notifications.notifyCityOnce).toHaveBeenCalledWith('user-1', 'top10_city', 'city-a', expect.any(Object));
   });
 
   it('is idempotent: skips an already-processed activity', async () => {

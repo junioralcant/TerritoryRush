@@ -17,6 +17,8 @@ const RULES: readonly AchievementRule[] = [
   { code: 'km_500', isSatisfied: (s) => s.totalDistanceKm >= 500 },
   { code: 'km_1000', isSatisfied: (s) => s.totalDistanceKm >= 1000 },
   { code: 'first_city', isSatisfied: (s) => s.citiesExplored >= 1 },
+  // 'first_neighborhood' (RF-8.1) is deferred: the geo model has cities, not
+  // neighborhoods. Add the rule + catalog entry once suburb boundaries land.
 ];
 
 /**

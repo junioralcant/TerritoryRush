@@ -3,6 +3,7 @@ import {
   NotificationRecord,
   NotificationType,
   RegisterDeviceTokenInput,
+  UnsentNotification,
 } from '../notifications.types';
 
 export const NOTIFICATION_REPOSITORY = Symbol('NOTIFICATION_REPOSITORY');
@@ -10,6 +11,7 @@ export const NOTIFICATION_REPOSITORY = Symbol('NOTIFICATION_REPOSITORY');
 export interface NotificationRepository {
   create(input: CreateNotificationInput): Promise<string>;
   markSent(id: string): Promise<void>;
+  findUnsent(limit: number): Promise<UnsentNotification[]>;
   listForUser(userId: string): Promise<NotificationRecord[]>;
   findDeviceTokens(userId: string): Promise<string[]>;
   upsertDeviceToken(input: RegisterDeviceTokenInput): Promise<void>;

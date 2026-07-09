@@ -32,3 +32,10 @@ export type RegisterDeviceTokenInput = {
   token: string;
   platform: string | null;
 };
+
+export type UnsentNotification = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  payload: NotificationPayload;
+};

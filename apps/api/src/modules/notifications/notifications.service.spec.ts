@@ -5,6 +5,7 @@ import { NotificationsService } from './notifications.service';
 const makeRepo = (): jest.Mocked<NotificationRepository> => ({
   create: jest.fn().mockResolvedValue('notif-1'),
   markSent: jest.fn(),
+  findUnsent: jest.fn().mockResolvedValue([]),
   listForUser: jest.fn(),
   findDeviceTokens: jest.fn().mockResolvedValue(['ExpoTok[abc]']),
   upsertDeviceToken: jest.fn(),
@@ -55,5 +56,18 @@ describe('NotificationsService', () => {
     await new NotificationsService(repo, push).notifyCityOnce('user-1', 'top10_city', 'city-a', { cityId: 'city-a' });
 
     expect(repo.create).not.toHaveBeenCalled();
+  });
+
+  it('retryUnsent re-dispatches pending notifications and marks them sent', async () => {
+    const repo = makeRepo();
+    const push = makePush();
+    repo.findUnsent.mockResolvedValue([
+      { id: 'notif-9', userId: 'user-1', type: 'street_captured', payload: {} },
+    ]);
+
+    await new NotificationsService(repo, push).retryUnsent();
+
+    expect(push.send).toHaveBeenCalledTimes(1);
+    expect(repo.markSent).toHaveBeenCalledWith('notif-9');
   });
 });

@@ -8,6 +8,9 @@ const MESSAGES: Record<NotificationType, ExpoPushMessage> = {
   new_neighborhood: { title: 'Novo bairro!', body: 'Você conquistou um novo bairro.' },
 };
 
+// 'new_neighborhood' has a message but is not emitted yet: the geo model has
+// cities, not neighborhoods (see territory.service). It activates once suburb
+// boundaries land in geo.
 export const buildPushMessage = (
   type: NotificationType,
   _payload: NotificationPayload,
