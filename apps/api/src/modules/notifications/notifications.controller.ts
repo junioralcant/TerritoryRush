@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
@@ -19,7 +29,10 @@ export class NotificationsController {
   @Post('notifications/:id/read')
   @HttpCode(204)
   async markRead(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    await this.notificationsService.markRead(user.id, id);
+    const marked = await this.notificationsService.markRead(user.id, id);
+    if (!marked) {
+      throw new NotFoundException(`Notification ${id} not found`);
+    }
   }
 
   @Post('device-tokens')

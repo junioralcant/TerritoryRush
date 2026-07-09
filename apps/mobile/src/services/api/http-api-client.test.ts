@@ -47,4 +47,37 @@ describe('createHttpApiClient', () => {
 
     await expect(createHttpApiClient('http://api', getToken).getStreet('s1')).rejects.toThrow('status 401');
   });
+
+  it('reads the profile, rankings, achievements and notifications', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse([]));
+    const api = createHttpApiClient('http://api', getToken);
+
+    await api.getProfile();
+    await api.getCityRanking('city-a');
+    await api.getExplorerRanking();
+    await api.getAchievements();
+    await api.getNotifications();
+
+    expect(fetchSpy.mock.calls.map((call) => call[0])).toEqual([
+      'http://api/me/profile',
+      'http://api/rankings/city/city-a',
+      'http://api/rankings/explorers',
+      'http://api/me/achievements',
+      'http://api/me/notifications',
+    ]);
+  });
+
+  it('marks a notification read (POST) and registers a device token', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse(null, true, 204));
+    const api = createHttpApiClient('http://api', getToken);
+
+    await api.markNotificationRead('n1');
+    await api.registerDeviceToken('ExpoTok[x]', 'ios');
+
+    const [readUrl, readInit] = fetchSpy.mock.calls[0];
+    expect(readUrl).toBe('http://api/me/notifications/n1/read');
+    expect((readInit as RequestInit).method).toBe('POST');
+    const [, tokenInit] = fetchSpy.mock.calls[1];
+    expect(String((tokenInit as RequestInit).body)).toContain('ExpoTok[x]');
+  });
 });

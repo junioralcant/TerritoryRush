@@ -28,3 +28,8 @@ jest.mock('expo-web-browser', () => ({
 jest.mock('expo-linking', () => ({
   createURL: (path) => `territoryrush://${path}`,
 }));
+
+jest.mock('expo-notifications', () => ({
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: 'ExpoTok[test]' }),
+}));

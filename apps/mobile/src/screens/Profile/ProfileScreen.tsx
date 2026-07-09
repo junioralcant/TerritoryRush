@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Text, View } from 'react-native';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
 
@@ -20,6 +20,14 @@ export const ProfileScreen = ({ api }: ProfileScreenProps) => {
 
   return (
     <View accessibilityLabel="Perfil do corredor">
+      {profile.photoUrl ? (
+        <Image
+          testID="profile-photo"
+          source={{ uri: profile.photoUrl }}
+          style={{ width: 64, height: 64, borderRadius: 32 }}
+          accessibilityLabel="Foto do corredor"
+        />
+      ) : null}
       <Text testID="profile-name">{profile.name ?? 'Corredor'}</Text>
       <Text testID="profile-city">{profile.city ?? 'Cidade não informada'}</Text>
       <Text testID="profile-streets-owned">{`Ruas dominadas: ${profile.streetsOwned}`}</Text>

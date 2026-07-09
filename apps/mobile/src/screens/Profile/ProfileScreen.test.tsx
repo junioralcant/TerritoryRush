@@ -35,6 +35,12 @@ describe('ProfileScreen', () => {
     expect(screen.getByTestId('profile-national-rank')).toHaveTextContent(/1/);
   });
 
+  it('renders the runner photo when available', async () => {
+    render(<ProfileScreen api={makeApi(jest.fn().mockResolvedValue({ ...profile, photoUrl: 'https://cdn/pic.jpg' }))} />);
+
+    await waitFor(() => expect(screen.getByTestId('profile-photo')).toBeOnTheScreen());
+  });
+
   it('shows an error state when the profile fails to load', async () => {
     render(<ProfileScreen api={makeApi(jest.fn().mockRejectedValue(new Error('nope')))} />);
 

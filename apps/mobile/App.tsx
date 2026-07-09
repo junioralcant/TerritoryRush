@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Button, View } from 'react-native';
+import { Button, Platform, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -16,6 +16,8 @@ import { ProfileScreen } from './src/screens/Profile/ProfileScreen';
 import { RankingRoute } from './src/screens/Ranking/RankingRoute';
 import { AchievementsScreen } from './src/screens/Achievements/AchievementsScreen';
 import { NotificationsCenter } from './src/screens/Notifications/NotificationsCenter';
+import { usePushRegistration } from './src/screens/Notifications/usePushRegistration';
+import { getExpoPushToken } from './src/screens/Notifications/getExpoPushToken';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,7 +35,9 @@ const HeaderNav = ({ navigate }: NavButtonsProps) => (
   </View>
 );
 
-const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId: string }) => (
+const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId: string }) => {
+  usePushRegistration(api, getExpoPushToken, Platform.OS);
+  return (
   <SafeAreaProvider>
     <NavigationContainer>
       <Stack.Navigator>
@@ -66,7 +70,8 @@ const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId
       </Stack.Navigator>
     </NavigationContainer>
   </SafeAreaProvider>
-);
+  );
+};
 
 export default function App() {
   const { session, authenticating, signInWith } = useSession();
