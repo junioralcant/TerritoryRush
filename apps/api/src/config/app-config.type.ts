@@ -3,4 +3,9 @@ export type AppConfig = {
   databaseUrl: string;
   supabaseJwtSecret: string;
   supabaseJwtAud: string;
+  tokenEncryptionKey: string;
+  stravaClientId: string;
+  stravaClientSecret: string;
+  stravaWebhookVerifyToken: string;
+  stravaWebhookCallbackUrl: string;
 };

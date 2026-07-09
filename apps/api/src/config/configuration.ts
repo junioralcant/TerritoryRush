@@ -15,4 +15,9 @@ export const loadConfiguration = (): AppConfig => ({
   databaseUrl: required('DATABASE_URL'),
   supabaseJwtSecret: required('SUPABASE_JWT_SECRET'),
   supabaseJwtAud: process.env.SUPABASE_JWT_AUD ?? 'authenticated',
+  tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY ?? '',
+  stravaClientId: process.env.STRAVA_CLIENT_ID ?? '',
+  stravaClientSecret: process.env.STRAVA_CLIENT_SECRET ?? '',
+  stravaWebhookVerifyToken: process.env.STRAVA_WEBHOOK_VERIFY_TOKEN ?? '',
+  stravaWebhookCallbackUrl: process.env.STRAVA_WEBHOOK_CALLBACK_URL ?? '',
 });

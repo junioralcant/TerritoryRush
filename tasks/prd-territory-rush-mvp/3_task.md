@@ -22,10 +22,10 @@ Conectar a conta Strava do corredor via OAuth 2.0, gerenciar tokens (com refresh
 
 ## Subtarefas
 
-- [ ] 3.1 Módulo `integrations/strava`: cliente OAuth (troca + refresh) e armazenamento seguro de tokens.
-- [ ] 3.2 Endpoints `POST /integrations/strava/connect` e `DELETE /integrations/strava/disconnect`.
-- [ ] 3.3 Gestão da assinatura de webhook + `GET /webhooks/strava` (validação `hub.challenge`).
-- [ ] 3.4 `POST /webhooks/strava`: validar evento, deduplicar e enfileirar `IngestActivityJob` (resposta 200 imediata).
+- [x] 3.1 Módulo `integrations/strava`: cliente OAuth (troca + refresh) e armazenamento seguro de tokens.
+- [x] 3.2 Endpoints `POST /integrations/strava/connect` e `DELETE /integrations/strava/disconnect`.
+- [x] 3.3 Gestão da assinatura de webhook + `GET /webhooks/strava` (validação `hub.challenge`).
+- [x] 3.4 `POST /webhooks/strava`: validar evento, deduplicar e enfileirar `IngestActivityJob` (resposta 200 imediata).
 
 ## Detalhes de Implementação
 
@@ -39,8 +39,8 @@ Ver `techspec.md`: "Pontos de Integração → Strava" (tokens, assinatura únic
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — troca/refresh de token, validação `hub.challenge`, dedup de evento repetido.
-- [ ] Testes de integração — connect/disconnect → estado de `provider_connection`; webhook → job na fila (mock da API Strava).
+- [x] Testes de unidade — troca/refresh de token, validação `hub.challenge`, dedup de evento repetido.
+- [x] Testes de integração — connect/disconnect → estado de `provider_connection`; webhook → job na fila (mock da API Strava).
 - [ ] Testes E2E (se aplicável) — não nesta tarefa (fluxo mobile de conexão coberto na 10.0).
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>
