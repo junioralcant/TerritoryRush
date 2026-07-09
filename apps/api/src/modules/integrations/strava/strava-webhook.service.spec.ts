@@ -20,7 +20,10 @@ const makeRepo = (): jest.Mocked<ProviderConnectionRepository> => ({
   delete: jest.fn(),
 });
 
-const makeQueue = (): jest.Mocked<IngestActivityQueue> => ({ enqueue: jest.fn().mockResolvedValue(true) });
+const makeQueue = (): jest.Mocked<IngestActivityQueue> => ({
+  enqueue: jest.fn().mockResolvedValue(true),
+  close: jest.fn().mockResolvedValue(undefined),
+});
 
 const makeSubs = (): jest.Mocked<StravaSubscriptionClient> => ({
   listSubscriptions: jest.fn(),

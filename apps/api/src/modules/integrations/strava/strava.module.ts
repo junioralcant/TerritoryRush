@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ActivitiesModule } from '../../activities/activities.module';
+import { PROVIDER_ACTIVITY_GATEWAY } from '../../activities/ports/provider-activity-gateway.port';
 import { AuthModule } from '../../auth/auth.module';
 import { AesTokenCipher } from './cipher/aes-token-cipher';
+import { HttpStravaActivityClient } from './clients/http-strava-activity.client';
 import { HttpStravaOAuthClient } from './clients/http-strava-oauth.client';
 import { HttpStravaSubscriptionClient } from './clients/http-strava-subscription.client';
 import { IntegrationsStravaController } from './integrations-strava.controller';
 import { PROVIDER_CONNECTION_REPOSITORY } from './ports/provider-connection-repository.port';
+import { STRAVA_ACTIVITY_CLIENT } from './ports/strava-activity-client.port';
 import { STRAVA_OAUTH_CLIENT } from './ports/strava-oauth-client.port';
 import { STRAVA_SUBSCRIPTION_CLIENT } from './ports/strava-subscription-client.port';
 import { TOKEN_CIPHER } from './ports/token-cipher.port';
 import { PgProviderConnectionRepository } from './repositories/provider-connection.repository';
+import { StravaActivityGateway } from './strava-activity.gateway';
 import { StravaConnectionService } from './strava-connection.service';
 import { StravaTokenService } from './strava-token.service';
 import { StravaWebhookController } from './strava-webhook.controller';
@@ -22,11 +26,13 @@ import { StravaWebhookService } from './strava-webhook.service';
     { provide: TOKEN_CIPHER, useClass: AesTokenCipher },
     { provide: STRAVA_OAUTH_CLIENT, useClass: HttpStravaOAuthClient },
     { provide: STRAVA_SUBSCRIPTION_CLIENT, useClass: HttpStravaSubscriptionClient },
+    { provide: STRAVA_ACTIVITY_CLIENT, useClass: HttpStravaActivityClient },
     { provide: PROVIDER_CONNECTION_REPOSITORY, useClass: PgProviderConnectionRepository },
+    { provide: PROVIDER_ACTIVITY_GATEWAY, useClass: StravaActivityGateway },
     StravaConnectionService,
     StravaTokenService,
     StravaWebhookService,
   ],
-  exports: [StravaTokenService, PROVIDER_CONNECTION_REPOSITORY, TOKEN_CIPHER],
+  exports: [StravaTokenService, PROVIDER_CONNECTION_REPOSITORY, TOKEN_CIPHER, PROVIDER_ACTIVITY_GATEWAY],
 })
 export class StravaIntegrationModule {}

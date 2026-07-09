@@ -10,4 +10,5 @@ export const INGEST_ACTIVITY_QUEUE = Symbol('INGEST_ACTIVITY_QUEUE');
  */
 export interface IngestActivityQueue {
   enqueue(job: IngestActivityJob): Promise<boolean>;
+  close(): Promise<void>;
 }

@@ -13,6 +13,7 @@ const required = (name: string): string => {
 export const loadConfiguration = (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),
   databaseUrl: required('DATABASE_URL'),
+  redisUrl: process.env.REDIS_URL ?? '',
   supabaseJwtSecret: required('SUPABASE_JWT_SECRET'),
   supabaseJwtAud: process.env.SUPABASE_JWT_AUD ?? 'authenticated',
   tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY ?? '',

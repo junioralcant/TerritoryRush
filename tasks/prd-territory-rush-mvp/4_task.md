@@ -22,10 +22,10 @@ Construir o pipeline assíncrono que consome os jobs enfileirados pelo webhook: 
 
 ## Subtarefas
 
-- [ ] 4.1 Configurar Redis + fila BullMQ e registrar o worker `ingest-activity`.
-- [ ] 4.2 Módulo `activities`: orquestrador de ingestão (`ActivityIngestionService`) com refresh de token, fetch de streams e backoff/retry.
-- [ ] 4.3 Persistência da `activity` com dedup e transições de status.
-- [ ] 4.4 Endpoint `GET /activities?status=` para o corredor consultar o estado das importações.
+- [x] 4.1 Configurar Redis + fila BullMQ e registrar o worker `ingest-activity`.
+- [x] 4.2 Módulo `activities`: orquestrador de ingestão (`ActivityIngestionService`) com refresh de token, fetch de streams e backoff/retry.
+- [x] 4.3 Persistência da `activity` com dedup e transições de status.
+- [x] 4.4 Endpoint `GET /activities?status=` para o corredor consultar o estado das importações.
 
 ## Detalhes de Implementação
 
@@ -40,8 +40,8 @@ Ver `techspec.md`: "Arquitetura → Fluxo de dados (ingestão)", "Interfaces Pri
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — dedup por chave única, transições de status, refresh de token antes do fetch (mock Strava).
-- [ ] Testes de integração — `webhook → fila → worker → DB` com Redis/Postgres de teste e streams de fixture; idempotência de evento repetido.
+- [x] Testes de unidade — dedup por chave única, transições de status, refresh de token antes do fetch (mock Strava).
+- [x] Testes de integração — `webhook → fila → worker → DB` com Redis/Postgres de teste e streams de fixture; idempotência de evento repetido.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

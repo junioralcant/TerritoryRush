@@ -5,7 +5,7 @@
 - [x] 1.0 Fundações do backend + Supabase + Auth + Perfil
 - [x] 2.0 Malha viária OSM (módulo `geo`) + `GET /streets?bbox=`
 - [x] 3.0 Integração Strava (OAuth + conexão/desconexão + webhook)
-- [ ] 4.0 Pipeline assíncrono de ingestão (fila + worker + streams + status)
+- [x] 4.0 Pipeline assíncrono de ingestão (fila + worker + streams + status)
 - [ ] 5.0 Map-matching OSRM + resolução em ruas nomeadas
 - [ ] 6.0 Motor de pontuação + domínio territorial
 - [ ] 7.0 Anti-cheat básico (guarda no worker)

@@ -27,4 +27,9 @@ export class InMemoryIngestActivityQueue implements IngestActivityQueue {
   enqueuedJobs(): IngestActivityJob[] {
     return [...this.jobs];
   }
+
+  async close(): Promise<void> {
+    this.seen.clear();
+    this.jobs.length = 0;
+  }
 }
