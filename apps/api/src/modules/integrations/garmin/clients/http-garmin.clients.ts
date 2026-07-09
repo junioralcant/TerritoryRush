@@ -81,15 +81,17 @@ export class HttpGarminActivityClient implements GarminActivityClient {
 
   async fetchStreams(summaryId: string, accessToken: string): Promise<GpsStreams> {
     const data = await this.get(summaryId, accessToken);
-    const samples = data.samples ?? [];
+    // Keep latlng/time/heartrate index-aligned: derive all three from the same
+    // set of coordinate-bearing samples. Heartrate is only reported when every
+    // such sample carries it (avoids polluting the anti-cheat average with 0s).
+    const samples = (data.samples ?? []).filter(
+      (s) => s.latitudeInDegree !== undefined && s.longitudeInDegree !== undefined,
+    );
+    const hasHeartrate = samples.length > 0 && samples.every((s) => s.heartRate !== undefined);
     return {
-      latlng: samples
-        .filter((s) => s.latitudeInDegree !== undefined && s.longitudeInDegree !== undefined)
-        .map((s) => [s.latitudeInDegree as number, s.longitudeInDegree as number]),
+      latlng: samples.map((s) => [s.latitudeInDegree as number, s.longitudeInDegree as number]),
       time: samples.map((s) => s.timerDurationInSeconds ?? 0),
-      heartrate: samples.some((s) => s.heartRate !== undefined)
-        ? samples.map((s) => s.heartRate ?? 0)
-        : undefined,
+      heartrate: hasHeartrate ? samples.map((s) => s.heartRate as number) : undefined,
     };
   }
 
