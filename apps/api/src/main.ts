@@ -7,6 +7,7 @@ import { AppConfig } from './config/app-config.type';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.enableShutdownHooks();
 
   const config = app.get(ConfigService<AppConfig, true>);
   const port = config.get('port', { infer: true });
