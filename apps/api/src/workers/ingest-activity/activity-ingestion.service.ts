@@ -5,6 +5,8 @@ import {
   PROVIDER_ACTIVITY_GATEWAY,
   ProviderActivityGateway,
 } from '../../modules/activities/ports/provider-activity-gateway.port';
+import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
+import { averageHeartrate } from '../../modules/anti-cheat/validators';
 import { toGpsTrace } from '../../modules/matching/matching-aggregation';
 import { MapMatchingService } from '../../modules/matching/matching.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
@@ -14,6 +16,7 @@ export class ActivityIngestionService {
   constructor(
     @Inject(ACTIVITY_REPOSITORY) private readonly activities: ActivityRepository,
     @Inject(PROVIDER_ACTIVITY_GATEWAY) private readonly gateway: ProviderActivityGateway,
+    private readonly antiCheat: AntiCheatService,
     private readonly matching: MapMatchingService,
     private readonly territory: TerritoryService,
   ) {}
@@ -30,6 +33,18 @@ export class ActivityIngestionService {
     await this.activities.updateStatus(activity.id, 'processing');
     const data = await this.gateway.fetchIngestData(job.userId, job.providerActivityId);
     await this.activities.saveIngestedData(activity.id, data);
+
+    const verdict = this.antiCheat.evaluate({
+      provider: job.provider,
+      distanceM: data.metrics.distanceM,
+      movingTimeS: data.metrics.movingTimeS,
+      avgPaceSKm: data.metrics.avgPaceSKm,
+      avgHeartrate: averageHeartrate(data.streams),
+    });
+    if (!verdict.approved) {
+      await this.activities.updateStatus(activity.id, 'rejected', verdict.reason);
+      return;
+    }
 
     const resolvedStreets = await this.matching.matchActivityStreets({
       activityId: activity.id,

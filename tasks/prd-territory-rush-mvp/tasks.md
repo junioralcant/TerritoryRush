@@ -8,7 +8,7 @@
 - [x] 4.0 Pipeline assíncrono de ingestão (fila + worker + streams + status)
 - [x] 5.0 Map-matching OSRM + resolução em ruas nomeadas
 - [x] 6.0 Motor de pontuação + domínio territorial
-- [ ] 7.0 Anti-cheat básico (guarda no worker)
+- [x] 7.0 Anti-cheat básico (guarda no worker)
 - [ ] 8.0 APIs de leitura: detalhe da rua + perfil + rankings
 - [ ] 9.0 Conquistas + notificações (Expo Push)
 - [ ] 10.0 App mobile — Auth + conexão Strava + mapa territorial

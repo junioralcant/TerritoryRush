@@ -21,9 +21,9 @@ Adicionar a validação anti-cheat básica como guarda no pipeline: antes de cas
 
 ## Subtarefas
 
-- [ ] 7.1 Módulo `anti-cheat`: validadores puros e composição do veredito.
-- [ ] 7.2 Plugar a guarda no worker antes das etapas de matching/scoring.
-- [ ] 7.3 Persistir `rejection_reason` e expor no status da atividade.
+- [x] 7.1 Módulo `anti-cheat`: validadores puros e composição do veredito.
+- [x] 7.2 Plugar a guarda no worker antes das etapas de matching/scoring.
+- [x] 7.3 Persistir `rejection_reason` e expor no status da atividade.
 
 ## Detalhes de Implementação
 
@@ -37,8 +37,8 @@ Ver `techspec.md`: "Arquitetura → Fluxo de dados" (posição do anti-cheat), "
 
 ## Testes da Tarefa
 
-- [ ] Testes de unidade — cada validador (ritmo/velocidade, coerência, FC, origem) e a composição do veredito.
-- [ ] Testes de integração — worker rejeita atividade fraudulenta (não pontua) e aprova atividade válida, com motivo persistido.
+- [x] Testes de unidade — cada validador (ritmo/velocidade, coerência, FC, origem) e a composição do veredito.
+- [x] Testes de integração — worker rejeita atividade fraudulenta (não pontua) e aprova atividade válida, com motivo persistido.
 - [ ] Testes E2E (se aplicável) — não nesta tarefa.
 
 <critical>SEMPRE CRIE E EXECUTE OS TESTES DA TAREFA ANTES DE CONSIDERÁ-LA FINALIZADA</critical>

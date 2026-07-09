@@ -1,6 +1,7 @@
 import { ActivityRecord, IngestActivityJob, IngestedActivityData } from '../../modules/activities/activities.types';
 import { ActivityRepository } from '../../modules/activities/ports/activity-repository.port';
 import { ProviderActivityGateway } from '../../modules/activities/ports/provider-activity-gateway.port';
+import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { MapMatchingService } from '../../modules/matching/matching.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
 import { ActivityIngestionService } from './activity-ingestion.service';
@@ -49,15 +50,19 @@ const makeMatching = () => ({
 
 const makeTerritory = () => ({ scoreAndApply: jest.fn().mockResolvedValue([]) });
 
+const makeAntiCheat = () => ({ evaluate: jest.fn().mockReturnValue({ approved: true }) });
+
 const makeService = (
   repo: ActivityRepository,
   gateway: ProviderActivityGateway,
   matching: { matchActivityStreets: jest.Mock },
   territory: { scoreAndApply: jest.Mock },
+  antiCheat: { evaluate: jest.Mock } = makeAntiCheat(),
 ): ActivityIngestionService =>
   new ActivityIngestionService(
     repo,
     gateway,
+    antiCheat as unknown as AntiCheatService,
     matching as unknown as MapMatchingService,
     territory as unknown as TerritoryService,
   );
@@ -84,6 +89,22 @@ describe('ActivityIngestionService', () => {
       }),
     );
     expect(repo.updateStatus).toHaveBeenNthCalledWith(2, 'activity-1', 'processed');
+  });
+
+  it('rejects a fraudulent activity before matching or scoring', async () => {
+    const repo = makeRepo();
+    const gateway = makeGateway();
+    const matching = makeMatching();
+    const territory = makeTerritory();
+    const antiCheat = { evaluate: jest.fn().mockReturnValue({ approved: false, reason: 'Velocidade média incompatível com corrida' }) };
+    repo.createIfAbsent.mockResolvedValue(activity());
+    gateway.fetchIngestData.mockResolvedValue(INGESTED);
+
+    await makeService(repo, gateway, matching, territory, antiCheat).ingest(JOB);
+
+    expect(repo.updateStatus).toHaveBeenLastCalledWith('activity-1', 'rejected', 'Velocidade média incompatível com corrida');
+    expect(matching.matchActivityStreets).not.toHaveBeenCalled();
+    expect(territory.scoreAndApply).not.toHaveBeenCalled();
   });
 
   it('is idempotent: skips an already-processed activity', async () => {

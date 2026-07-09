@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { AntiCheatService } from './anti-cheat.service';
 
-// Scaffolded in Task 1.0. Implemented in Task 7.0 — see
-// tasks/prd-territory-rush-mvp/7_task.md.
-@Module({})
+@Module({
+  providers: [AntiCheatService],
+  exports: [AntiCheatService],
+})
 export class AntiCheatModule {}
