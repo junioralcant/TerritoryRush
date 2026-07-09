@@ -8,6 +8,7 @@ type StravaActivityPayload = {
   distance?: number;
   moving_time?: number;
   start_date?: string;
+  average_speed?: number;
 };
 
 type StravaStreamSet = {
@@ -41,8 +42,15 @@ export class HttpStravaActivityClient implements StravaActivityClient {
     const data = (await response.json()) as StravaActivityPayload;
     const distanceM = data.distance ?? null;
     const movingTimeS = data.moving_time ?? null;
+    // Prefer Strava's reported average_speed (an independent field) so the
+    // anti-cheat coherence check can compare it against the distance/time-derived
+    // pace; fall back to deriving it only when average_speed is absent.
     const avgPaceSKm =
-      distanceM && movingTimeS && distanceM > 0 ? movingTimeS / (distanceM / 1000) : null;
+      data.average_speed && data.average_speed > 0
+        ? 1000 / data.average_speed
+        : distanceM && movingTimeS && distanceM > 0
+          ? movingTimeS / (distanceM / 1000)
+          : null;
     return { distanceM, movingTimeS, avgPaceSKm, startedAt: data.start_date ?? null };
   }
 
