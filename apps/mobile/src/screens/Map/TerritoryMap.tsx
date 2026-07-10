@@ -1,5 +1,6 @@
 import { Camera, LineLayer, MapView, ShapeSource } from '@maplibre/maplibre-react-native';
 import { StreetSummary } from '../../services/api/types';
+import { nearestStreetId } from './nearestStreet';
 import { toStreetFeatureCollection } from './streetFeatures';
 import { Coordinate } from './useCurrentLocation';
 
@@ -16,19 +17,24 @@ export const TerritoryMap = ({ streets, onSelectStreet, initialCenter }: Territo
   const features = toStreetFeatureCollection(streets);
 
   return (
-    <MapView testID="territory-map" style={{ flex: 1 }} mapStyle={OSM_STYLE_URL}>
+    <MapView
+      testID="territory-map"
+      style={{ flex: 1 }}
+      mapStyle={OSM_STYLE_URL}
+      onPress={(feature) => {
+        const geometry = feature.geometry;
+        if (!geometry || geometry.type !== 'Point') {
+          return;
+        }
+        const [lng, lat] = geometry.coordinates;
+        const streetId = nearestStreetId(streets, [lng, lat]);
+        if (streetId) {
+          onSelectStreet(streetId);
+        }
+      }}
+    >
       <Camera defaultSettings={{ centerCoordinate: initialCenter, zoomLevel: INITIAL_ZOOM }} />
-      <ShapeSource
-        id="streets"
-        testID="streets-source"
-        shape={features}
-        onPress={(event) => {
-          const properties = event.features?.[0]?.properties as { id?: string } | null | undefined;
-          if (properties?.id) {
-            onSelectStreet(properties.id);
-          }
-        }}
-      >
+      <ShapeSource id="streets" testID="streets-source" shape={features}>
         <LineLayer
           id="streets-line"
           style={{
