@@ -18,3 +18,14 @@ apps/**/ios/
 apps/**/android/
 apps/**/web-build/
 *.orig
+
+# OSRM data — downloaded/generated, regenerated via infra/osrm/README.md
+infra/osrm/*.osm
+infra/osrm/*.osm.pbf
+infra/osrm/*.osrm*
+
+# Local scratch / screenshots (not part of the project)
+/Captura de Tela*.png
+/simulator_screenshot_*.png
+/Untitled
+/territory-rush-icon.png
