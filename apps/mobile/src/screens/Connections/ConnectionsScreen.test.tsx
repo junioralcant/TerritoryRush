@@ -21,12 +21,12 @@ describe('ConnectionsScreen', () => {
     const startStravaAuth = jest.fn().mockResolvedValue('auth-code');
     render(<ConnectionsScreen api={api} startStravaAuth={startStravaAuth} />);
 
-    await waitFor(() => expect(screen.getByTestId('strava-status')).toHaveTextContent('Strava não conectado'));
+    await waitFor(() => expect(screen.getByTestId('strava-status')).toHaveTextContent('Não conectado'));
 
     fireEvent.press(screen.getByTestId('connect-strava'));
 
     await waitFor(() => expect(api.connectStrava).toHaveBeenCalledWith('auth-code'));
-    await waitFor(() => expect(screen.getByTestId('strava-status')).toHaveTextContent('Strava conectado'));
+    await waitFor(() => expect(screen.getByTestId('strava-status')).toHaveTextContent('Conectado'));
   });
 
   it('shows the connected state and disconnects on press', async () => {

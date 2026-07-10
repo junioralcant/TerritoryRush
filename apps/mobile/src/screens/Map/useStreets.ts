@@ -8,6 +8,7 @@ export type UseStreetsResult = {
   loading: boolean;
   error: string | null;
   selectStreet: (id: string) => Promise<void>;
+  clearSelection: () => void;
 };
 
 export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
@@ -49,5 +50,7 @@ export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
     [api],
   );
 
-  return { streets, selected, loading, error, selectStreet };
+  const clearSelection = useCallback(() => setSelected(null), []);
+
+  return { streets, selected, loading, error, selectStreet, clearSelection };
 };

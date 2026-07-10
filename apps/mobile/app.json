@@ -5,9 +5,40 @@
     "scheme": "territoryrush",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "backgroundColor": "#0A0F1A",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": true, "bundleIdentifier": "com.territoryrush.app" },
-    "android": { "package": "com.territoryrush.app" }
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0F1A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.territoryrush.app",
+      "icon": "./assets/icon.png"
+    },
+    "android": {
+      "package": "com.territoryrush.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0F1A"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@maplibre/maplibre-react-native",
+      "expo-notifications",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Territory Rush usa sua localização para centralizar o mapa na sua cidade e mostrar as ruas ao seu redor."
+        }
+      ]
+    ]
   }
 }

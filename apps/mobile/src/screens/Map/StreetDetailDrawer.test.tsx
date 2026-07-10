@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { StreetDetail } from '../../services/api/types';
 import { StreetDetailDrawer } from './StreetDetailDrawer';
 
@@ -18,21 +18,35 @@ const detail: StreetDetail = {
 
 describe('StreetDetailDrawer', () => {
   it('shows owner, tenure, disputes and ranking', () => {
-    render(<StreetDetailDrawer detail={detail} />);
+    render(<StreetDetailDrawer detail={detail} currentUserId="u1" />);
 
     expect(screen.getByTestId('drawer-name')).toHaveTextContent('Rua Maranhão');
-    expect(screen.getByTestId('drawer-owner')).toHaveTextContent(/Ana/);
+    expect(screen.getByTestId('drawer-owner')).toHaveTextContent('Você é o proprietário');
     expect(screen.getByTestId('drawer-tenure')).toHaveTextContent(/12 dias/);
-    expect(screen.getByTestId('drawer-disputes')).toHaveTextContent('Disputas: 3');
+    expect(screen.getByTestId('drawer-disputes')).toHaveTextContent('3');
     expect(screen.getByTestId('rank-1')).toHaveTextContent(/Ana/);
     expect(screen.getByTestId('rank-2')).toHaveTextContent(/Bruno/);
     expect(screen.getByTestId('history-0')).toHaveTextContent(/atual/);
   });
 
+  it('labels the owner when the street belongs to someone else', () => {
+    render(<StreetDetailDrawer detail={detail} currentUserId="u2" />);
+
+    expect(screen.getByTestId('drawer-owner')).toHaveTextContent(/Ana/);
+  });
+
   it('shows the ownerless state', () => {
     render(<StreetDetailDrawer detail={{ ...detail, owner: null, tenureDays: null }} />);
 
-    expect(screen.getByTestId('drawer-owner')).toHaveTextContent('Sem dono');
+    expect(screen.getByTestId('drawer-owner')).toHaveTextContent(/Sem dono/);
     expect(screen.getByTestId('drawer-tenure')).toHaveTextContent('Sem posse');
+  });
+
+  it('closes when the close control is pressed', () => {
+    const onClose = jest.fn();
+    render(<StreetDetailDrawer detail={detail} onClose={onClose} />);
+
+    fireEvent.press(screen.getByLabelText('Fechar'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

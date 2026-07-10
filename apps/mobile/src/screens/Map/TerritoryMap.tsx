@@ -1,20 +1,23 @@
 import { Camera, LineLayer, MapView, ShapeSource } from '@maplibre/maplibre-react-native';
 import { StreetSummary } from '../../services/api/types';
 import { toStreetFeatureCollection } from './streetFeatures';
+import { Coordinate } from './useCurrentLocation';
 
 export type TerritoryMapProps = {
   streets: StreetSummary[];
   onSelectStreet: (streetId: string) => void;
+  initialCenter: Coordinate;
 };
 
-const OSM_STYLE_URL = 'https://demotiles.maplibre.org/style.json';
+const OSM_STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const INITIAL_ZOOM = 14;
 
-export const TerritoryMap = ({ streets, onSelectStreet }: TerritoryMapProps) => {
+export const TerritoryMap = ({ streets, onSelectStreet, initialCenter }: TerritoryMapProps) => {
   const features = toStreetFeatureCollection(streets);
 
   return (
     <MapView testID="territory-map" style={{ flex: 1 }} mapStyle={OSM_STYLE_URL}>
-      <Camera />
+      <Camera defaultSettings={{ centerCoordinate: initialCenter, zoomLevel: INITIAL_ZOOM }} />
       <ShapeSource
         id="streets"
         testID="streets-source"
@@ -28,7 +31,10 @@ export const TerritoryMap = ({ streets, onSelectStreet }: TerritoryMapProps) => 
       >
         <LineLayer
           id="streets-line"
-          style={{ lineColor: ['get', 'color'], lineWidth: 4 }}
+          style={{
+            lineColor: ['get', 'color'],
+            lineWidth: ['case', ['==', ['get', 'ownership'], 'unclaimed'], 3, 8],
+          }}
         />
       </ShapeSource>
     </MapView>

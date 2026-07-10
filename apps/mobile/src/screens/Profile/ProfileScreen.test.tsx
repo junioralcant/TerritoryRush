@@ -19,26 +19,26 @@ const profile: RunnerProfileDetail = {
   nationalRank: 1,
 };
 
-const makeApi = (getProfile: jest.Mock): ApiClient =>
-  ({ getProfile } as unknown as ApiClient);
+const makeApi = (getProfile: jest.Mock): ApiClient => ({ getProfile } as unknown as ApiClient);
 
 describe('ProfileScreen', () => {
   it('renders the runner aggregates', async () => {
     render(<ProfileScreen api={makeApi(jest.fn().mockResolvedValue(profile))} />);
 
     await waitFor(() => expect(screen.getByTestId('profile-name')).toHaveTextContent('Ana'));
-    expect(screen.getByTestId('profile-streets-owned')).toHaveTextContent(/7/);
-    expect(screen.getByTestId('profile-streets-explored')).toHaveTextContent(/20/);
-    expect(screen.getByTestId('profile-distance')).toHaveTextContent(/42 km/);
+    expect(screen.getByTestId('profile-city')).toHaveTextContent('São Paulo');
+    expect(screen.getByTestId('profile-streets-owned')).toHaveTextContent('7');
+    expect(screen.getByTestId('profile-streets-explored')).toHaveTextContent('20');
+    expect(screen.getByTestId('profile-distance')).toHaveTextContent('42 km');
     expect(screen.getByTestId('profile-streak')).toHaveTextContent(/5 dias/);
-    expect(screen.getByTestId('profile-city-rank')).toHaveTextContent(/2/);
-    expect(screen.getByTestId('profile-national-rank')).toHaveTextContent(/1/);
+    expect(screen.getByTestId('profile-city-rank')).toHaveTextContent('#2');
+    expect(screen.getByTestId('profile-national-rank')).toHaveTextContent('#1');
   });
 
   it('renders the runner photo when available', async () => {
     render(<ProfileScreen api={makeApi(jest.fn().mockResolvedValue({ ...profile, photoUrl: 'https://cdn/pic.jpg' }))} />);
 
-    await waitFor(() => expect(screen.getByTestId('profile-photo')).toBeOnTheScreen());
+    await waitFor(() => expect(screen.getByTestId('profile-avatar-photo')).toBeOnTheScreen());
   });
 
   it('shows an error state when the profile fails to load', async () => {

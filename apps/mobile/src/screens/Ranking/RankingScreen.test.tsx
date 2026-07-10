@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { ApiClient } from '../../services/api/api-client.port';
 import { RankingScreen } from './RankingScreen';
 
@@ -9,15 +9,19 @@ const makeApi = (): ApiClient =>
   }) as unknown as ApiClient;
 
 describe('RankingScreen', () => {
-  it('renders the city and explorer leaderboards', async () => {
+  it('shows the city leaderboard by default and switches to explorers', async () => {
     render(<RankingScreen api={makeApi()} cityId="city-a" />);
 
     await waitFor(() => expect(screen.getByTestId('city-rank-1')).toBeOnTheScreen());
     expect(screen.getByTestId('city-rank-1')).toHaveTextContent(/Ana/);
+
+    fireEvent.press(screen.getByTestId('ranking-tab-explorers'));
+
+    await waitFor(() => expect(screen.getByTestId('explorer-rank-1')).toBeOnTheScreen());
     expect(screen.getByTestId('explorer-rank-1')).toHaveTextContent(/Bruno/);
   });
 
-  it('shows only explorers when there is no city', async () => {
+  it('defaults to explorers and never queries the city board when there is no city', async () => {
     const api = makeApi();
     render(<RankingScreen api={api} cityId={null} />);
 

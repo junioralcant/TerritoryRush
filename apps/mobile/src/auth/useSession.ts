@@ -28,16 +28,23 @@ export const useSession = (): UseSessionResult => {
     setAuthenticating(true);
     try {
       const redirectTo = Linking.createURL('auth-callback');
-      const { data } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: { redirectTo, skipBrowserRedirect: true },
       });
-      if (data.url) {
-        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-        if (result.type === 'success') {
-          await supabase.auth.exchangeCodeForSession(result.url);
-        }
-      }
+      if (error) throw error;
+      if (!data.url) return;
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type !== 'success') return;
+
+      const code = Linking.parse(result.url).queryParams?.code;
+      if (typeof code !== 'string') return;
+
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) throw exchangeError;
+    } catch (err) {
+      console.warn('[auth] falha ao entrar', err);
     } finally {
       setAuthenticating(false);
     }

@@ -10,5 +10,12 @@ export type RankingRouteProps = {
 export const RankingRoute = ({ api }: RankingRouteProps) => {
   const loader = useCallback(() => api.getProfile(), [api]);
   const { data } = useApiResource(loader);
-  return <RankingScreen api={api} cityId={data?.cityId ?? null} />;
+  return (
+    <RankingScreen
+      api={api}
+      cityId={data?.cityId ?? null}
+      cityName={data?.city ?? null}
+      currentUserId={data?.userId ?? null}
+    />
+  );
 };
