@@ -17,10 +17,10 @@ export class SupabaseJwtGuard implements CanActivate {
     @Inject(TOKEN_VERIFIER) private readonly tokenVerifier: TokenVerifier,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractBearerToken(request.header('authorization'));
-    request.user = this.tokenVerifier.verify(token);
+    request.user = await this.tokenVerifier.verify(token);
     return true;
   }
 

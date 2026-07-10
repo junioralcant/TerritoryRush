@@ -3,6 +3,7 @@ export type AppConfig = {
   databaseUrl: string;
   redisUrl: string;
   osrmUrl: string;
+  supabaseUrl: string;
   supabaseJwtSecret: string;
   supabaseJwtAud: string;
   tokenEncryptionKey: string;

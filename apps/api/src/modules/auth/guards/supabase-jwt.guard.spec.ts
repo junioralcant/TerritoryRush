@@ -24,45 +24,43 @@ const makeGuard = (verify: TokenVerifier['verify']): SupabaseJwtGuard =>
   new SupabaseJwtGuard({ verify });
 
 describe('SupabaseJwtGuard', () => {
-  it('verifies the bearer token and attaches the user to the request', () => {
-    const verify = jest.fn().mockReturnValue(USER);
+  it('verifies the bearer token and attaches the user to the request', async () => {
+    const verify = jest.fn().mockResolvedValue(USER);
     const { context, request } = makeContext('Bearer valid-token');
 
-    expect(makeGuard(verify).canActivate(context)).toBe(true);
+    await expect(makeGuard(verify).canActivate(context)).resolves.toBe(true);
     expect(verify).toHaveBeenCalledWith('valid-token');
     expect(request.user).toEqual(USER);
   });
 
-  it('rejects a request without an Authorization header', () => {
+  it('rejects a request without an Authorization header', async () => {
     const verify = jest.fn();
     const { context } = makeContext(undefined);
 
-    expect(() => makeGuard(verify).canActivate(context)).toThrow(UnauthorizedException);
+    await expect(makeGuard(verify).canActivate(context)).rejects.toThrow(UnauthorizedException);
     expect(verify).not.toHaveBeenCalled();
   });
 
-  it('rejects a non-bearer Authorization scheme', () => {
+  it('rejects a non-bearer Authorization scheme', async () => {
     const verify = jest.fn();
     const { context } = makeContext('Basic abc123');
 
-    expect(() => makeGuard(verify).canActivate(context)).toThrow('Bearer token');
+    await expect(makeGuard(verify).canActivate(context)).rejects.toThrow('Bearer token');
     expect(verify).not.toHaveBeenCalled();
   });
 
-  it('rejects a bearer scheme with no token', () => {
+  it('rejects a bearer scheme with no token', async () => {
     const verify = jest.fn();
     const { context } = makeContext('Bearer');
 
-    expect(() => makeGuard(verify).canActivate(context)).toThrow(UnauthorizedException);
+    await expect(makeGuard(verify).canActivate(context)).rejects.toThrow(UnauthorizedException);
     expect(verify).not.toHaveBeenCalled();
   });
 
-  it('propagates the verifier rejection for an invalid token', () => {
-    const verify = jest.fn().mockImplementation(() => {
-      throw new UnauthorizedException('Invalid authentication token');
-    });
+  it('propagates the verifier rejection for an invalid token', async () => {
+    const verify = jest.fn().mockRejectedValue(new UnauthorizedException('Invalid authentication token'));
     const { context } = makeContext('Bearer bad-token');
 
-    expect(() => makeGuard(verify).canActivate(context)).toThrow('Invalid authentication token');
+    await expect(makeGuard(verify).canActivate(context)).rejects.toThrow('Invalid authentication token');
   });
 });

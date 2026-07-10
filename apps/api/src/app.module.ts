@@ -24,6 +24,7 @@ import { IngestActivityWorkerModule } from './workers/ingest-activity/ingest-act
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
       load: [loadConfiguration],
     }),
     ScheduleModule.forRoot(),
