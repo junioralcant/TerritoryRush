@@ -10,6 +10,7 @@ import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { averageHeartrate } from '../../modules/anti-cheat/validators';
 import { toGpsTrace } from '../../modules/matching/matching-aggregation';
 import { MapMatchingService } from '../../modules/matching/matching.service';
+import { OsrmUnmatchableTraceError } from '../../modules/matching/osrm-unmatchable-trace.error';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
 import { RankingsService } from '../../modules/rankings/rankings.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
@@ -65,11 +66,22 @@ export class ActivityIngestionService {
       return;
     }
 
-    const resolvedStreets = await this.matching.matchActivityStreets({
-      activityId: activity.id,
-      userId: job.userId,
-      trace: toGpsTrace(data.streams),
-    });
+    let resolvedStreets: ResolvedStreet[];
+    try {
+      resolvedStreets = await this.matching.matchActivityStreets({
+        activityId: activity.id,
+        userId: job.userId,
+        trace: toGpsTrace(data.streams),
+      });
+    } catch (error) {
+      if (error instanceof OsrmUnmatchableTraceError) {
+        await this.activities.updateStatus(activity.id, 'rejected', `Sem correspondência no mapa (${error.code})`);
+        this.metrics.observeIngestionDuration((Date.now() - startedAt) / 1000);
+        this.logger.log(`activity ${activity.id} rejected: unmatched trace (${error.code})`);
+        return;
+      }
+      throw error;
+    }
 
     const now = new Date().toISOString();
     const changes = await this.territory.scoreAndApply({

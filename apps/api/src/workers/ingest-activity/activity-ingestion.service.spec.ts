@@ -5,6 +5,7 @@ import { ProviderGatewayRegistry } from '../../modules/activities/ports/provider
 import { AchievementsService } from '../../modules/achievements/achievements.service';
 import { AntiCheatService } from '../../modules/anti-cheat/anti-cheat.service';
 import { MapMatchingService } from '../../modules/matching/matching.service';
+import { OsrmUnmatchableTraceError } from '../../modules/matching/osrm-unmatchable-trace.error';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
 import { RankingsService } from '../../modules/rankings/rankings.service';
 import { TerritoryService } from '../../modules/territory/territory.service';
@@ -172,6 +173,21 @@ describe('ActivityIngestionService', () => {
     expect(matching.matchActivityStreets).not.toHaveBeenCalled();
     expect(territory.scoreAndApply).not.toHaveBeenCalled();
     expect(repo.updateStatus).not.toHaveBeenCalled();
+  });
+
+  it('rejects the activity (no retry) when OSRM cannot match the trace', async () => {
+    const repo = makeRepo();
+    const gateway = makeGateway();
+    const matching = makeMatching();
+    const territory = makeTerritory();
+    repo.createIfAbsent.mockResolvedValue(activity());
+    gateway.fetchIngestData.mockResolvedValue(INGESTED);
+    matching.matchActivityStreets.mockRejectedValue(new OsrmUnmatchableTraceError('NoSegment'));
+
+    await makeService(repo, gateway, matching, territory).ingest(JOB);
+
+    expect(repo.updateStatus).toHaveBeenLastCalledWith('activity-1', 'rejected', 'Sem correspondência no mapa (NoSegment)');
+    expect(territory.scoreAndApply).not.toHaveBeenCalled();
   });
 
   it('leaves the activity in processing (for retry) when matching fails', async () => {

@@ -12,6 +12,7 @@ describe('StravaActivityGateway', () => {
     const client: jest.Mocked<StravaActivityClient> = {
       fetchActivity: jest.fn().mockResolvedValue(METRICS),
       fetchStreams: jest.fn().mockResolvedValue(STREAMS),
+      listRecentActivities: jest.fn().mockResolvedValue([]),
     };
 
     const result = await new StravaActivityGateway(tokenService, client).fetchIngestData('user-1', '555');
@@ -25,7 +26,7 @@ describe('StravaActivityGateway', () => {
   it('exposes the strava provider tag', () => {
     const gateway = new StravaActivityGateway(
       { getFreshAccessToken: jest.fn() } as unknown as StravaTokenService,
-      { fetchActivity: jest.fn(), fetchStreams: jest.fn() },
+      { fetchActivity: jest.fn(), fetchStreams: jest.fn(), listRecentActivities: jest.fn() },
     );
 
     expect(gateway.provider).toBe('strava');

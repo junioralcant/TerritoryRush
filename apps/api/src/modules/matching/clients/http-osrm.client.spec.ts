@@ -2,6 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../../config/app-config.type';
 import { MetricsService } from '../../../observability/metrics.service';
 import { GpsPoint } from '../matching.types';
+import { OsrmUnmatchableTraceError } from '../osrm-unmatchable-trace.error';
 import { HttpOsrmClient } from './http-osrm.client';
 
 const config = { get: () => 'http://osrm.test' } as unknown as ConfigService<AppConfig, true>;
@@ -39,13 +40,26 @@ describe('HttpOsrmClient', () => {
     expect(edges).toEqual([{ streetName: 'Rua Maranhão', lengthM: 120, coordinate: [-46.63, -23.55] }]);
   });
 
-  it('throws when OSRM returns a non-Ok code', async () => {
+  it('treats a 200 response with a non-Ok code as an unmatchable trace', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(okResponse({ code: 'NoMatch' }));
 
-    await expect(makeClient().match(TRACE)).rejects.toThrow('code NoMatch');
+    await expect(makeClient().match(TRACE)).rejects.toBeInstanceOf(OsrmUnmatchableTraceError);
   });
 
-  it('opens the circuit after repeated failures', async () => {
+  it('treats an HTTP 4xx as an unmatchable trace, surfacing the code without opening the circuit', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      { ok: false, status: 400, json: async () => ({ code: 'NoSegment' }) } as unknown as Response,
+    );
+    const client = makeClient();
+
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const error = await client.match(TRACE).catch((caught) => caught);
+      expect(error).toBeInstanceOf(OsrmUnmatchableTraceError);
+      expect(error.code).toBe('NoSegment');
+    }
+  });
+
+  it('opens the circuit after repeated transient (5xx) failures', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({ ok: false, status: 500 } as unknown as Response);
     const client = makeClient();
 

@@ -38,6 +38,22 @@ describe('HttpStravaOAuthClient', () => {
     expect(String((init as RequestInit).body)).toContain('code=the-code');
   });
 
+  it('splits a space-separated scope string as Strava returns it on token exchange', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      jsonResponse({
+        access_token: 'a-token',
+        refresh_token: 'r-token',
+        expires_at: 1_700_000_000,
+        athlete: { id: 42 },
+        scope: 'activity:read read',
+      }),
+    );
+
+    const result = await new HttpStravaOAuthClient(config).exchangeAuthorizationCode('the-code');
+
+    expect(result.scopes).toEqual(['activity:read', 'read']);
+  });
+
   it('maps an empty scope/athlete to safe defaults', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
       jsonResponse({ access_token: 'a', refresh_token: 'r', expires_at: 1 }),

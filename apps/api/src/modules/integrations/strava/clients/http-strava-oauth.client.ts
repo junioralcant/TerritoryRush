@@ -57,7 +57,7 @@ export class HttpStravaOAuthClient implements StravaOAuthClient {
       refreshToken: data.refresh_token,
       expiresAt: data.expires_at,
       athleteId: data.athlete?.id ? String(data.athlete.id) : '',
-      scopes: data.scope ? data.scope.split(',') : [],
+      scopes: data.scope ? data.scope.split(/[,\s]+/).filter(Boolean) : [],
     };
   }
 }

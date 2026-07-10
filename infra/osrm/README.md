@@ -10,18 +10,33 @@ then process it with the **foot** profile and serve it:
 
 ```bash
 cd infra/osrm
-export OSRM_PBF=region.osm.pbf   # place the extract in this directory
-docker compose up
+# place ${OSRM_REGION}.osm.pbf in this directory (here: sao-mateus.osm.pbf)
+OSRM_REGION=sao-mateus docker compose up
 # OSRM is now on http://localhost:5000 -> set OSRM_URL=http://localhost:5000
 ```
 
+On macOS, port 5000 is taken by the AirPlay Receiver, so map the routed service
+elsewhere and point `OSRM_URL` at it:
+
+```bash
+OSRM_REGION=sao-mateus OSRM_PORT=5050 docker compose up
+# -> set OSRM_URL=http://localhost:5050
+```
+
 `docker-compose.yml` runs, in order:
-1. `osrm-extract -p /opt/foot.lua /data/$OSRM_PBF`
+1. `osrm-extract -p /opt/foot.lua /data/${OSRM_REGION}.osm.pbf`
 2. `osrm-partition` + `osrm-customize` (MLD pipeline)
-3. `osrm-routed --algorithm mld` serving port 5000
+3. `osrm-routed --algorithm mld` serving container port 5000 (mapped to `OSRM_PORT`)
 
 The extract is intentionally not committed (large, region-specific). Re-run the
 pipeline when the OSM data is refreshed.
+
+## Comandos úteis (do `infra/osrm`)
+
+```bash
+docker compose logs -f osrm-routed           # logs
+OSRM_REGION=sao-mateus docker compose down   # derrubar
+```
 
 ## Notes
 

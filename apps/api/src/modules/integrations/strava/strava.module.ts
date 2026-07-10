@@ -13,6 +13,7 @@ import { STRAVA_SUBSCRIPTION_CLIENT } from './ports/strava-subscription-client.p
 import { TOKEN_CIPHER } from './ports/token-cipher.port';
 import { PgProviderConnectionRepository } from './repositories/provider-connection.repository';
 import { STRAVA_ACTIVITY_GATEWAY, StravaActivityGateway } from './strava-activity.gateway';
+import { StravaBackfillService } from './strava-backfill.service';
 import { StravaConnectionService } from './strava-connection.service';
 import { StravaTokenService } from './strava-token.service';
 import { StravaWebhookController } from './strava-webhook.controller';
@@ -29,6 +30,7 @@ import { StravaWebhookService } from './strava-webhook.service';
     { provide: PROVIDER_CONNECTION_REPOSITORY, useClass: PgProviderConnectionRepository },
     { provide: STRAVA_ACTIVITY_GATEWAY, useClass: StravaActivityGateway },
     StravaConnectionService,
+    StravaBackfillService,
     StravaTokenService,
     StravaWebhookService,
   ],

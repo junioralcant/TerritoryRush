@@ -1,15 +1,18 @@
-# OSRM foot-profile pipeline. Requires an OSM extract at ./${OSRM_PBF}.
-# Usage: OSRM_PBF=region.osm.pbf docker compose up
+# OSRM foot-profile pipeline. Set OSRM_REGION to the extract's base name; a
+# matching ${OSRM_REGION}.osm.pbf must exist in this directory. OSRM_PORT maps
+# the routed service to the host (default 5000; use 5050 on macOS, where 5000 is
+# taken by the AirPlay Receiver).
+# Usage: OSRM_REGION=sao-mateus OSRM_PORT=5050 docker compose up
 services:
   osrm-extract:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
-    command: osrm-extract -p /opt/foot.lua /data/${OSRM_PBF}
+    command: osrm-extract -p /opt/foot.lua /data/${OSRM_REGION}.osm.pbf
     volumes:
       - ./:/data
 
   osrm-partition:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
-    command: osrm-partition /data/${OSRM_PBF%.osm.pbf}.osrm
+    command: osrm-partition /data/${OSRM_REGION}.osrm
     volumes:
       - ./:/data
     depends_on:
@@ -18,7 +21,7 @@ services:
 
   osrm-customize:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
-    command: osrm-customize /data/${OSRM_PBF%.osm.pbf}.osrm
+    command: osrm-customize /data/${OSRM_REGION}.osrm
     volumes:
       - ./:/data
     depends_on:
@@ -27,9 +30,9 @@ services:
 
   osrm-routed:
     image: ghcr.io/project-osrm/osrm-backend:v5.27.1
-    command: osrm-routed --algorithm mld /data/${OSRM_PBF%.osm.pbf}.osrm
+    command: osrm-routed --algorithm mld --max-matching-size 100000 /data/${OSRM_REGION}.osrm
     ports:
-      - "5000:5000"
+      - "${OSRM_PORT:-5000}:5000"
     volumes:
       - ./:/data
     depends_on:

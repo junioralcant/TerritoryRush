@@ -12,7 +12,9 @@
     "api:test:int": "npm run test:int --workspace apps/api",
     "api:lint": "npm run lint --workspace apps/api",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down"
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "dev": "bash scripts/dev-up.sh",
+    "dev:down": "bash scripts/dev-down.sh"
   },
   "engines": {
     "node": ">=20"

@@ -18,6 +18,10 @@ type StravaStreamSet = {
   heartrate?: { data: number[] };
 };
 
+type StravaSummaryActivity = {
+  id?: number;
+};
+
 const authHeaders = (accessToken: string): Record<string, string> => ({
   Authorization: `Bearer ${accessToken}`,
 });
@@ -77,5 +81,15 @@ export class HttpStravaActivityClient implements StravaActivityClient {
       time: data.time?.data ?? [],
       heartrate: data.heartrate?.data,
     };
+  }
+
+  async listRecentActivities(accessToken: string, perPage: number): Promise<string[]> {
+    const response = await fetch(`${STRAVA_API}/athlete/activities?per_page=${perPage}`, {
+      headers: authHeaders(accessToken),
+    });
+    this.recordRateLimit(response);
+    ensureOk(response, 'list activities');
+    const data = (await response.json()) as StravaSummaryActivity[];
+    return data.filter((activity) => activity.id != null).map((activity) => String(activity.id));
   }
 }

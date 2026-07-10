@@ -7,6 +7,7 @@ describe('buildStravaAuthorizeUrl', () => {
     expect(url).toContain('client_id=client-1');
     expect(url).toContain('response_type=code');
     expect(url).toContain('scope=read%2Cactivity%3Aread');
+    expect(url).toContain('approval_prompt=force');
   });
 });
 

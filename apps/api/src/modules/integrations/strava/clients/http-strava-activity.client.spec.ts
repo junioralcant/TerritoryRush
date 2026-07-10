@@ -70,4 +70,24 @@ describe('HttpStravaActivityClient', () => {
 
     await expect(makeClient().fetchActivity('555', 'token')).rejects.toThrow('status 404');
   });
+
+  it('lists recent activity ids, requesting the given per_page and dropping entries without an id', async () => {
+    const fetchSpy = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(jsonResponse([{ id: 555 }, { id: 556 }, { name: 'no id' }]));
+
+    const ids = await makeClient().listRecentActivities('token', 30);
+
+    expect(ids).toEqual(['555', '556']);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://www.strava.com/api/v3/athlete/activities?per_page=30',
+      { headers: { Authorization: 'Bearer token' } },
+    );
+  });
+
+  it('throws a rate-limit error when listing is throttled', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(jsonResponse({}, { ok: false, status: 429, retryAfter: '30' }));
+
+    await expect(makeClient().listRecentActivities('token', 30)).rejects.toThrow('rate limited (retry-after=30)');
+  });
 });

@@ -8,7 +8,7 @@ export const buildStravaAuthorizeUrl = (clientId: string, redirectUri: string): 
     client_id: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
-    approval_prompt: 'auto',
+    approval_prompt: 'force',
     scope: 'read,activity:read',
   });
   return `${STRAVA_AUTHORIZE_URL}?${params.toString()}`;
