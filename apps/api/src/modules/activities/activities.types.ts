@@ -18,6 +18,7 @@ export type ActivityMetrics = {
   movingTimeS: number | null;
   avgPaceSKm: number | null;
   startedAt: string | null;
+  sportType?: string | null;
 };
 
 export type GpsStreams = {

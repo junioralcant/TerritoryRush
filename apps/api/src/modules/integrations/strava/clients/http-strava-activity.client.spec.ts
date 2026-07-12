@@ -20,7 +20,13 @@ describe('HttpStravaActivityClient', () => {
 
   it('maps activity metrics, taking pace from the independent average_speed', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
-      jsonResponse({ distance: 5000, moving_time: 1500, average_speed: 4, start_date: '2026-07-09T10:00:00Z' }),
+      jsonResponse({
+        distance: 5000,
+        moving_time: 1500,
+        average_speed: 4,
+        start_date: '2026-07-09T10:00:00Z',
+        sport_type: 'Run',
+      }),
     );
 
     const metrics = await makeClient().fetchActivity('555', 'token');
@@ -30,6 +36,7 @@ describe('HttpStravaActivityClient', () => {
       movingTimeS: 1500,
       avgPaceSKm: 250,
       startedAt: '2026-07-09T10:00:00Z',
+      sportType: 'Run',
     });
   });
 
@@ -71,14 +78,17 @@ describe('HttpStravaActivityClient', () => {
     await expect(makeClient().fetchActivity('555', 'token')).rejects.toThrow('status 404');
   });
 
-  it('lists recent activity ids, requesting the given per_page and dropping entries without an id', async () => {
+  it('lists recent activities with their sport type, requesting the given per_page and dropping entries without an id', async () => {
     const fetchSpy = jest
       .spyOn(global, 'fetch')
-      .mockResolvedValue(jsonResponse([{ id: 555 }, { id: 556 }, { name: 'no id' }]));
+      .mockResolvedValue(jsonResponse([{ id: 555, sport_type: 'Run' }, { id: 556, type: 'Ride' }, { name: 'no id' }]));
 
-    const ids = await makeClient().listRecentActivities('token', 30);
+    const activities = await makeClient().listRecentActivities('token', 30);
 
-    expect(ids).toEqual(['555', '556']);
+    expect(activities).toEqual([
+      { providerActivityId: '555', sportType: 'Run' },
+      { providerActivityId: '556', sportType: 'Ride' },
+    ]);
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://www.strava.com/api/v3/athlete/activities?per_page=30',
       { headers: { Authorization: 'Bearer token' } },

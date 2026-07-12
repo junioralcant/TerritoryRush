@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { isAllowedSport } from '../../activities/is-allowed-sport';
 import { INGEST_ACTIVITY_QUEUE, IngestActivityQueue } from '../../activities/ports/ingest-activity-queue.port';
 import { STRAVA_ACTIVITY_CLIENT, StravaActivityClient } from './ports/strava-activity-client.port';
 
@@ -14,16 +15,17 @@ export class StravaBackfillService {
   ) {}
 
   async backfillRecent(userId: string, accessToken: string): Promise<number> {
-    const providerActivityIds = await this.client.listRecentActivities(accessToken, BACKFILL_ACTIVITY_COUNT);
+    const summaries = await this.client.listRecentActivities(accessToken, BACKFILL_ACTIVITY_COUNT);
+    const onFoot = summaries.filter((summary) => isAllowedSport(summary.sportType));
     let enqueued = 0;
-    for (const providerActivityId of providerActivityIds) {
+    for (const { providerActivityId } of onFoot) {
       const added = await this.queue.enqueue({ userId, provider: 'strava', providerActivityId });
       if (added) {
         enqueued += 1;
       }
     }
     this.logger.log(
-      `Strava backfill enqueued ${enqueued}/${providerActivityIds.length} activities for user ${userId}`,
+      `Strava backfill for user ${userId}: ${summaries.length} listadas, ${summaries.length - onFoot.length} não-a-pé ignoradas, ${enqueued} enfileiradas`,
     );
     return enqueued;
   }

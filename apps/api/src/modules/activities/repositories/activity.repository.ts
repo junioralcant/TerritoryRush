@@ -47,6 +47,10 @@ export class PgActivityRepository implements ActivityRepository {
     return existing;
   }
 
+  async delete(id: string): Promise<void> {
+    await this.pool.query(`delete from public.activity where id = $1`, [id]);
+  }
+
   async updateStatus(id: string, status: ActivityStatus, rejectionReason: string | null = null): Promise<void> {
     await this.pool.query(
       `update public.activity set status = $2, rejection_reason = $3, updated_at = now() where id = $1`,

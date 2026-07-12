@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IngestActivityJob } from '../../modules/activities/activities.types';
+import { isAllowedSport } from '../../modules/activities/is-allowed-sport';
 import { ACTIVITY_REPOSITORY, ActivityRepository } from '../../modules/activities/ports/activity-repository.port';
 import {
   PROVIDER_GATEWAY_REGISTRY,
@@ -49,6 +50,16 @@ export class ActivityIngestionService {
     const startedAt = Date.now();
     await this.activities.updateStatus(activity.id, 'processing');
     const data = await gateway.fetchIngestData(job.userId, job.providerActivityId);
+
+    if (!isAllowedSport(data.metrics.sportType)) {
+      await this.activities.delete(activity.id);
+      this.metrics.observeIngestionDuration((Date.now() - startedAt) / 1000);
+      this.logger.log(
+        `activity ${activity.id} discarded: sport type "${data.metrics.sportType ?? 'unknown'}" is not on foot`,
+      );
+      return;
+    }
+
     await this.activities.saveIngestedData(activity.id, data);
 
     const verdict = this.antiCheat.evaluate({

@@ -8,6 +8,11 @@ export type StravaTokenResponse = {
   scopes: string[];
 };
 
+export type StravaActivitySummary = {
+  providerActivityId: string;
+  sportType: string | null;
+};
+
 export type StravaWebhookEvent = {
   objectType: string;
   objectId: number;

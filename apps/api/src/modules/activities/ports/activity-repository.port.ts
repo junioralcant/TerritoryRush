@@ -14,6 +14,7 @@ export const ACTIVITY_REPOSITORY = Symbol('ACTIVITY_REPOSITORY');
  */
 export interface ActivityRepository {
   createIfAbsent(input: CreateActivityInput): Promise<ActivityRecord>;
+  delete(id: string): Promise<void>;
   updateStatus(id: string, status: ActivityStatus, rejectionReason?: string | null): Promise<void>;
   saveIngestedData(id: string, data: IngestedActivityData): Promise<void>;
   findByUserAndStatus(userId: string, status?: ActivityStatus): Promise<ActivityRecord[]>;

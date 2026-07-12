@@ -41,6 +41,7 @@ const activity = (overrides: Partial<ActivityRecord> = {}): ActivityRecord => ({
 
 const makeRepo = (): jest.Mocked<ActivityRepository> => ({
   createIfAbsent: jest.fn(),
+  delete: jest.fn(),
   updateStatus: jest.fn(),
   saveIngestedData: jest.fn(),
   findByUserAndStatus: jest.fn(),
@@ -116,6 +117,25 @@ describe('ActivityIngestionService', () => {
       }),
     );
     expect(repo.updateStatus).toHaveBeenNthCalledWith(2, 'activity-1', 'processed');
+  });
+
+  it('discards a non-foot activity (bike) without matching or scoring territory', async () => {
+    const repo = makeRepo();
+    const gateway = makeGateway();
+    const matching = makeMatching();
+    const territory = makeTerritory();
+    repo.createIfAbsent.mockResolvedValue(activity());
+    gateway.fetchIngestData.mockResolvedValue({
+      ...INGESTED,
+      metrics: { ...INGESTED.metrics, sportType: 'Ride' },
+    });
+
+    await makeService(repo, gateway, matching, territory).ingest(JOB);
+
+    expect(repo.delete).toHaveBeenCalledWith('activity-1');
+    expect(repo.saveIngestedData).not.toHaveBeenCalled();
+    expect(matching.matchActivityStreets).not.toHaveBeenCalled();
+    expect(territory.scoreAndApply).not.toHaveBeenCalled();
   });
 
   it('rejects a fraudulent activity before matching or scoring', async () => {

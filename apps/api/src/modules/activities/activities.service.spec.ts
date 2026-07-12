@@ -4,6 +4,7 @@ import { ActivityRepository } from './ports/activity-repository.port';
 
 const makeRepo = (): jest.Mocked<ActivityRepository> => ({
   createIfAbsent: jest.fn(),
+  delete: jest.fn(),
   updateStatus: jest.fn(),
   saveIngestedData: jest.fn(),
   findByUserAndStatus: jest.fn().mockResolvedValue([]),

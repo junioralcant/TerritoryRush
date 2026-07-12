@@ -1,4 +1,5 @@
 import { ActivityMetrics, GpsStreams } from '../../../activities/activities.types';
+import { StravaActivitySummary } from '../strava.types';
 
 export const STRAVA_ACTIVITY_CLIENT = Symbol('STRAVA_ACTIVITY_CLIENT');
 
@@ -10,5 +11,5 @@ export const STRAVA_ACTIVITY_CLIENT = Symbol('STRAVA_ACTIVITY_CLIENT');
 export interface StravaActivityClient {
   fetchActivity(providerActivityId: string, accessToken: string): Promise<ActivityMetrics>;
   fetchStreams(providerActivityId: string, accessToken: string): Promise<GpsStreams>;
-  listRecentActivities(accessToken: string, perPage: number): Promise<string[]>;
+  listRecentActivities(accessToken: string, perPage: number): Promise<StravaActivitySummary[]>;
 }

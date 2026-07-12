@@ -18,7 +18,10 @@ describe('StravaBackfillService', () => {
   it('lists the athlete recent activities and enqueues an ingest job for each', async () => {
     const client = makeClient();
     const queue = makeQueue();
-    client.listRecentActivities.mockResolvedValue(['555', '556']);
+    client.listRecentActivities.mockResolvedValue([
+      { providerActivityId: '555', sportType: 'Run' },
+      { providerActivityId: '556', sportType: 'Walk' },
+    ]);
 
     const enqueued = await new StravaBackfillService(client, queue).backfillRecent('user-1', 'access-xyz');
 
@@ -36,10 +39,29 @@ describe('StravaBackfillService', () => {
     expect(enqueued).toBe(2);
   });
 
+  it('skips non-foot activities (bike/swim) at the listing step, before enqueueing', async () => {
+    const client = makeClient();
+    const queue = makeQueue();
+    client.listRecentActivities.mockResolvedValue([
+      { providerActivityId: '555', sportType: 'Run' },
+      { providerActivityId: '900', sportType: 'Ride' },
+      { providerActivityId: '901', sportType: 'Swim' },
+    ]);
+
+    const enqueued = await new StravaBackfillService(client, queue).backfillRecent('user-1', 'access-xyz');
+
+    expect(queue.enqueue).toHaveBeenCalledTimes(1);
+    expect(queue.enqueue).toHaveBeenCalledWith({ userId: 'user-1', provider: 'strava', providerActivityId: '555' });
+    expect(enqueued).toBe(1);
+  });
+
   it('counts only newly enqueued jobs, skipping duplicates already in the queue', async () => {
     const client = makeClient();
     const queue = makeQueue();
-    client.listRecentActivities.mockResolvedValue(['555', '556']);
+    client.listRecentActivities.mockResolvedValue([
+      { providerActivityId: '555', sportType: 'Run' },
+      { providerActivityId: '556', sportType: 'Run' },
+    ]);
     queue.enqueue.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
     const enqueued = await new StravaBackfillService(client, queue).backfillRecent('user-1', 'access-xyz');

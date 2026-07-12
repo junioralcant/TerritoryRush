@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ActivityMetrics, GpsStreams } from '../../../activities/activities.types';
 import { MetricsService } from '../../../../observability/metrics.service';
 import { StravaActivityClient } from '../ports/strava-activity-client.port';
+import { StravaActivitySummary } from '../strava.types';
 
 const STRAVA_API = 'https://www.strava.com/api/v3';
 
@@ -10,6 +11,8 @@ type StravaActivityPayload = {
   moving_time?: number;
   start_date?: string;
   average_speed?: number;
+  sport_type?: string;
+  type?: string;
 };
 
 type StravaStreamSet = {
@@ -20,6 +23,8 @@ type StravaStreamSet = {
 
 type StravaSummaryActivity = {
   id?: number;
+  sport_type?: string;
+  type?: string;
 };
 
 const authHeaders = (accessToken: string): Record<string, string> => ({
@@ -65,7 +70,13 @@ export class HttpStravaActivityClient implements StravaActivityClient {
         : distanceM && movingTimeS && distanceM > 0
           ? movingTimeS / (distanceM / 1000)
           : null;
-    return { distanceM, movingTimeS, avgPaceSKm, startedAt: data.start_date ?? null };
+    return {
+      distanceM,
+      movingTimeS,
+      avgPaceSKm,
+      startedAt: data.start_date ?? null,
+      sportType: data.sport_type ?? data.type ?? null,
+    };
   }
 
   async fetchStreams(providerActivityId: string, accessToken: string): Promise<GpsStreams> {
@@ -83,13 +94,18 @@ export class HttpStravaActivityClient implements StravaActivityClient {
     };
   }
 
-  async listRecentActivities(accessToken: string, perPage: number): Promise<string[]> {
+  async listRecentActivities(accessToken: string, perPage: number): Promise<StravaActivitySummary[]> {
     const response = await fetch(`${STRAVA_API}/athlete/activities?per_page=${perPage}`, {
       headers: authHeaders(accessToken),
     });
     this.recordRateLimit(response);
     ensureOk(response, 'list activities');
     const data = (await response.json()) as StravaSummaryActivity[];
-    return data.filter((activity) => activity.id != null).map((activity) => String(activity.id));
+    return data
+      .filter((activity) => activity.id != null)
+      .map((activity) => ({
+        providerActivityId: String(activity.id),
+        sportType: activity.sport_type ?? activity.type ?? null,
+      }));
   }
 }
