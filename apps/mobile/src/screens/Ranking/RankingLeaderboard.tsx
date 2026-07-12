@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, fonts } from '../../theme';
 import { formatNumber, initials } from '../../ui';
@@ -18,12 +19,53 @@ export type RankingLeaderboardProps = {
   currentUserId?: string | null;
 };
 
-const PODIUM_HEIGHT: Record<number, number> = { 1: 78, 2: 56, 3: 44 };
-const PODIUM_COLOR: Record<number, string> = { 1: colors.gold, 2: colors.silver, 3: colors.bronze };
+type PodiumStyle = {
+  height: number;
+  color: string;
+  gradient: readonly [string, string];
+  border: string;
+  avatarBg: string;
+  avatarBorder: number;
+  rankSize: number;
+  valueColor: string;
+};
+
+const PODIUM: Record<number, PodiumStyle> = {
+  1: {
+    height: 78,
+    color: colors.gold,
+    gradient: ['#2A2410', '#1A1608'],
+    border: 'rgba(245,180,0,0.3)',
+    avatarBg: '#2A2410',
+    avatarBorder: 3,
+    rankSize: 24,
+    valueColor: '#C9A15A',
+  },
+  2: {
+    height: 56,
+    color: colors.silver,
+    gradient: ['#1C2431', '#141A24'],
+    border: 'rgba(255,255,255,0.06)',
+    avatarBg: '#26303D',
+    avatarBorder: 2.5,
+    rankSize: 20,
+    valueColor: colors.textMid,
+  },
+  3: {
+    height: 44,
+    color: colors.bronze,
+    gradient: ['#1C2431', '#141A24'],
+    border: 'rgba(255,255,255,0.06)',
+    avatarBg: '#26303D',
+    avatarBorder: 2.5,
+    rankSize: 18,
+    valueColor: colors.textMid,
+  },
+};
 const PODIUM_ORDER = [2, 1, 3];
 
 const PodiumPlace = ({ row, prefix }: { row: RankRow; prefix: string }) => {
-  const color = PODIUM_COLOR[row.rank];
+  const place = PODIUM[row.rank];
   const first = row.rank === 1;
   return (
     <View style={styles.podiumPlace} testID={`${prefix}-rank-${row.rank}`}>
@@ -31,7 +73,14 @@ const PodiumPlace = ({ row, prefix }: { row: RankRow; prefix: string }) => {
       <View
         style={[
           styles.podiumAvatar,
-          { width: first ? 60 : 52, height: first ? 60 : 52, borderRadius: first ? 30 : 26, borderColor: color },
+          {
+            width: first ? 60 : 52,
+            height: first ? 60 : 52,
+            borderRadius: first ? 30 : 26,
+            borderColor: place.color,
+            borderWidth: place.avatarBorder,
+            backgroundColor: place.avatarBg,
+          },
         ]}
       >
         <Text style={styles.podiumInitials}>{initials(row.name)}</Text>
@@ -39,10 +88,10 @@ const PodiumPlace = ({ row, prefix }: { row: RankRow; prefix: string }) => {
       <Text style={styles.podiumName} numberOfLines={1}>
         {row.name ?? row.userId}
       </Text>
-      <View style={[styles.pedestal, { height: PODIUM_HEIGHT[row.rank], borderColor: `${color}4D` }]}>
-        <Text style={[styles.pedestalRank, { color }]}>{row.rank}</Text>
-        <Text style={styles.pedestalValue}>{formatNumber(row.value)}</Text>
-      </View>
+      <LinearGradient colors={place.gradient} style={[styles.pedestal, { height: place.height, borderColor: place.border }]}>
+        <Text style={[styles.pedestalRank, { color: place.color, fontSize: place.rankSize }]}>{row.rank}</Text>
+        <Text style={[styles.pedestalValue, { color: place.valueColor }]}>{formatNumber(row.value)}</Text>
+      </LinearGradient>
     </View>
   );
 };
@@ -59,24 +108,43 @@ const ListRow = ({
   unit: string;
   accent: string;
   mine: boolean;
-}) => (
-  <View
-    testID={`${prefix}-rank-${row.rank}`}
-    style={[styles.row, mine && { backgroundColor: `${accent}1F`, borderWidth: 1.5, borderColor: `${accent}80` }]}
-  >
-    <Text style={[styles.rowRank, mine && { color: accent }]}>{row.rank}</Text>
-    <View style={styles.rowAvatar}>
-      <Text style={styles.rowAvatarText}>{initials(row.name)}</Text>
+}) => {
+  const content = (
+    <>
+      <Text style={[styles.rowRank, mine && { color: accent }]}>{row.rank}</Text>
+      <View style={styles.rowAvatar}>
+        <Text style={styles.rowAvatarText}>{initials(row.name)}</Text>
+      </View>
+      <Text style={styles.rowName} numberOfLines={1}>
+        {row.name ?? row.userId}
+        {mine ? <Text style={[styles.youTag, { color: accent }]}> · você</Text> : null}
+      </Text>
+      <Text style={[styles.rowValue, mine && { color: accent }]}>
+        {formatNumber(row.value)} <Text style={styles.rowUnit}>{unit}</Text>
+      </Text>
+    </>
+  );
+
+  if (mine) {
+    return (
+      <LinearGradient
+        testID={`${prefix}-rank-${row.rank}`}
+        colors={[`${accent}29`, `${accent}0F`] as const}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0.4 }}
+        style={[styles.row, styles.rowMine, { borderColor: `${accent}80` }]}
+      >
+        {content}
+      </LinearGradient>
+    );
+  }
+
+  return (
+    <View testID={`${prefix}-rank-${row.rank}`} style={styles.row}>
+      {content}
     </View>
-    <Text style={styles.rowName} numberOfLines={1}>
-      {row.name ?? row.userId}
-      {mine ? <Text style={[styles.youTag, { color: accent }]}> · você</Text> : null}
-    </Text>
-    <Text style={[styles.rowValue, mine && { color: accent }]}>
-      {formatNumber(row.value)} <Text style={styles.rowUnit}>{unit}</Text>
-    </Text>
-  </View>
-);
+  );
+};
 
 export const RankingLeaderboard = ({ rows, prefix, unit, accent, currentUserId }: RankingLeaderboardProps) => {
   const podium = PODIUM_ORDER.map((rank) => rows.find((row) => row.rank === rank)).filter((row): row is RankRow => Boolean(row));
@@ -122,12 +190,11 @@ export const RankingLeaderboard = ({ rows, prefix, unit, accent, currentUserId }
 const styles = StyleSheet.create({
   podium: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginVertical: 16 },
   podiumPlace: { flex: 1, alignItems: 'center', gap: 6 },
-  podiumAvatar: { backgroundColor: colors.surfaceInner, alignItems: 'center', justifyContent: 'center', borderWidth: 2.5 },
+  podiumAvatar: { alignItems: 'center', justifyContent: 'center' },
   podiumInitials: { fontFamily: fonts.sairaExtraBold, fontSize: 16, color: colors.textHi },
   podiumName: { fontFamily: fonts.manropeBold, fontSize: 11, color: colors.textHi, textAlign: 'center' },
   pedestal: {
     width: '100%',
-    backgroundColor: colors.surfaceCard,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderWidth: 1,
@@ -135,12 +202,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pedestalRank: { fontFamily: fonts.sairaExtraBold, fontSize: 22 },
-  pedestalValue: { fontFamily: fonts.manrope, fontSize: 10.5, color: colors.textMid },
+  pedestalRank: { fontFamily: fonts.sairaExtraBold },
+  pedestalValue: { fontFamily: fonts.manrope, fontSize: 10.5 },
   list: { gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 13, backgroundColor: colors.surfaceCard },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 13,
+    backgroundColor: colors.surfaceCard,
+  },
+  rowMine: { backgroundColor: 'transparent', borderWidth: 1.5 },
   rowRank: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: colors.textMid, width: 26 },
-  rowAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.surfaceInner, alignItems: 'center', justifyContent: 'center' },
+  rowAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#26303D', alignItems: 'center', justifyContent: 'center' },
   rowAvatarText: { fontFamily: fonts.sairaExtraBold, fontSize: 13, color: colors.textSoft },
   rowName: { flex: 1, fontFamily: fonts.manropeBold, fontSize: 14, color: colors.textHi },
   youTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11 },
