@@ -1,5 +1,6 @@
 import {
   AchievementView,
+  Activity,
   Bbox,
   CityRankingEntry,
   ExplorerRankingEntry,
@@ -23,6 +24,7 @@ export interface ApiClient {
   getProfile(): Promise<RunnerProfileDetail>;
   getCityRanking(cityId: string): Promise<CityRankingEntry[]>;
   getExplorerRanking(): Promise<ExplorerRankingEntry[]>;
+  getActivities(): Promise<Activity[]>;
   getAchievements(): Promise<AchievementView[]>;
   getNotifications(): Promise<NotificationItem[]>;
   markNotificationRead(id: string): Promise<void>;

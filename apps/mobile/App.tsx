@@ -43,7 +43,7 @@ const Tabs = ({ api }: { api: ApiClient }) => (
       )}
     </Tab.Screen>
     <Tab.Screen name="Activities">
-      {({ navigation }) => <ActivitiesScreen onOpenConnections={() => navigation.navigate('Connections')} />}
+      {({ navigation }) => <ActivitiesScreen api={api} onOpenConnections={() => navigation.navigate('Connections')} />}
     </Tab.Screen>
     <Tab.Screen name="Ranking">{() => <RankingRoute api={api} />}</Tab.Screen>
     <Tab.Screen name="Profile">

@@ -101,3 +101,17 @@ export type NotificationItem = {
   readAt: string | null;
   createdAt: string;
 };
+
+export type ActivityStatus = 'imported' | 'processing' | 'processed' | 'rejected';
+
+export type Activity = {
+  id: string;
+  provider: 'strava' | 'garmin';
+  providerActivityId: string;
+  status: ActivityStatus;
+  distanceM: number | null;
+  movingTimeS: number | null;
+  avgPaceSKm: number | null;
+  startedAt: string | null;
+  rejectionReason: string | null;
+};

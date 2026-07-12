@@ -1,6 +1,7 @@
 import { ApiClient } from './api-client.port';
 import {
   AchievementView,
+  Activity,
   Bbox,
   CityRankingEntry,
   ExplorerRankingEntry,
@@ -50,6 +51,7 @@ export const createHttpApiClient = (baseUrl: string, getToken: TokenProvider): A
     getProfile: () => request<RunnerProfileDetail>('/me/profile'),
     getCityRanking: (cityId) => request<CityRankingEntry[]>(`/rankings/city/${cityId}`),
     getExplorerRanking: () => request<ExplorerRankingEntry[]>('/rankings/explorers'),
+    getActivities: () => request<Activity[]>('/activities'),
     getAchievements: () => request<AchievementView[]>('/me/achievements'),
     getNotifications: () => request<NotificationItem[]>('/me/notifications'),
     markNotificationRead: (id) =>
