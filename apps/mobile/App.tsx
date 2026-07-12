@@ -39,12 +39,7 @@ const Tabs = ({ api }: { api: ApiClient }) => (
   >
     <Tab.Screen name="Map">
       {({ navigation }) => (
-        <MapScreen
-          api={api}
-          onOpenNotifications={() => navigation.navigate('Notifications')}
-          onOpenAchievements={() => navigation.navigate('Achievements')}
-          onOpenConnections={() => navigation.navigate('Connections')}
-        />
+        <MapScreen api={api} onOpenNotifications={() => navigation.navigate('Notifications')} />
       )}
     </Tab.Screen>
     <Tab.Screen name="Activities">

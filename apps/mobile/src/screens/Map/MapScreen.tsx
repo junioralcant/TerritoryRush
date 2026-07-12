@@ -1,50 +1,37 @@
 import { useCallback } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
-import { ErrorView, LocationPermissionView, Screen } from '../../ui';
+import { ErrorView, Screen } from '../../ui';
 import { MapControls } from './MapControls';
 import { MapSkeleton } from './MapSkeleton';
 import { MapTopBar } from './MapTopBar';
-import { ProfileHeroCards } from './ProfileHeroCards';
-import { RecentActivityCard } from './RecentActivityCard';
-import { RecentAchievements } from './RecentAchievements';
 import { StreetDetailDrawer } from './StreetDetailDrawer';
 import { StreetStateLegend } from './StreetStateLegend';
 import { TerritoryMap } from './TerritoryMap';
 import { bboxAround } from './bboxAround';
-import { Coordinate, useCurrentLocation } from './useCurrentLocation';
+import { Coordinate } from './useCurrentLocation';
 import { useStreets } from './useStreets';
 
 export type MapScreenProps = {
   api: ApiClient;
   onOpenNotifications?: () => void;
-  onOpenAchievements?: () => void;
-  onOpenConnections?: () => void;
 };
 
-const FALLBACK_CENTER: Coordinate = [-38.5014, -12.9777];
+const SAO_MATEUS_CENTER: Coordinate = [-44.4689, -4.0361];
 
-export const MapScreen = ({ api, onOpenNotifications, onOpenAchievements, onOpenConnections }: MapScreenProps) => {
-  const { center, resolving, permissionDenied, retry } = useCurrentLocation(FALLBACK_CENTER);
-  const { streets, selected, loading, error, selectStreet, clearSelection } = useStreets(api, bboxAround(center));
+export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
+  const { streets, selected, loading, error, selectStreet, clearSelection } = useStreets(
+    api,
+    bboxAround(SAO_MATEUS_CENTER),
+  );
 
   const profileLoader = useCallback(() => api.getProfile(), [api]);
-  const achievementsLoader = useCallback(() => api.getAchievements(), [api]);
   const notificationsLoader = useCallback(() => api.getNotifications(), [api]);
   const profile = useApiResource(profileLoader);
-  const achievements = useApiResource(achievementsLoader);
   const notifications = useApiResource(notificationsLoader);
 
-  if (permissionDenied) {
-    return (
-      <Screen>
-        <LocationPermissionView onAllow={retry} onDismiss={retry} testID="map-permission" />
-      </Screen>
-    );
-  }
-
-  if (resolving || profile.loading || loading) {
+  if (profile.loading || loading) {
     return (
       <Screen>
         <MapSkeleton />
@@ -55,13 +42,7 @@ export const MapScreen = ({ api, onOpenNotifications, onOpenAchievements, onOpen
   if (error || profile.error || !profile.data) {
     return (
       <Screen>
-        <ErrorView
-          testID="map-error"
-          onRetry={() => {
-            profile.reload();
-            retry();
-          }}
-        />
+        <ErrorView testID="map-error" onRetry={() => profile.reload()} />
       </Screen>
     );
   }
@@ -78,20 +59,13 @@ export const MapScreen = ({ api, onOpenNotifications, onOpenAchievements, onOpen
         unreadCount={unread}
         onOpenNotifications={onOpenNotifications}
       />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <ProfileHeroCards profile={runner} />
-
-        <View style={styles.mapSection}>
-          <TerritoryMap streets={streets} initialCenter={center} onSelectStreet={(id) => void selectStreet(id)} />
-          <MapControls onRecenter={retry} />
-          <View style={styles.legend}>
-            <StreetStateLegend />
-          </View>
+      <View style={styles.mapSection}>
+        <TerritoryMap streets={streets} initialCenter={SAO_MATEUS_CENTER} onSelectStreet={(id) => void selectStreet(id)} />
+        <MapControls />
+        <View style={styles.legend}>
+          <StreetStateLegend />
         </View>
-
-        <RecentActivityCard onPress={onOpenConnections} />
-        <RecentAchievements achievements={achievements.data ?? []} onSeeAll={onOpenAchievements} />
-      </ScrollView>
+      </View>
 
       {selected ? (
         <StreetDetailDrawer
@@ -106,7 +80,6 @@ export const MapScreen = ({ api, onOpenNotifications, onOpenAchievements, onOpen
 };
 
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: 16 },
-  mapSection: { height: 300, position: 'relative', backgroundColor: '#0C1119', overflow: 'hidden' },
+  mapSection: { flex: 1, position: 'relative', backgroundColor: '#0C1119', overflow: 'hidden' },
   legend: { position: 'absolute', right: 14, bottom: 14 },
 });

@@ -46,11 +46,10 @@ describe('MapScreen', () => {
     expect(screen.getByTestId('legend-other')).toBeOnTheScreen();
   });
 
-  it('shows the runner hero stats and the notifications bell', async () => {
+  it('shows the top bar streak metric and the notifications bell', async () => {
     render(<MapScreen api={api} />);
 
     await waitFor(() => expect(screen.getByTestId('map-notifications')).toBeOnTheScreen());
-    expect(screen.getByText('243')).toBeOnTheScreen();
     expect(screen.getByText('14')).toBeOnTheScreen();
   });
 });
