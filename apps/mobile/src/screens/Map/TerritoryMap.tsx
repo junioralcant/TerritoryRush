@@ -1,3 +1,4 @@
+import { ComponentRef, useEffect, useRef } from 'react';
 import { Camera, LineLayer, MapView, ShapeSource } from '@maplibre/maplibre-react-native';
 import { StreetSummary } from '../../services/api/types';
 import { nearestStreetId } from './nearestStreet';
@@ -8,13 +9,26 @@ export type TerritoryMapProps = {
   streets: StreetSummary[];
   onSelectStreet: (streetId: string) => void;
   initialCenter: Coordinate;
+  recenterToken?: number;
 };
 
 const OSM_STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const INITIAL_ZOOM = 14;
 
-export const TerritoryMap = ({ streets, onSelectStreet, initialCenter }: TerritoryMapProps) => {
+export const TerritoryMap = ({ streets, onSelectStreet, initialCenter, recenterToken = 0 }: TerritoryMapProps) => {
+  const camera = useRef<ComponentRef<typeof Camera>>(null);
   const features = toStreetFeatureCollection(streets);
+
+  useEffect(() => {
+    if (recenterToken > 0) {
+      camera.current?.setCamera({
+        centerCoordinate: initialCenter,
+        zoomLevel: INITIAL_ZOOM,
+        animationMode: 'flyTo',
+        animationDuration: 600,
+      });
+    }
+  }, [recenterToken, initialCenter]);
 
   return (
     <MapView
@@ -33,7 +47,7 @@ export const TerritoryMap = ({ streets, onSelectStreet, initialCenter }: Territo
         }
       }}
     >
-      <Camera defaultSettings={{ centerCoordinate: initialCenter, zoomLevel: INITIAL_ZOOM }} />
+      <Camera ref={camera} defaultSettings={{ centerCoordinate: initialCenter, zoomLevel: INITIAL_ZOOM }} />
       <ShapeSource id="streets" testID="streets-source" shape={features}>
         <LineLayer
           id="streets-line"

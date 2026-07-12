@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { colors, radii } from '../../theme';
 
 export type MapControlsProps = {
-  onRecenter?: () => void;
+  top?: number;
 };
 
 const ControlButton = ({
@@ -30,18 +30,19 @@ const ControlButton = ({
 );
 
 /**
- * Left-hand column of glass map controls: recentre, layers, filter.
+ * Left-hand column of glass map controls: locate, layers, filter. Floats over
+ * the map below the top bar; `top` is driven by the safe-area inset.
  */
-export const MapControls = ({ onRecenter }: MapControlsProps) => (
-  <View style={styles.column}>
-    <ControlButton icon="crosshair" label="Recentralizar mapa" onPress={onRecenter} testID="map-recenter" />
+export const MapControls = ({ top = 14 }: MapControlsProps) => (
+  <View style={[styles.column, { top }]}>
+    <ControlButton icon="crosshair" label="Localizar" testID="map-locate" />
     <ControlButton icon="layers" label="Camadas do mapa" />
-    <ControlButton icon="sliders" label="Filtrar ruas" />
+    <ControlButton icon="filter" label="Filtrar ruas" />
   </View>
 );
 
 const styles = StyleSheet.create({
-  column: { position: 'absolute', left: 14, top: 14, gap: 10 },
+  column: { position: 'absolute', left: 14, gap: 10 },
   button: {
     width: 44,
     height: 44,
