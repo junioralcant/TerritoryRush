@@ -12,8 +12,10 @@ export type WordmarkProps = {
  */
 export const Wordmark = ({ size = 38, align = 'center', testID }: WordmarkProps) => (
   <View testID={testID} style={{ alignItems: align === 'center' ? 'center' : 'flex-start' }}>
-    <Text style={[styles.word, { fontSize: size, lineHeight: size * 0.9 }]}>TERRITORY</Text>
-    <Text style={[styles.word, styles.rush, { fontSize: size, lineHeight: size * 0.9 }]}>RUSH</Text>
+    <Text style={[styles.word, { fontSize: size, lineHeight: size * 1.08 }]}>TERRITORY</Text>
+    <Text style={[styles.word, styles.rush, { fontSize: size, lineHeight: size * 1.08, marginTop: -size * 0.16 }]}>
+      RUSH
+    </Text>
   </View>
 );
 
