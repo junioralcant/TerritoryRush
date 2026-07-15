@@ -13,8 +13,10 @@ export const resolveStreetName = (name: string | null, osmId: number): string =>
 /**
  * Groups OSM road records into streets keyed by (cityId, resolvedName): every
  * segment sharing a name within a city collapses into one street. Records
- * without a city or highway tag are dropped. Pure mirror of the SQL derivation
- * used in production, so the aggregation rule can be unit-tested in isolation.
+ * without a city or highway tag are dropped. Pure mirror of the *name-grouping*
+ * half of the SQL derivation, so that rule can be unit-tested in isolation. The
+ * geometric step that folds unnamed ways into a continuous named street lives in
+ * `deriveStreetsFromOsmRoads` (it needs PostGIS) and is covered by integration tests.
  */
 export const aggregateOsmRoads = (records: OsmRoadRecord[]): AggregatedStreet[] => {
   const groups = new Map<string, AggregatedStreet>();

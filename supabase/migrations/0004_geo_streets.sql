@@ -7,8 +7,12 @@
 --                  attribute each road to a city.
 -- public.street  : the territorial unit — a *named road aggregated per city*.
 --                  Every segment sharing the same name within a city collapses
---                  into one street (unnamed ways get a deterministic fallback
---                  label, keeping distinct physical ways separate).
+--                  into one street. Unnamed ways that continue a named street on
+--                  the same line (shared node + near-straight angle) are folded
+--                  into it; unnamed ways with no such continuation keep a
+--                  deterministic per-way fallback label. Each street's geometry
+--                  is clipped to its city boundary, so a road passing through the
+--                  city contributes only its in-city portion.
 
 create table if not exists public.city_ref (
   id       uuid                          primary key default gen_random_uuid(),

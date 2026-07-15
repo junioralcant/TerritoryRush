@@ -1,10 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { STREET_REPOSITORY, StreetRepository } from '../geo/ports/street-repository.port';
+import { StreetRow } from '../geo/geo.types';
 import { aggregateByCityAndName } from './matching-aggregation';
 import { AnnotatedEdge, MatchActivityInput, MatchedEdge, ResolvedStreet } from './matching.types';
 
 import { ACTIVITY_STREET_REPOSITORY, ActivityStreetRepository } from './ports/activity-street-repository.port';
 import { OSRM_CLIENT, OsrmClient } from './ports/osrm-client.port';
+
+const TRACE_COVERAGE_RADIUS_M = 15;
+const MIN_TRACE_COVERAGE_M = 20;
+const UNNAMED_SNAP_RADIUS_M = 20;
+
+type StreetMatch = { street: StreetRow; matchedLengthM: number };
 
 @Injectable()
 export class MapMatchingService {
@@ -16,16 +23,33 @@ export class MapMatchingService {
 
   async matchActivityStreets(input: MatchActivityInput): Promise<ResolvedStreet[]> {
     const edges = await this.osrm.match(input.trace);
-    const annotated = await this.annotateWithCity(edges);
-    const aggregated = aggregateByCityAndName(annotated);
+    const byStreet = new Map<string, StreetMatch>();
 
-    const resolved: ResolvedStreet[] = [];
+    const named = edges.filter((edge) => edge.streetName.trim() !== '');
+    const aggregated = aggregateByCityAndName(await this.annotateWithCity(named));
     for (const match of aggregated) {
       const street = await this.streets.findByNameAndCity(match.cityId, match.streetName);
-      if (!street) {
-        continue;
+      if (street) {
+        this.addMatchedLength(byStreet, street, match.totalLengthM);
       }
+    }
 
+    const unnamed = edges.filter((edge) => edge.streetName.trim() === '');
+    const nearby = await this.streets.findNearestStreets(
+      unnamed.map((edge) => edge.coordinate),
+      UNNAMED_SNAP_RADIUS_M,
+    );
+    unnamed.forEach((edge, index) => {
+      const street = nearby[index];
+      if (street) {
+        this.addMatchedLength(byStreet, street, edge.lengthM);
+      }
+    });
+
+    const confirmed = await this.confirmedByTraceCoverage([...byStreet.values()], input.trace);
+
+    const resolved: ResolvedStreet[] = [];
+    for (const { street, matchedLengthM } of confirmed) {
       const visitedBefore = await this.activityStreets.hasUserVisitedStreet(
         input.userId,
         street.id,
@@ -37,18 +61,42 @@ export class MapMatchingService {
         activityId: input.activityId,
         streetId: street.id,
         isFirstVisit,
-        matchedLengthM: match.totalLengthM,
+        matchedLengthM,
       });
 
       resolved.push({
         streetId: street.id,
         streetName: street.osm_name,
-        cityId: match.cityId,
-        matchedLengthM: match.totalLengthM,
+        cityId: street.city_id,
+        matchedLengthM,
         isFirstVisit,
       });
     }
     return resolved;
+  }
+
+  private addMatchedLength(byStreet: Map<string, StreetMatch>, street: StreetRow, lengthM: number): void {
+    const existing = byStreet.get(street.id);
+    if (existing) {
+      existing.matchedLengthM += lengthM;
+    } else {
+      byStreet.set(street.id, { street, matchedLengthM: lengthM });
+    }
+  }
+
+  private async confirmedByTraceCoverage(
+    candidates: StreetMatch[],
+    trace: MatchActivityInput['trace'],
+  ): Promise<StreetMatch[]> {
+    if (candidates.length === 0) {
+      return [];
+    }
+    const covered = await this.streets.coveredLengthByTrace(
+      candidates.map((candidate) => candidate.street.id),
+      trace,
+      TRACE_COVERAGE_RADIUS_M,
+    );
+    return candidates.filter((candidate) => (covered.get(candidate.street.id) ?? 0) >= MIN_TRACE_COVERAGE_M);
   }
 
   private async annotateWithCity(edges: MatchedEdge[]): Promise<AnnotatedEdge[]> {

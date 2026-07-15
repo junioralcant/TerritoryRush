@@ -18,8 +18,11 @@ const makeStreets = (): jest.Mocked<StreetRepository> => ({
   findInBbox: jest.fn(),
   findByNameAndCity: jest.fn(),
   findCityIdContaining: jest.fn(),
+  coveredLengthByTrace: jest.fn().mockImplementation(async (ids: string[]) => new Map(ids.map((id) => [id, 1000]))),
+  findNearestStreets: jest.fn().mockResolvedValue([]),
   resolveCitiesForOsmRoads: jest.fn(),
   deriveStreetsFromOsmRoads: jest.fn(),
+  clearDerivedStreets: jest.fn(),
 });
 
 const makeActivityStreets = (): jest.Mocked<ActivityStreetRepository> => ({
@@ -116,6 +119,47 @@ describe('MapMatchingService', () => {
 
     const resolved = await new MapMatchingService(
       makeOsrm([{ streetName: 'Rua Fantasma', lengthM: 100, coordinate: [0, 0] }]),
+      streets,
+      activityStreets,
+    ).matchActivityStreets(INPUT);
+
+    expect(resolved).toEqual([]);
+    expect(activityStreets.upsert).not.toHaveBeenCalled();
+  });
+
+  it('captures an unnamed edge by resolving the nearest street geometrically', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockResolvedValue('city-a');
+    streets.findNearestStreets.mockResolvedValue([streetRow({ id: 'via-1', osm_name: 'Via sem nome (99)' })]);
+
+    const resolved = await new MapMatchingService(
+      makeOsrm([{ streetName: '', lengthM: 80, coordinate: [0, 0] }]),
+      streets,
+      activityStreets,
+    ).matchActivityStreets(INPUT);
+
+    expect(streets.findNearestStreets).toHaveBeenCalledWith([[0, 0]], expect.any(Number));
+    expect(resolved).toEqual([
+      { streetId: 'via-1', streetName: 'Via sem nome (99)', cityId: 'city-a', matchedLengthM: 80, isFirstVisit: true },
+    ]);
+    expect(activityStreets.upsert).toHaveBeenCalledWith({
+      activityId: 'activity-1',
+      streetId: 'via-1',
+      isFirstVisit: true,
+      matchedLengthM: 80,
+    });
+  });
+
+  it('drops a street the raw GPS trace barely covers (OSRM over-match)', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockResolvedValue('city-a');
+    streets.findByNameAndCity.mockResolvedValue(streetRow());
+    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', 3]]));
+
+    const resolved = await new MapMatchingService(
+      makeOsrm([{ streetName: 'Rua Maranhão', lengthM: 140, coordinate: [0, 0] }]),
       streets,
       activityStreets,
     ).matchActivityStreets(INPUT);

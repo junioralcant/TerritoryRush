@@ -14,6 +14,7 @@
     "test:int": "jest --config test/jest-int.config.ts --runInBand",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "geo:derive": "ts-node src/modules/geo/derive-cli.ts",
+    "activities:reprocess": "ts-node src/workers/ingest-activity/reprocess-cli.ts",
     "strava:subscribe": "ts-node src/modules/integrations/strava/webhook-subscribe-cli.ts"
   },
   "dependencies": {
