@@ -9,6 +9,7 @@ export type UseStreetsResult = {
   error: string | null;
   selectStreet: (id: string) => Promise<void>;
   clearSelection: () => void;
+  reload: () => void;
 };
 
 export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
@@ -16,6 +17,7 @@ export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
   const [selected, setSelected] = useState<StreetDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -41,7 +43,9 @@ export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
     return () => {
       active = false;
     };
-  }, [api, bbox.minLng, bbox.minLat, bbox.maxLng, bbox.maxLat]);
+  }, [api, bbox.minLng, bbox.minLat, bbox.maxLng, bbox.maxLat, reloadToken]);
+
+  const reload = useCallback(() => setReloadToken((token) => token + 1), []);
 
   const selectStreet = useCallback(
     async (id: string) => {
@@ -52,5 +56,5 @@ export const useStreets = (api: ApiClient, bbox: Bbox): UseStreetsResult => {
 
   const clearSelection = useCallback(() => setSelected(null), []);
 
-  return { streets, selected, loading, error, selectStreet, clearSelection };
+  return { streets, selected, loading, error, selectStreet, clearSelection, reload };
 };

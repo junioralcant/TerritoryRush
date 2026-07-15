@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, fonts } from '../../theme';
 import { Wordmark, formatNumber } from '../../ui';
@@ -8,13 +8,22 @@ export type MapTopBarProps = {
   totalPoints: number;
   unreadCount: number;
   onOpenNotifications?: () => void;
+  onSync?: () => void;
+  syncing?: boolean;
 };
 
 /**
  * Floating glass top bar over the map: wordmark, streak + points pills and the
  * notifications bell (red dot when there are unread items).
  */
-export const MapTopBar = ({ streakDays, totalPoints, unreadCount, onOpenNotifications }: MapTopBarProps) => (
+export const MapTopBar = ({
+  streakDays,
+  totalPoints,
+  unreadCount,
+  onOpenNotifications,
+  onSync,
+  syncing,
+}: MapTopBarProps) => (
   <View style={styles.bar}>
     <Wordmark size={16} align="left" />
     <View style={styles.right}>
@@ -26,6 +35,21 @@ export const MapTopBar = ({ streakDays, totalPoints, unreadCount, onOpenNotifica
         <MaterialCommunityIcons name="crown" size={13} color={colors.gold} />
         <Text style={styles.pointsValue}>{formatNumber(totalPoints)}</Text>
       </View>
+      <Pressable
+        onPress={onSync}
+        disabled={syncing}
+        accessibilityRole="button"
+        accessibilityLabel="Atualizar atividades"
+        testID="map-sync"
+        hitSlop={8}
+        style={styles.bell}
+      >
+        {syncing ? (
+          <ActivityIndicator size="small" color={colors.textSofter} />
+        ) : (
+          <Feather name="refresh-cw" size={18} color={colors.textSofter} />
+        )}
+      </Pressable>
       <Pressable
         onPress={onOpenNotifications}
         accessibilityRole="button"

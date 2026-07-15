@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
+import { useStravaSync } from '../../services/useStravaSync';
 import { ErrorView, Screen } from '../../ui';
 import { MapControls } from './MapControls';
 import { MapSkeleton } from './MapSkeleton';
@@ -25,7 +26,7 @@ const SAO_MATEUS_CENTER: Coordinate = [-44.4689, -4.0361];
 
 export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
   const insets = useSafeAreaInsets();
-  const { streets, selected, loading, error, selectStreet, clearSelection } = useStreets(
+  const { streets, selected, loading, error, selectStreet, clearSelection, reload: reloadStreets } = useStreets(
     api,
     bboxAround(SAO_MATEUS_CENTER),
   );
@@ -36,6 +37,13 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
   const notificationsLoader = useCallback(() => api.getNotifications(), [api]);
   const profile = useApiResource(profileLoader);
   const notifications = useApiResource(notificationsLoader);
+  const { syncing, sync } = useStravaSync(api);
+  const onSync = () =>
+    void sync(() => {
+      reloadStreets();
+      profile.reload();
+      notifications.reload();
+    });
 
   if (profile.loading || loading) {
     return (
@@ -78,6 +86,8 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
             totalPoints={runner.totalPoints}
             unreadCount={unread}
             onOpenNotifications={onOpenNotifications}
+            onSync={onSync}
+            syncing={syncing}
           />
         </View>
 

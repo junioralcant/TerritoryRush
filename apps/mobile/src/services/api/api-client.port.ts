@@ -7,6 +7,7 @@ import {
   NotificationItem,
   RunnerProfileDetail,
   StravaConnectionState,
+  StravaSyncResult,
   StreetDetail,
   StreetSummary,
 } from './types';
@@ -21,6 +22,7 @@ export interface ApiClient {
   getStravaConnection(): Promise<StravaConnectionState>;
   connectStrava(code: string): Promise<StravaConnectionState>;
   disconnectStrava(): Promise<void>;
+  syncStrava(): Promise<StravaSyncResult>;
   getProfile(): Promise<RunnerProfileDetail>;
   getCityRanking(cityId: string): Promise<CityRankingEntry[]>;
   getExplorerRanking(): Promise<ExplorerRankingEntry[]>;

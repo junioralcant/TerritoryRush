@@ -15,6 +15,7 @@ import { PgProviderConnectionRepository } from './repositories/provider-connecti
 import { STRAVA_ACTIVITY_GATEWAY, StravaActivityGateway } from './strava-activity.gateway';
 import { StravaBackfillService } from './strava-backfill.service';
 import { StravaConnectionService } from './strava-connection.service';
+import { StravaSyncService } from './strava-sync.service';
 import { StravaTokenService } from './strava-token.service';
 import { StravaWebhookController } from './strava-webhook.controller';
 import { StravaWebhookService } from './strava-webhook.service';
@@ -32,6 +33,7 @@ import { StravaWebhookService } from './strava-webhook.service';
     StravaConnectionService,
     StravaBackfillService,
     StravaTokenService,
+    StravaSyncService,
     StravaWebhookService,
   ],
   exports: [StravaTokenService, PROVIDER_CONNECTION_REPOSITORY, TOKEN_CIPHER, STRAVA_ACTIVITY_GATEWAY],

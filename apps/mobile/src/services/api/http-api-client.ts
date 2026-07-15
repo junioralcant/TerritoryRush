@@ -8,6 +8,7 @@ import {
   NotificationItem,
   RunnerProfileDetail,
   StravaConnectionState,
+  StravaSyncResult,
   StreetDetail,
   StreetSummary,
 } from './types';
@@ -48,6 +49,7 @@ export const createHttpApiClient = (baseUrl: string, getToken: TokenProvider): A
       }),
     disconnectStrava: () =>
       request<void>('/integrations/strava/disconnect', { method: 'DELETE' }),
+    syncStrava: () => request<StravaSyncResult>('/integrations/strava/sync', { method: 'POST' }),
     getProfile: () => request<RunnerProfileDetail>('/me/profile'),
     getCityRanking: (cityId) => request<CityRankingEntry[]>(`/rankings/city/${cityId}`),
     getExplorerRanking: () => request<ExplorerRankingEntry[]>('/rankings/explorers'),

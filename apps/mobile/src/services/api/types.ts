@@ -47,6 +47,10 @@ export type StravaConnectionState = {
   expiresAt: string | null;
 };
 
+export type StravaSyncResult = {
+  enqueued: number;
+};
+
 export type Bbox = {
   minLng: number;
   minLat: number;

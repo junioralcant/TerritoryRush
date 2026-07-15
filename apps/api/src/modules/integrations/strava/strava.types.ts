@@ -54,6 +54,10 @@ export type StravaConnectionState = {
   expiresAt: string | null;
 };
 
+export type StravaSyncResult = {
+  enqueued: number;
+};
+
 export type ProviderConnectionRow = {
   user_id: string;
   provider: Provider;
