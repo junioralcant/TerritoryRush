@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../../config/app-config.type';
 import { MetricsService } from '../../../observability/metrics.service';
 import { CircuitBreaker } from '../circuit-breaker';
+import { downsampleTrace } from '../downsample-trace';
 import { GpsPoint, MatchedEdge, OsrmMatchResponse } from '../matching.types';
 import { OsrmClient } from '../ports/osrm-client.port';
 import { OsrmUnmatchableTraceError } from '../osrm-unmatchable-trace.error';
@@ -11,6 +12,7 @@ import { toMatchedEdges } from '../osrm-response';
 const OSRM_TIMEOUT_MS = 4000;
 const CIRCUIT_THRESHOLD = 5;
 const CIRCUIT_COOLDOWN_MS = 30_000;
+const MAX_MATCH_POINTS = 1000;
 
 const isTransientStatus = (status: number): boolean => status >= 500 || status === 429;
 
@@ -57,7 +59,9 @@ export class HttpOsrmClient implements OsrmClient {
   }
 
   private async requestMatch(trace: GpsPoint[]): Promise<MatchedEdge[]> {
-    const coordinates = trace.map((point) => `${point.lng},${point.lat}`).join(';');
+    const coordinates = downsampleTrace(trace, MAX_MATCH_POINTS)
+      .map((point) => `${point.lng},${point.lat}`)
+      .join(';');
     const url = `${this.baseUrl}/match/v1/foot/${coordinates}?steps=true&geometries=geojson&overview=false`;
 
     const controller = new AbortController();

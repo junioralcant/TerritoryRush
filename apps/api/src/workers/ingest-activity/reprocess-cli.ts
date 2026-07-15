@@ -9,19 +9,22 @@ import { GpsStreams } from '../../modules/activities/activities.types';
 import { toGpsTrace } from '../../modules/matching/matching-aggregation';
 import { MatchingModule } from '../../modules/matching/matching.module';
 import { MapMatchingService } from '../../modules/matching/matching.service';
+import { OsrmUnmatchableTraceError } from '../../modules/matching/osrm-unmatchable-trace.error';
 import { ScoringModule } from '../../modules/scoring/scoring.module';
 import { TerritoryService } from '../../modules/territory/territory.service';
 import { ObservabilityModule } from '../../observability/observability.module';
 
 /**
- * Re-runs map-matching + scoring for every already-ingested activity, using the
- * GPS streams already stored in `public.activity.gps_streams` — no provider
- * re-fetch. Rebuilds `activity_street`, `street_score` and street ownership after
- * the street network was re-derived (see `geo:derive`), which cascade-wipes those
- * tables. Reuses the production services, so matching/scoring stay in one place.
+ * Re-runs map-matching + scoring for every ingested activity that has stored GPS
+ * streams (`public.activity.gps_streams`) — no provider re-fetch. Rebuilds
+ * `activity_street`, `street_score` and street ownership after the street network
+ * was re-derived (see `geo:derive`, which cascade-wipes those tables), and also
+ * settles activities left stuck in `processing` (e.g. when OSRM was down mid-match).
+ * Reuses the production services, so matching/scoring stay in one place.
  *
  * Idempotent: clears `scored_at` on the activities it will re-run and zeroes the
- * affected runners' aggregates first, so points do not double-count.
+ * affected runners' aggregates first, so points do not double-count. Marks each
+ * activity `processed` on success or `rejected` when its trace is unmatchable.
  */
 @Module({
   imports: [
@@ -51,7 +54,7 @@ const run = async (): Promise<void> => {
     const { rows } = await pool.query<ActivityToReprocess>(
       `select id, user_id, gps_streams, coalesce(started_at, created_at) as activity_date
        from public.activity
-       where status = 'processed'
+       where status in ('processed', 'processing')
          and gps_streams is not null
          and gps_streams ? 'latlng'
          and jsonb_array_length(gps_streams->'latlng') > 0
@@ -95,10 +98,17 @@ const run = async (): Promise<void> => {
             isFirstVisit: street.isFirstVisit,
           })),
         });
+        await pool.query(`update public.activity set status = 'processed' where id = $1`, [row.id]);
         totalStreets += resolved.length;
         totalChanges += changes.length;
         process.stdout.write(`activity ${row.id}: ${resolved.length} ruas, ${changes.length} mudanças de dono\n`);
       } catch (error) {
+        if (error instanceof OsrmUnmatchableTraceError) {
+          await pool.query(`update public.activity set status = 'rejected', rejection_reason = $2 where id = $1`, [
+            row.id,
+            `Sem correspondência no mapa (${error.code})`,
+          ]);
+        }
         failed += 1;
         process.stderr.write(`activity ${row.id} falhou: ${(error as Error).message}\n`);
       }
