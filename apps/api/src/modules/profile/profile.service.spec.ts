@@ -28,6 +28,7 @@ const makeRepository = (): jest.Mocked<ProfileRepository> => ({
     cityRank: null,
     nationalRank: 1,
   }),
+  ensureSignedUpAt: jest.fn().mockResolvedValue('2026-07-10T00:00:00.000Z'),
 });
 
 const USER: AuthUser = { id: 'user-1', email: 'junior@example.com' };

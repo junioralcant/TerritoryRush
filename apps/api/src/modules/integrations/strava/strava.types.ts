@@ -11,6 +11,7 @@ export type StravaTokenResponse = {
 export type StravaActivitySummary = {
   providerActivityId: string;
   sportType: string | null;
+  startedAt: string | null;
 };
 
 export type StravaWebhookEvent = {

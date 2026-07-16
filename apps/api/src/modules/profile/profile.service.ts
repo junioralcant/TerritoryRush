@@ -30,4 +30,8 @@ export class ProfileService {
     const aggregates = await this.profiles.loadAggregates(user.id);
     return { ...profile, ...aggregates };
   }
+
+  ensureSignedUpAt(userId: string): Promise<string> {
+    return this.profiles.ensureSignedUpAt(userId);
+  }
 }

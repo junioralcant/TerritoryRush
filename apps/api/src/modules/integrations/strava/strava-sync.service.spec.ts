@@ -1,12 +1,19 @@
+import { ProfileService } from '../../profile/profile.service';
 import { StravaBackfillService } from './strava-backfill.service';
 import { StravaSyncService } from './strava-sync.service';
 import { StravaTokenService } from './strava-token.service';
 
-const makeService = (tokens: Partial<StravaTokenService>, backfill: Partial<StravaBackfillService>): StravaSyncService =>
-  new StravaSyncService(tokens as StravaTokenService, backfill as StravaBackfillService);
+const SIGNED_UP_AT = '2026-07-10T00:00:00.000Z';
+
+const makeService = (
+  tokens: Partial<StravaTokenService>,
+  backfill: Partial<StravaBackfillService>,
+  profiles: Partial<ProfileService> = { ensureSignedUpAt: jest.fn().mockResolvedValue(SIGNED_UP_AT) },
+): StravaSyncService =>
+  new StravaSyncService(tokens as StravaTokenService, backfill as StravaBackfillService, profiles as ProfileService);
 
 describe('StravaSyncService', () => {
-  it('renews the token and backfills recent activities, returning the enqueued count', async () => {
+  it('renews the token and backfills recent activities from the signup date, returning the enqueued count', async () => {
     const tokens = { getFreshAccessToken: jest.fn().mockResolvedValue('fresh-token') };
     const backfill = { backfillRecent: jest.fn().mockResolvedValue(3) };
     const service = makeService(tokens, backfill);
@@ -14,7 +21,7 @@ describe('StravaSyncService', () => {
     const result = await service.syncRecentActivities('user-1');
 
     expect(tokens.getFreshAccessToken).toHaveBeenCalledWith('user-1');
-    expect(backfill.backfillRecent).toHaveBeenCalledWith('user-1', 'fresh-token');
+    expect(backfill.backfillRecent).toHaveBeenCalledWith('user-1', 'fresh-token', SIGNED_UP_AT);
     expect(result).toEqual({ enqueued: 3 });
   });
 

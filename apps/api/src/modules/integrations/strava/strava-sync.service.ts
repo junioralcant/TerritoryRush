@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileService } from '../../profile/profile.service';
 import { StravaBackfillService } from './strava-backfill.service';
 import { StravaTokenService } from './strava-token.service';
 import { StravaSyncResult } from './strava.types';
@@ -14,11 +15,13 @@ export class StravaSyncService {
   constructor(
     private readonly tokens: StravaTokenService,
     private readonly backfill: StravaBackfillService,
+    private readonly profiles: ProfileService,
   ) {}
 
   async syncRecentActivities(userId: string): Promise<StravaSyncResult> {
     const accessToken = await this.tokens.getFreshAccessToken(userId);
-    const enqueued = await this.backfill.backfillRecent(userId, accessToken);
+    const signedUpAt = await this.profiles.ensureSignedUpAt(userId);
+    const enqueued = await this.backfill.backfillRecent(userId, accessToken, signedUpAt);
     return { enqueued };
   }
 }

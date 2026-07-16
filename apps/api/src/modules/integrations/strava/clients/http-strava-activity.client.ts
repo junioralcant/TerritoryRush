@@ -25,6 +25,7 @@ type StravaSummaryActivity = {
   id?: number;
   sport_type?: string;
   type?: string;
+  start_date?: string;
 };
 
 const authHeaders = (accessToken: string): Record<string, string> => ({
@@ -106,6 +107,7 @@ export class HttpStravaActivityClient implements StravaActivityClient {
       .map((activity) => ({
         providerActivityId: String(activity.id),
         sportType: activity.sport_type ?? activity.type ?? null,
+        startedAt: activity.start_date ?? null,
       }));
   }
 }

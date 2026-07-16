@@ -1,9 +1,12 @@
+import { ProfileService } from '../../profile/profile.service';
 import { ProviderConnectionRepository } from './ports/provider-connection-repository.port';
 import { StravaOAuthClient } from './ports/strava-oauth-client.port';
 import { TokenCipher } from './ports/token-cipher.port';
 import { ProviderConnection } from './strava.types';
 import { StravaBackfillService } from './strava-backfill.service';
 import { StravaConnectionService } from './strava-connection.service';
+
+const SIGNED_UP_AT = '2026-07-10T00:00:00.000Z';
 
 const makeRepo = (): jest.Mocked<ProviderConnectionRepository> => ({
   upsert: jest.fn(),
@@ -25,6 +28,18 @@ const cipher: TokenCipher = {
 
 const makeBackfill = (): jest.Mocked<StravaBackfillService> =>
   ({ backfillRecent: jest.fn().mockResolvedValue(0) }) as unknown as jest.Mocked<StravaBackfillService>;
+
+const makeProfiles = (): jest.Mocked<Pick<ProfileService, 'ensureSignedUpAt'>> => ({
+  ensureSignedUpAt: jest.fn().mockResolvedValue(SIGNED_UP_AT),
+});
+
+const makeService = (
+  oauth: StravaOAuthClient,
+  repo: ProviderConnectionRepository,
+  backfill: StravaBackfillService,
+  profiles = makeProfiles(),
+): StravaConnectionService =>
+  new StravaConnectionService(oauth, repo, cipher, backfill, profiles as unknown as ProfileService);
 
 const connection = (): ProviderConnection => ({
   userId: 'user-1',
@@ -49,7 +64,7 @@ describe('StravaConnectionService', () => {
     });
 
     const backfill = makeBackfill();
-    const state = await new StravaConnectionService(oauth, repo, cipher, backfill).connect('user-1', 'code');
+    const state = await makeService(oauth, repo, backfill).connect('user-1', 'code');
 
     expect(state).toEqual({
       provider: 'strava',
@@ -66,7 +81,7 @@ describe('StravaConnectionService', () => {
         athleteId: '42',
       }),
     );
-    expect(backfill.backfillRecent).toHaveBeenCalledWith('user-1', 'access-xyz');
+    expect(backfill.backfillRecent).toHaveBeenCalledWith('user-1', 'access-xyz', SIGNED_UP_AT);
   });
 
   it('still returns a connected state when the backfill fails (best effort)', async () => {
@@ -82,7 +97,7 @@ describe('StravaConnectionService', () => {
     });
     backfill.backfillRecent.mockRejectedValue(new Error('strava down'));
 
-    const state = await new StravaConnectionService(oauth, repo, cipher, backfill).connect('user-1', 'code');
+    const state = await makeService(oauth, repo, backfill).connect('user-1', 'code');
 
     expect(state.connected).toBe(true);
     expect(repo.upsert).toHaveBeenCalled();
@@ -93,7 +108,7 @@ describe('StravaConnectionService', () => {
     const oauth = makeOauth();
     repo.findByUserAndProvider.mockResolvedValue(connection());
 
-    await new StravaConnectionService(oauth, repo, cipher, makeBackfill()).disconnect('user-1');
+    await makeService(oauth, repo, makeBackfill()).disconnect('user-1');
 
     expect(oauth.deauthorize).toHaveBeenCalledWith('access-current');
     expect(repo.delete).toHaveBeenCalledWith('user-1', 'strava');
@@ -105,7 +120,7 @@ describe('StravaConnectionService', () => {
     repo.findByUserAndProvider.mockResolvedValue(connection());
     oauth.deauthorize.mockRejectedValue(new Error('strava down'));
 
-    await new StravaConnectionService(oauth, repo, cipher, makeBackfill()).disconnect('user-1');
+    await makeService(oauth, repo, makeBackfill()).disconnect('user-1');
 
     expect(repo.delete).toHaveBeenCalledWith('user-1', 'strava');
   });
@@ -114,9 +129,7 @@ describe('StravaConnectionService', () => {
     const repo = makeRepo();
     repo.findByUserAndProvider.mockResolvedValue(null);
 
-    const state = await new StravaConnectionService(makeOauth(), repo, cipher, makeBackfill()).getConnectionState(
-      'user-1',
-    );
+    const state = await makeService(makeOauth(), repo, makeBackfill()).getConnectionState('user-1');
 
     expect(state).toEqual({ provider: 'strava', connected: false, athleteId: null, scopes: [], expiresAt: null });
   });

@@ -11,4 +11,10 @@ export interface ProfileRepository {
   findByUserId(userId: string): Promise<RunnerProfile | null>;
   create(input: CreateRunnerProfileInput): Promise<RunnerProfile>;
   loadAggregates(userId: string): Promise<RunnerProfileAggregates>;
+  /**
+   * Ensures the runner profile exists and returns its `signed_up_at` (ISO). Used
+   * as the cutoff for the initial activity seed; creating it here stamps the
+   * signup date on first connect if the runner has not opened the app yet.
+   */
+  ensureSignedUpAt(userId: string): Promise<string>;
 }

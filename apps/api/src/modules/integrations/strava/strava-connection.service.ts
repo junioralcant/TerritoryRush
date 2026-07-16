@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ProfileService } from '../../profile/profile.service';
 import { PROVIDER_CONNECTION_REPOSITORY, ProviderConnectionRepository } from './ports/provider-connection-repository.port';
 import { STRAVA_OAUTH_CLIENT, StravaOAuthClient } from './ports/strava-oauth-client.port';
 import { TOKEN_CIPHER, TokenCipher } from './ports/token-cipher.port';
@@ -16,6 +17,7 @@ export class StravaConnectionService {
     @Inject(PROVIDER_CONNECTION_REPOSITORY) private readonly connections: ProviderConnectionRepository,
     @Inject(TOKEN_CIPHER) private readonly cipher: TokenCipher,
     private readonly backfill: StravaBackfillService,
+    private readonly profiles: ProfileService,
   ) {}
 
   async connect(userId: string, code: string): Promise<StravaConnectionState> {
@@ -33,7 +35,8 @@ export class StravaConnectionService {
     });
 
     try {
-      await this.backfill.backfillRecent(userId, tokens.accessToken);
+      const signedUpAt = await this.profiles.ensureSignedUpAt(userId);
+      await this.backfill.backfillRecent(userId, tokens.accessToken, signedUpAt);
     } catch (error) {
       this.logger.warn(`Strava backfill failed for user ${userId}: ${(error as Error).message}`);
     }

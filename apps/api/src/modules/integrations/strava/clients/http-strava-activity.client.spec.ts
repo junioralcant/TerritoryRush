@@ -78,16 +78,22 @@ describe('HttpStravaActivityClient', () => {
     await expect(makeClient().fetchActivity('555', 'token')).rejects.toThrow('status 404');
   });
 
-  it('lists recent activities with their sport type, requesting the given per_page and dropping entries without an id', async () => {
+  it('lists recent activities with sport type and start date, requesting the given per_page and dropping entries without an id', async () => {
     const fetchSpy = jest
       .spyOn(global, 'fetch')
-      .mockResolvedValue(jsonResponse([{ id: 555, sport_type: 'Run' }, { id: 556, type: 'Ride' }, { name: 'no id' }]));
+      .mockResolvedValue(
+        jsonResponse([
+          { id: 555, sport_type: 'Run', start_date: '2026-07-09T10:00:00Z' },
+          { id: 556, type: 'Ride' },
+          { name: 'no id' },
+        ]),
+      );
 
     const activities = await makeClient().listRecentActivities('token', 30);
 
     expect(activities).toEqual([
-      { providerActivityId: '555', sportType: 'Run' },
-      { providerActivityId: '556', sportType: 'Ride' },
+      { providerActivityId: '555', sportType: 'Run', startedAt: '2026-07-09T10:00:00Z' },
+      { providerActivityId: '556', sportType: 'Ride', startedAt: null },
     ]);
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://www.strava.com/api/v3/athlete/activities?per_page=30',

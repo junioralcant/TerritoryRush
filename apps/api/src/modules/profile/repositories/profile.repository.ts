@@ -56,6 +56,18 @@ export class PgProfileRepository implements ProfileRepository {
     return existing;
   }
 
+  async ensureSignedUpAt(userId: string): Promise<string> {
+    await this.pool.query(
+      `insert into public.runner_profile (user_id) values ($1) on conflict (user_id) do nothing`,
+      [userId],
+    );
+    const result = await this.pool.query<{ signed_up_at: Date }>(
+      `select signed_up_at from public.runner_profile where user_id = $1`,
+      [userId],
+    );
+    return result.rows[0].signed_up_at.toISOString();
+  }
+
   async loadAggregates(userId: string): Promise<RunnerProfileAggregates> {
     const [owned, explored, total, national, primaryCity] = await Promise.all([
       this.pool.query<{ count: number }>(

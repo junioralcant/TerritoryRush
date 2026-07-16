@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ActivitiesModule } from '../../activities/activities.module';
 import { AuthModule } from '../../auth/auth.module';
+import { ProfileModule } from '../../profile/profile.module';
 import { AesTokenCipher } from './cipher/aes-token-cipher';
 import { HttpStravaActivityClient } from './clients/http-strava-activity.client';
 import { HttpStravaOAuthClient } from './clients/http-strava-oauth.client';
@@ -21,7 +22,7 @@ import { StravaWebhookController } from './strava-webhook.controller';
 import { StravaWebhookService } from './strava-webhook.service';
 
 @Module({
-  imports: [AuthModule, ActivitiesModule],
+  imports: [AuthModule, ActivitiesModule, ProfileModule],
   controllers: [IntegrationsStravaController, StravaWebhookController],
   providers: [
     { provide: TOKEN_CIPHER, useClass: AesTokenCipher },
