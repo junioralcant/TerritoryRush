@@ -1,10 +1,10 @@
-import { ReactNode, useCallback } from 'react';
+import { ReactNode, useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
 import { RunnerProfileDetail } from '../../services/api/types';
 import { useApiResource } from '../../services/useApiResource';
-import { colors, fonts, radii } from '../../theme';
+import { Palette, fonts, radii, useTheme } from '../../theme';
 import { ErrorView, LevelAvatar, LoadingView, PulseDot, Screen, formatNumber } from '../../ui';
 import { levelFromPoints } from './level';
 
@@ -27,29 +27,39 @@ const RankCard = ({
   sub: string;
   color?: string;
   testID: string;
-}) => (
-  <View style={[styles.rankCard, color ? { borderColor: `${color}4D` } : null]}>
-    <View style={styles.rankHead}>
-      <PulseDot size={7} color={colors.green} />
-      <Text style={styles.rankLabel}>{label}</Text>
+}) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <View style={[styles.rankCard, color ? { borderColor: `${color}4D` } : null]}>
+      <View style={styles.rankHead}>
+        <PulseDot size={7} color={colors.green} />
+        <Text style={styles.rankLabel}>{label}</Text>
+      </View>
+      <Text testID={testID} style={[styles.rankPlace, color ? { color } : null]}>
+        {place}
+      </Text>
+      <Text style={styles.rankSub}>{sub}</Text>
     </View>
-    <Text testID={testID} style={[styles.rankPlace, color ? { color } : null]}>
-      {place}
-    </Text>
-    <Text style={styles.rankSub}>{sub}</Text>
-  </View>
-);
+  );
+};
 
-const StatTile = ({ label, value, color, testID }: { label: string; value: ReactNode; color?: string; testID: string }) => (
-  <View style={styles.statTile}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text testID={testID} style={[styles.statValue, color ? { color } : null]}>
-      {value}
-    </Text>
-  </View>
-);
+const StatTile = ({ label, value, color, testID }: { label: string; value: ReactNode; color?: string; testID: string }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <View style={styles.statTile}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text testID={testID} style={[styles.statValue, color ? { color } : null]}>
+        {value}
+      </Text>
+    </View>
+  );
+};
 
 export const ProfileScreen = ({ api, onOpenSettings }: ProfileScreenProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const loader = useCallback(() => api.getProfile(), [api]);
   const { data: profile, loading, error, reload } = useApiResource(loader);
 
@@ -160,54 +170,55 @@ export const ProfileScreen = ({ api, onOpenSettings }: ProfileScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
-  headerSpacer: { width: 36 },
-  headerTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 18, color: colors.textHi },
-  gear: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceCard, alignItems: 'center', justifyContent: 'center' },
-  scroll: { paddingHorizontal: 18, paddingBottom: 24 },
-  flex: { flex: 1 },
-  identity: { alignItems: 'center' },
-  name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: colors.textHi, marginTop: 14 },
-  cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  city: { fontFamily: fonts.manrope, fontSize: 13, color: colors.textMid },
-  xpBlock: { width: '100%', marginTop: 16 },
-  xpTop: { flexDirection: 'row', justifyContent: 'space-between' },
-  levelLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 11.5, color: colors.textSoft },
-  xpText: { fontFamily: fonts.manrope, fontSize: 11.5, color: colors.textMid },
-  xpValue: { fontFamily: fonts.manropeBold, color: colors.primary },
-  xpTrack: { marginTop: 6, height: 8, borderRadius: 4, backgroundColor: '#222A37', overflow: 'hidden' },
-  xpFill: { height: '100%', borderRadius: 4, backgroundColor: colors.primary },
-  rankRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
-  rankCard: { flex: 1, backgroundColor: colors.surfaceCard, borderWidth: 1, borderColor: colors.stroke, borderRadius: radii.boxLg, padding: 13 },
-  rankHead: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  rankLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 10, color: colors.textMid },
-  rankPlace: { fontFamily: fonts.sairaExtraBold, fontSize: 28, color: colors.textHi, marginTop: 4 },
-  rankSub: { fontFamily: fonts.manrope, fontSize: 11, color: colors.textMid },
-  streakCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 13,
-    marginTop: 14,
-    padding: 14,
-    borderRadius: radii.boxLg,
-    borderWidth: 1,
-    borderColor: 'rgba(252,76,2,0.3)',
-    backgroundColor: 'rgba(252,76,2,0.1)',
-  },
-  streakTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 20, color: colors.textHi },
-  streakSub: { fontFamily: fonts.manrope, fontSize: 11.5, color: '#C9A15A', marginTop: 2 },
-  sectionTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: colors.textHi, marginTop: 20, marginBottom: 10 },
-  statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  statTile: {
-    width: '47.8%',
-    flexGrow: 1,
-    backgroundColor: colors.surfaceCard,
-    borderWidth: 1,
-    borderColor: colors.stroke,
-    borderRadius: radii.box,
-    padding: 12,
-  },
-  statLabel: { fontFamily: fonts.manrope, fontSize: 11, color: colors.textMid },
-  statValue: { fontFamily: fonts.sairaExtraBold, fontSize: 21, color: colors.textHi, marginTop: 2 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 6 },
+    headerSpacer: { width: 36 },
+    headerTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 18, color: c.textHi },
+    gear: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surfaceCard, alignItems: 'center', justifyContent: 'center' },
+    scroll: { paddingHorizontal: 18, paddingBottom: 24 },
+    flex: { flex: 1 },
+    identity: { alignItems: 'center' },
+    name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: c.textHi, marginTop: 14 },
+    cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
+    city: { fontFamily: fonts.manrope, fontSize: 13, color: c.textMid },
+    xpBlock: { width: '100%', marginTop: 16 },
+    xpTop: { flexDirection: 'row', justifyContent: 'space-between' },
+    levelLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 11.5, color: c.textSoft },
+    xpText: { fontFamily: fonts.manrope, fontSize: 11.5, color: c.textMid },
+    xpValue: { fontFamily: fonts.manropeBold, color: c.primary },
+    xpTrack: { marginTop: 6, height: 8, borderRadius: 4, backgroundColor: c.divider, overflow: 'hidden' },
+    xpFill: { height: '100%', borderRadius: 4, backgroundColor: c.primary },
+    rankRow: { flexDirection: 'row', gap: 10, marginTop: 18 },
+    rankCard: { flex: 1, backgroundColor: c.surfaceCard, borderWidth: 1, borderColor: c.stroke, borderRadius: radii.boxLg, padding: 13 },
+    rankHead: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    rankLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 10, color: c.textMid },
+    rankPlace: { fontFamily: fonts.sairaExtraBold, fontSize: 28, color: c.textHi, marginTop: 4 },
+    rankSub: { fontFamily: fonts.manrope, fontSize: 11, color: c.textMid },
+    streakCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 13,
+      marginTop: 14,
+      padding: 14,
+      borderRadius: radii.boxLg,
+      borderWidth: 1,
+      borderColor: c.accentBorder,
+      backgroundColor: c.accentSurfaceSoft,
+    },
+    streakTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 20, color: c.textHi },
+    streakSub: { fontFamily: fonts.manrope, fontSize: 11.5, color: c.goldText, marginTop: 2 },
+    sectionTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: c.textHi, marginTop: 20, marginBottom: 10 },
+    statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    statTile: {
+      width: '47.8%',
+      flexGrow: 1,
+      backgroundColor: c.surfaceCard,
+      borderWidth: 1,
+      borderColor: c.stroke,
+      borderRadius: radii.box,
+      padding: 12,
+    },
+    statLabel: { fontFamily: fonts.manrope, fontSize: 11, color: c.textMid },
+    statValue: { fontFamily: fonts.sairaExtraBold, fontSize: 21, color: c.textHi, marginTop: 2 },
+  });

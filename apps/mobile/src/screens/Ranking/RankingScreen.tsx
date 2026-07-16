@@ -1,10 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
 import { CityRankingEntry, ExplorerRankingEntry } from '../../services/api/types';
 import { useApiResource } from '../../services/useApiResource';
-import { colors, fonts, radii } from '../../theme';
+import { Palette, fonts, radii, useTheme } from '../../theme';
 import { LoadingView, Screen } from '../../ui';
 import { RankRow, RankingLeaderboard } from './RankingLeaderboard';
 
@@ -18,6 +18,8 @@ export type RankingScreenProps = {
 type Tab = 'city' | 'explorers';
 
 export const RankingScreen = ({ api, cityId, cityName, currentUserId }: RankingScreenProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [tab, setTab] = useState<Tab>(cityId ? 'city' : 'explorers');
 
   const cityLoader = useCallback(
@@ -94,23 +96,24 @@ export const RankingScreen = ({ api, cityId, cityName, currentUserId }: RankingS
   );
 };
 
-const styles = StyleSheet.create({
-  header: { paddingHorizontal: 18, paddingTop: 6 },
-  title: { fontFamily: fonts.sairaExtraBold, fontSize: 22, color: colors.textHi },
-  segmented: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 12,
-    backgroundColor: colors.surfaceCard,
-    borderWidth: 1,
-    borderColor: colors.stroke,
-    borderRadius: radii.boxSm,
-    padding: 4,
-  },
-  segment: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 9 },
-  segmentLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 13, color: colors.textMid },
-  segmentActive: { color: colors.white, fontFamily: fonts.manropeBold },
-  context: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 10 },
-  contextText: { fontFamily: fonts.manrope, fontSize: 12, color: colors.textMid },
-  scroll: { paddingHorizontal: 18, paddingBottom: 24 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    header: { paddingHorizontal: 18, paddingTop: 6 },
+    title: { fontFamily: fonts.sairaExtraBold, fontSize: 22, color: c.textHi },
+    segmented: {
+      flexDirection: 'row',
+      gap: 4,
+      marginTop: 12,
+      backgroundColor: c.surfaceCard,
+      borderWidth: 1,
+      borderColor: c.stroke,
+      borderRadius: radii.boxSm,
+      padding: 4,
+    },
+    segment: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 9 },
+    segmentLabel: { fontFamily: fonts.manropeSemiBold, fontSize: 13, color: c.textMid },
+    segmentActive: { color: c.white, fontFamily: fonts.manropeBold },
+    context: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 10 },
+    contextText: { fontFamily: fonts.manrope, fontSize: 12, color: c.textMid },
+    scroll: { paddingHorizontal: 18, paddingBottom: 24 },
+  });

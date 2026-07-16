@@ -1,4 +1,5 @@
 import { NotificationItem } from '../../services/api/types';
+import { lightColors } from '../../theme';
 import { groupByDay, notificationView, relativeTime } from './notificationView';
 
 const make = (over: Partial<NotificationItem>): NotificationItem => ({
@@ -7,7 +8,7 @@ const make = (over: Partial<NotificationItem>): NotificationItem => ({
 
 describe('notificationView', () => {
   it('maps a captured-street notification to green/flag with a rich message', () => {
-    const view = notificationView(make({ type: 'street_captured', payload: { streetName: 'Rua Maranhão', points: 120 } }));
+    const view = notificationView(make({ type: 'street_captured', payload: { streetName: 'Rua Maranhão', points: 120 } }), lightColors);
     expect(view.title).toBe('Rua conquistada');
     expect(view.icon).toBe('flag');
     expect(view.message).toContain('Rua Maranhão');
@@ -15,21 +16,21 @@ describe('notificationView', () => {
   });
 
   it('maps a lost-street notification to the danger alert', () => {
-    const view = notificationView(make({ type: 'street_lost', payload: { byName: 'Marina', streetName: 'R. Minas' } }));
+    const view = notificationView(make({ type: 'street_lost', payload: { byName: 'Marina', streetName: 'R. Minas' } }), lightColors);
     expect(view.title).toBe('Rua perdida');
     expect(view.icon).toBe('alert-triangle');
     expect(view.message).toContain('Marina');
   });
 
   it('maps an achievement notification to the purple star', () => {
-    const view = notificationView(make({ type: 'achievement_unlocked', payload: { title: 'Dominador' } }));
+    const view = notificationView(make({ type: 'achievement_unlocked', payload: { title: 'Dominador' } }), lightColors);
     expect(view.title).toBe('Conquista desbloqueada');
     expect(view.icon).toBe('star');
     expect(view.message).toContain('Dominador');
   });
 
   it('falls back to a generic aviso for unknown types', () => {
-    const view = notificationView(make({ type: 'weird_new_type', payload: {} }));
+    const view = notificationView(make({ type: 'weird_new_type', payload: {} }), lightColors);
     expect(view.title).toBe('Aviso');
     expect(view.icon).toBe('bell');
   });

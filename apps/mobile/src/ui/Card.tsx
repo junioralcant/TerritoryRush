@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
-import { colors, radii, spacing } from '../theme';
+import { Palette, radii, spacing, useTheme } from '../theme';
 
 export type CardProps = {
   children: ReactNode;
@@ -9,18 +9,23 @@ export type CardProps = {
   accessibilityLabel?: string;
 };
 
-export const Card = ({ children, style, testID, accessibilityLabel }: CardProps) => (
-  <View testID={testID} accessibilityLabel={accessibilityLabel} style={[styles.card, style]}>
-    {children}
-  </View>
-);
+export const Card = ({ children, style, testID, accessibilityLabel }: CardProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <View testID={testID} accessibilityLabel={accessibilityLabel} style={[styles.card, style]}>
+      {children}
+    </View>
+  );
+};
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceCard,
-    borderRadius: radii.card,
-    borderWidth: 1,
-    borderColor: colors.stroke,
-    padding: spacing.m,
-  },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: c.surfaceCard,
+      borderRadius: radii.card,
+      borderWidth: 1,
+      borderColor: c.stroke,
+      padding: spacing.m,
+    },
+  });

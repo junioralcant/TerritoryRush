@@ -1,10 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
 import { useStravaSync } from '../../services/useStravaSync';
-import { colors, fonts } from '../../theme';
+import { Palette, fonts, useTheme } from '../../theme';
 import { EmptyView, ErrorView, LoadingView, PrimaryButton, Screen } from '../../ui';
 import { ActivityCard } from './ActivityCard';
 
@@ -13,23 +13,27 @@ export type ActivitiesScreenProps = {
   onOpenConnections?: () => void;
 };
 
-const SyncButton = ({ syncing, onPress }: { syncing: boolean; onPress: () => void }) => (
-  <Pressable
-    onPress={onPress}
-    disabled={syncing}
-    accessibilityRole="button"
-    accessibilityLabel="Atualizar atividades"
-    testID="activities-sync"
-    hitSlop={8}
-    style={styles.syncButton}
-  >
-    {syncing ? (
-      <ActivityIndicator size="small" color={colors.textLo} />
-    ) : (
-      <Feather name="refresh-cw" size={20} color={colors.textLo} />
-    )}
-  </Pressable>
-);
+const SyncButton = ({ syncing, onPress }: { syncing: boolean; onPress: () => void }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={syncing}
+      accessibilityRole="button"
+      accessibilityLabel="Atualizar atividades"
+      testID="activities-sync"
+      hitSlop={8}
+      style={styles.syncButton}
+    >
+      {syncing ? (
+        <ActivityIndicator size="small" color={colors.textLo} />
+      ) : (
+        <Feather name="refresh-cw" size={20} color={colors.textLo} />
+      )}
+    </Pressable>
+  );
+};
 
 /**
  * Activities feed: runs imported from Strava/Garmin, each showing distance,
@@ -42,6 +46,8 @@ export const ActivitiesScreen = ({ api, onOpenConnections }: ActivitiesScreenPro
   const activities = useApiResource(loader);
   const { syncing, sync } = useStravaSync(api);
   const onRefresh = useCallback(() => void sync(activities.reload), [sync, activities.reload]);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   if (activities.loading) {
     return (
@@ -93,22 +99,23 @@ export const ActivitiesScreen = ({ api, onOpenConnections }: ActivitiesScreenPro
   );
 };
 
-const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: { fontFamily: fonts.sairaExtraBold, fontSize: 22, color: colors.textHi },
-  syncButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scroll: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 24, gap: 12 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    header: {
+      paddingHorizontal: 18,
+      paddingVertical: 6,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    title: { fontFamily: fonts.sairaExtraBold, fontSize: 22, color: c.textHi },
+    syncButton: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: c.stroke,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scroll: { paddingHorizontal: 18, paddingTop: 6, paddingBottom: 24, gap: 12 },
+  });

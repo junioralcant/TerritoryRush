@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
-import { colors, fonts, radii } from '../../theme';
-import { LoadingView, Screen, ScreenHeader } from '../../ui';
+import { Palette, fonts, radii, useTheme } from '../../theme';
+import { LoadingView, Screen, ScreenHeader, ThemeToggle } from '../../ui';
 import { StravaLogo } from './StravaLogo';
 import { useConnections } from './useConnections';
 
@@ -14,6 +15,8 @@ export type ConnectionsScreenProps = {
 
 export const ConnectionsScreen = ({ api, startStravaAuth, onBack }: ConnectionsScreenProps) => {
   const { connection, loading, error, connect, disconnect } = useConnections(api, { startStravaAuth });
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   if (loading) {
     return (
@@ -112,6 +115,10 @@ export const ConnectionsScreen = ({ api, startStravaAuth, onBack }: ConnectionsS
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
+        <View style={styles.appearance}>
+          <ThemeToggle testID="theme-toggle" />
+        </View>
+
         <Text style={styles.privacy}>
           Só usamos suas atividades para calcular pontos e posse de ruas. Você pode desconectar quando quiser.
         </Text>
@@ -120,56 +127,58 @@ export const ConnectionsScreen = ({ api, startStravaAuth, onBack }: ConnectionsS
   );
 };
 
-const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: 18, paddingBottom: 24 },
-  flex: { flex: 1 },
-  intro: { fontFamily: fonts.manrope, fontSize: 13, lineHeight: 20, color: colors.textMid, marginBottom: 18 },
-  card: { backgroundColor: colors.surfaceCard, borderWidth: 1, borderColor: colors.stroke, borderRadius: radii.card, padding: 16 },
-  stravaCard: { borderColor: 'rgba(252,76,2,0.35)' },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: 13 },
-  stravaTile: { width: 48, height: 48, borderRadius: 13, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
-  provider: { fontFamily: fonts.sairaExtraBold, fontSize: 17, color: colors.textHi },
-  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
-  statusDot: { width: 7, height: 7, borderRadius: 4 },
-  statusText: { fontFamily: fonts.manropeSemiBold, fontSize: 12 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.stroke },
-  detailLabel: { fontFamily: fonts.manrope, fontSize: 12, color: colors.textMid },
-  detailValue: { fontFamily: fonts.manropeSemiBold, fontSize: 12, color: colors.textHi },
-  disconnect: {
-    marginTop: 14,
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderRadius: radii.boxSm,
-    borderWidth: 1,
-    borderColor: 'rgba(226,59,59,0.35)',
-  },
-  disconnectLabel: { fontFamily: fonts.manropeBold, fontSize: 13.5, color: colors.dangerSoft },
-  connect: {
-    marginTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: radii.boxSm,
-    backgroundColor: colors.accent,
-  },
-  connectLabel: { fontFamily: fonts.manropeBold, fontSize: 14.5, color: colors.white },
-  oauthNote: { textAlign: 'center', fontFamily: fonts.manrope, fontSize: 10.5, color: colors.textLo, marginTop: 8 },
-  garminCard: { marginTop: 14, opacity: 0.7 },
-  garminTile: {
-    width: 48,
-    height: 48,
-    borderRadius: 13,
-    backgroundColor: '#1A2230',
-    borderWidth: 1,
-    borderColor: colors.strokeStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  garminSub: { fontFamily: fonts.manrope, fontSize: 12, color: colors.textMid, marginTop: 3 },
-  soonChip: { backgroundColor: colors.surfaceInner, borderRadius: radii.pill, paddingVertical: 5, paddingHorizontal: 10 },
-  soonText: { fontFamily: fonts.manropeBold, fontSize: 11, color: colors.textMid },
-  error: { fontFamily: fonts.manrope, fontSize: 12, color: colors.dangerSoft, marginTop: 14 },
-  privacy: { fontFamily: fonts.manrope, fontSize: 11, lineHeight: 16, color: colors.textLo, marginTop: 18 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    scroll: { paddingHorizontal: 18, paddingBottom: 24 },
+    flex: { flex: 1 },
+    intro: { fontFamily: fonts.manrope, fontSize: 13, lineHeight: 20, color: c.textMid, marginBottom: 18 },
+    card: { backgroundColor: c.surfaceCard, borderWidth: 1, borderColor: c.stroke, borderRadius: radii.card, padding: 16 },
+    stravaCard: { borderColor: c.accentBorder },
+    cardHead: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+    stravaTile: { width: 48, height: 48, borderRadius: 13, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' },
+    provider: { fontFamily: fonts.sairaExtraBold, fontSize: 17, color: c.textHi },
+    statusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
+    statusDot: { width: 7, height: 7, borderRadius: 4 },
+    statusText: { fontFamily: fonts.manropeSemiBold, fontSize: 12 },
+    detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: c.stroke },
+    detailLabel: { fontFamily: fonts.manrope, fontSize: 12, color: c.textMid },
+    detailValue: { fontFamily: fonts.manropeSemiBold, fontSize: 12, color: c.textHi },
+    disconnect: {
+      marginTop: 14,
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderRadius: radii.boxSm,
+      borderWidth: 1,
+      borderColor: c.dangerBorder,
+    },
+    disconnectLabel: { fontFamily: fonts.manropeBold, fontSize: 13.5, color: c.dangerSoft },
+    connect: {
+      marginTop: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 14,
+      borderRadius: radii.boxSm,
+      backgroundColor: c.accent,
+    },
+    connectLabel: { fontFamily: fonts.manropeBold, fontSize: 14.5, color: c.white },
+    oauthNote: { textAlign: 'center', fontFamily: fonts.manrope, fontSize: 10.5, color: c.textLo, marginTop: 8 },
+    garminCard: { marginTop: 14, opacity: 0.7 },
+    garminTile: {
+      width: 48,
+      height: 48,
+      borderRadius: 13,
+      backgroundColor: c.surfaceInner,
+      borderWidth: 1,
+      borderColor: c.strokeStrong,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    garminSub: { fontFamily: fonts.manrope, fontSize: 12, color: c.textMid, marginTop: 3 },
+    soonChip: { backgroundColor: c.surfaceInner, borderRadius: radii.pill, paddingVertical: 5, paddingHorizontal: 10 },
+    soonText: { fontFamily: fonts.manropeBold, fontSize: 11, color: c.textMid },
+    error: { fontFamily: fonts.manrope, fontSize: 12, color: c.dangerSoft, marginTop: 14 },
+    appearance: { marginTop: 18 },
+    privacy: { fontFamily: fonts.manrope, fontSize: 11, lineHeight: 16, color: c.textLo, marginTop: 18 },
+  });

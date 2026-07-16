@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, fonts, radii } from '../theme';
+import { fonts, radii, useTheme } from '../theme';
 
 export type ChipProps = {
   label: string;
@@ -12,15 +12,19 @@ export type ChipProps = {
 /**
  * Pill with a coloured status dot + label (e.g. "Você é o proprietário").
  */
-export const Chip = ({ label, color = colors.primary, labelColor, dot = true, testID }: ChipProps) => (
-  <View
-    testID={testID}
-    style={[styles.chip, { backgroundColor: `${color}24`, borderColor: `${color}66` }]}
-  >
-    {dot ? <View style={[styles.dot, { backgroundColor: color }]} /> : null}
-    <Text style={[styles.label, { color: labelColor ?? color }]}>{label}</Text>
-  </View>
-);
+export const Chip = ({ label, color, labelColor, dot = true, testID }: ChipProps) => {
+  const { colors } = useTheme();
+  const chipColor = color ?? colors.primary;
+  return (
+    <View
+      testID={testID}
+      style={[styles.chip, { backgroundColor: `${chipColor}24`, borderColor: `${chipColor}66` }]}
+    >
+      {dot ? <View style={[styles.dot, { backgroundColor: chipColor }]} /> : null}
+      <Text style={[styles.label, { color: labelColor ?? chipColor }]}>{label}</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   chip: {

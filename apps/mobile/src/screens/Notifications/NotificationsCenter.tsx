@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
-import { colors, fonts } from '../../theme';
+import { Palette, fonts, useTheme } from '../../theme';
 import { EmptyView, ErrorView, LoadingView, Screen, ScreenHeader } from '../../ui';
 import { NotificationRow } from './NotificationRow';
 import { groupByDay } from './notificationView';
@@ -16,6 +16,8 @@ export type NotificationsCenterProps = {
 export const NotificationsCenter = ({ api, onBack }: NotificationsCenterProps) => {
   const loader = useCallback(() => api.getNotifications(), [api]);
   const { data: notifications, loading, error, reload } = useApiResource(loader);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const markRead = useCallback(
     async (id: string): Promise<void> => {
@@ -100,18 +102,19 @@ export const NotificationsCenter = ({ api, onBack }: NotificationsCenterProps) =
   );
 };
 
-const styles = StyleSheet.create({
-  markAll: { fontFamily: fonts.manropeSemiBold, fontSize: 12, color: colors.primary },
-  scroll: { paddingHorizontal: 16, paddingBottom: 24 },
-  group: { marginTop: 8 },
-  groupLabel: {
-    fontFamily: fonts.manropeBold,
-    fontSize: 11.5,
-    color: colors.textMid,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginHorizontal: 4,
-    marginBottom: 8,
-  },
-  rows: { gap: 8 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    markAll: { fontFamily: fonts.manropeSemiBold, fontSize: 12, color: c.primary },
+    scroll: { paddingHorizontal: 16, paddingBottom: 24 },
+    group: { marginTop: 8 },
+    groupLabel: {
+      fontFamily: fonts.manropeBold,
+      fontSize: 11.5,
+      color: c.textMid,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginHorizontal: 4,
+      marginBottom: 8,
+    },
+    rows: { gap: 8 },
+  });

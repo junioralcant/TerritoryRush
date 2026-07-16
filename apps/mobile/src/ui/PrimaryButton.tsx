@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
-import { colors, fonts, radii } from '../theme';
+import { fonts, radii, useTheme } from '../theme';
 
 export type PrimaryButtonProps = {
   label: string;
@@ -22,8 +22,8 @@ export type PrimaryButtonProps = {
 export const PrimaryButton = ({
   label,
   onPress,
-  color = colors.primary,
-  textColor = colors.white,
+  color,
+  textColor,
   icon,
   loading = false,
   disabled = false,
@@ -31,41 +31,48 @@ export const PrimaryButton = ({
   testID,
   accessibilityLabel,
   accessibilityHint,
-}: PrimaryButtonProps) => (
-  <Pressable
-    testID={testID}
-    onPress={onPress}
-    disabled={disabled || loading}
-    accessibilityRole="button"
-    accessibilityLabel={accessibilityLabel ?? label}
-    accessibilityHint={accessibilityHint}
-    accessibilityState={{ disabled: disabled || loading }}
-    style={({ pressed }) => [
-      styles.button,
-      { backgroundColor: color, opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
-      style,
-    ]}
-  >
-    {loading ? (
-      <ActivityIndicator color={textColor} />
-    ) : (
-      <>
-        {icon}
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
-      </>
-    )}
-  </Pressable>
-);
+}: PrimaryButtonProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(), []);
+  const bg = color ?? colors.primary;
+  const fg = textColor ?? colors.white;
+  return (
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: disabled || loading }}
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor: bg, opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+        style,
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={fg} />
+      ) : (
+        <>
+          {icon}
+          <Text style={[styles.label, { color: fg }]}>{label}</Text>
+        </>
+      )}
+    </Pressable>
+  );
+};
 
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 15,
-    paddingHorizontal: 22,
-    borderRadius: radii.button,
-  },
-  label: { fontFamily: fonts.manropeBold, fontSize: 15 },
-});
+const makeStyles = () =>
+  StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 15,
+      paddingHorizontal: 22,
+      borderRadius: radii.button,
+    },
+    label: { fontFamily: fonts.manropeBold, fontSize: 15 },
+  });

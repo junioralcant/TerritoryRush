@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { colors } from '../theme';
+import { Palette, useTheme } from '../theme';
 
 export type ScreenProps = {
   children: ReactNode;
@@ -13,22 +13,28 @@ export type ScreenProps = {
 };
 
 /**
- * Dark app surface with a light status bar. Wraps content in a SafeAreaView so
- * screens don't repeat the background / inset boilerplate.
+ * App surface with a matching status bar. Wraps content in a SafeAreaView so
+ * screens don't repeat the background / inset boilerplate. Colours follow the
+ * active theme (light by default).
  */
-export const Screen = ({ children, edges = ['top'], style, accessibilityLabel, testID }: ScreenProps) => (
-  <SafeAreaView
-    edges={edges}
-    style={[styles.safe, style]}
-    accessibilityLabel={accessibilityLabel}
-    testID={testID}
-  >
-    <StatusBar style="light" />
-    <View style={styles.fill}>{children}</View>
-  </SafeAreaView>
-);
+export const Screen = ({ children, edges = ['top'], style, accessibilityLabel, testID }: ScreenProps) => {
+  const { colors, statusBarStyle } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <SafeAreaView
+      edges={edges}
+      style={[styles.safe, style]}
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+    >
+      <StatusBar style={statusBarStyle} />
+      <View style={styles.fill}>{children}</View>
+    </SafeAreaView>
+  );
+};
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bgApp },
-  fill: { flex: 1 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: c.bgApp },
+    fill: { flex: 1 },
+  });

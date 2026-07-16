@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { StreetDetail } from '../../services/api/types';
-import { colors, fonts, ownershipColors, radii } from '../../theme';
+import { Palette, fonts, radii, useTheme } from '../../theme';
 import { Chip, formatNumber, initials } from '../../ui';
 
 export type StreetDetailDrawerProps = {
@@ -24,16 +24,22 @@ const ownerPoints = (detail: StreetDetail): number | null => {
   return match?.points ?? detail.ranking[0]?.points ?? null;
 };
 
-const Stat = ({ label, children, testID }: { label: string; children: ReactNode; testID?: string }) => (
-  <View style={styles.stat}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <View testID={testID} style={styles.statValueRow}>
-      {children}
+const Stat = ({ label, children, testID }: { label: string; children: ReactNode; testID?: string }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <View testID={testID} style={styles.statValueRow}>
+        {children}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 export const StreetDetailDrawer = ({ detail, isMine = false, currentUserId, onClose }: StreetDetailDrawerProps) => {
+  const { colors, ownership } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const points = ownerPoints(detail);
   const meId = currentUserId ?? (isMine ? detail.owner?.userId : undefined);
 
@@ -70,17 +76,17 @@ export const StreetDetailDrawer = ({ detail, isMine = false, currentUserId, onCl
                     : `Dominada por ${detail.owner.name ?? detail.owner.userId}`
                 }
                 color={isMine || detail.owner.userId === meId ? colors.primary : colors.danger}
-                labelColor={isMine || detail.owner.userId === meId ? colors.primaryTint : colors.dangerSoft}
+                labelColor={isMine || detail.owner.userId === meId ? colors.primaryText : colors.dangerSoft}
               />
             ) : (
-              <Chip testID="drawer-owner" label="Sem dono — rua livre" color={ownershipColors.unclaimed} labelColor={colors.textSoft} dot />
+              <Chip testID="drawer-owner" label="Sem dono — rua livre" color={ownership.unclaimed} labelColor={colors.textSoft} dot />
             )}
           </View>
 
           <View style={styles.statsRow}>
             <Stat label="Pontuação">
               <MaterialCommunityIcons name="crown" size={15} color={colors.gold} />
-              <Text style={[styles.statValue, { color: colors.gold }]}>{points != null ? formatNumber(points) : '—'}</Text>
+              <Text style={[styles.statValue, { color: colors.goldText }]}>{points != null ? formatNumber(points) : '—'}</Text>
             </Stat>
             <Stat label="Posse" testID="drawer-tenure">
               <Text style={styles.statValue}>{detail.tenureDays != null ? `${detail.tenureDays} dias` : 'Sem posse'}</Text>
@@ -145,56 +151,57 @@ export const StreetDetailDrawer = ({ detail, isMine = false, currentUserId, onCl
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(5,8,14,0.55)' },
-  sheet: {
-    backgroundColor: colors.surfaceSheet,
-    borderTopLeftRadius: radii.sheet,
-    borderTopRightRadius: radii.sheet,
-    borderTopWidth: 1,
-    borderColor: 'rgba(46,139,255,0.35)',
-    paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 20,
-    maxHeight: '80%',
-  },
-  grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: '#39424F', alignSelf: 'center', marginBottom: 14 },
-  headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
-  flex: { flex: 1 },
-  name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: colors.textHi },
-  close: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceInner, alignItems: 'center', justifyContent: 'center' },
-  chipRow: { marginTop: 12 },
-  statsRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  stat: {
-    flex: 1,
-    backgroundColor: colors.surfaceCard,
-    borderWidth: 1,
-    borderColor: colors.stroke,
-    borderRadius: radii.box,
-    padding: 12,
-  },
-  statLabel: { fontFamily: fonts.manrope, fontSize: 10.5, color: colors.textMid },
-  statValueRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  statValue: { fontFamily: fonts.sairaExtraBold, fontSize: 17, color: colors.textHi },
-  sectionTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: colors.textHi, marginTop: 20, marginBottom: 10 },
-  rankList: { gap: 8 },
-  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 9, paddingHorizontal: 12, borderRadius: 13 },
-  rankRowMine: { backgroundColor: 'rgba(46,139,255,0.1)', borderWidth: 1, borderColor: 'rgba(46,139,255,0.35)' },
-  rankNum: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: colors.textMid, width: 16 },
-  rankNumMine: { color: colors.primary },
-  rankAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.surfaceInner, alignItems: 'center', justifyContent: 'center' },
-  rankAvatarText: { fontFamily: fonts.sairaExtraBold, fontSize: 12, color: colors.textSoft },
-  rankName: { flex: 1, fontFamily: fonts.manropeBold, fontSize: 13.5, color: colors.textHi },
-  youTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11, color: colors.primary },
-  rankPoints: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: colors.textSoft },
-  rankPointsMine: { color: colors.primary },
-  timelineRow: { flexDirection: 'row', gap: 12 },
-  timelineMarker: { alignItems: 'center', width: 11 },
-  timelineDot: { width: 11, height: 11, borderRadius: 6, marginTop: 3 },
-  timelineLine: { flex: 1, width: 2, backgroundColor: '#26303D', marginTop: 2 },
-  timelineBody: { flex: 1, paddingBottom: 16 },
-  timelineName: { fontFamily: fonts.manropeBold, fontSize: 13, color: colors.textHi },
-  currentTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11, color: colors.green },
-  timelineDate: { fontFamily: fonts.manrope, fontSize: 11.5, color: colors.textMid, marginTop: 2 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
+    scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: c.scrimBackdrop },
+    sheet: {
+      backgroundColor: c.surfaceSheet,
+      borderTopLeftRadius: radii.sheet,
+      borderTopRightRadius: radii.sheet,
+      borderTopWidth: 1,
+      borderColor: c.primaryBorder,
+      paddingHorizontal: 18,
+      paddingTop: 10,
+      paddingBottom: 20,
+      maxHeight: '80%',
+    },
+    grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: c.sheetHandle, alignSelf: 'center', marginBottom: 14 },
+    headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
+    flex: { flex: 1 },
+    name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: c.textHi },
+    close: { width: 32, height: 32, borderRadius: 16, backgroundColor: c.surfaceInner, alignItems: 'center', justifyContent: 'center' },
+    chipRow: { marginTop: 12 },
+    statsRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
+    stat: {
+      flex: 1,
+      backgroundColor: c.surfaceCard,
+      borderWidth: 1,
+      borderColor: c.stroke,
+      borderRadius: radii.box,
+      padding: 12,
+    },
+    statLabel: { fontFamily: fonts.manrope, fontSize: 10.5, color: c.textMid },
+    statValueRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+    statValue: { fontFamily: fonts.sairaExtraBold, fontSize: 17, color: c.textHi },
+    sectionTitle: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: c.textHi, marginTop: 20, marginBottom: 10 },
+    rankList: { gap: 8 },
+    rankRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 9, paddingHorizontal: 12, borderRadius: 13 },
+    rankRowMine: { backgroundColor: c.primarySurface, borderWidth: 1, borderColor: c.primaryBorder },
+    rankNum: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: c.textMid, width: 16 },
+    rankNumMine: { color: c.primary },
+    rankAvatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: c.avatarMuted, alignItems: 'center', justifyContent: 'center' },
+    rankAvatarText: { fontFamily: fonts.sairaExtraBold, fontSize: 12, color: c.textSoft },
+    rankName: { flex: 1, fontFamily: fonts.manropeBold, fontSize: 13.5, color: c.textHi },
+    youTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11, color: c.primary },
+    rankPoints: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: c.textSoft },
+    rankPointsMine: { color: c.primary },
+    timelineRow: { flexDirection: 'row', gap: 12 },
+    timelineMarker: { alignItems: 'center', width: 11 },
+    timelineDot: { width: 11, height: 11, borderRadius: 6, marginTop: 3 },
+    timelineLine: { flex: 1, width: 2, backgroundColor: c.divider, marginTop: 2 },
+    timelineBody: { flex: 1, paddingBottom: 16 },
+    timelineName: { fontFamily: fonts.manropeBold, fontSize: 13, color: c.textHi },
+    currentTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11, color: c.green },
+    timelineDate: { fontFamily: fonts.manrope, fontSize: 11.5, color: c.textMid, marginTop: 2 },
+  });

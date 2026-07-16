@@ -1,21 +1,27 @@
 import { StreetOwnership } from '../../services/api/types';
-import { ownershipColors } from '../../theme';
+import { OwnershipColors, lightOwnership } from '../../theme';
 
 export type OwnershipStyle = {
   color: string;
   accessibilityLabel: string;
 };
 
-// Fixed street-ownership colours — must match the handoff's ownership table
-// (dark theme) and never change meaning. The legend always pairs colour with
-// text so state is not conveyed by colour alone.
-const STYLES: Record<StreetOwnership, OwnershipStyle> = {
-  unclaimed: { color: ownershipColors.unclaimed, accessibilityLabel: 'Rua sem dono' },
-  mine: { color: ownershipColors.mine, accessibilityLabel: 'Rua dominada por você' },
-  other: { color: ownershipColors.other, accessibilityLabel: 'Rua dominada por outro corredor' },
+// Ownership meaning is fixed (livre / sua / de outro) and paired with text so
+// state is never conveyed by colour alone. The exact hue comes from the active
+// theme's ownership palette (defaults to light, the app default).
+const ACCESSIBILITY_LABEL: Record<StreetOwnership, string> = {
+  unclaimed: 'Rua sem dono',
+  mine: 'Rua dominada por você',
+  other: 'Rua dominada por outro corredor',
 };
 
-export const ownershipStyle = (ownership: StreetOwnership): OwnershipStyle => STYLES[ownership];
+export const ownershipStyle = (
+  ownership: StreetOwnership,
+  palette: OwnershipColors = lightOwnership,
+): OwnershipStyle => ({
+  color: palette[ownership],
+  accessibilityLabel: ACCESSIBILITY_LABEL[ownership],
+});
 
 export const OWNERSHIP_STATES: StreetOwnership[] = ['unclaimed', 'mine', 'other'];
 

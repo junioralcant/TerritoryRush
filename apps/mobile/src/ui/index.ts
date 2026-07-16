@@ -9,6 +9,7 @@ export { Hexagon } from './Hexagon';
 export { HexBadge } from './HexBadge';
 export { LevelAvatar } from './LevelAvatar';
 export { Wordmark } from './Wordmark';
+export { ThemeToggle } from './ThemeToggle';
 export { BrandIcon } from './BrandIcon';
 export { GoogleLogo } from './GoogleLogo';
 export { AppTabBar } from './AppTabBar';

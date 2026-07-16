@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Animated, StyleSheet, ViewStyle } from 'react-native';
-import { colors, radii } from '../theme';
+import { Palette, radii, useTheme } from '../theme';
 
 export type SkeletonProps = {
   width?: number | `${number}%`;
@@ -14,6 +14,8 @@ export type SkeletonProps = {
  * Pulsing placeholder block (opacity .35 ↔ .9, ~1.4s) used for loading skeletons.
  */
 export const Skeleton = ({ width = '100%', height = 16, radius = radii.boxSm, style, testID }: SkeletonProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const pulse = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export const Skeleton = ({ width = '100%', height = 16, radius = radii.boxSm, st
   );
 };
 
-const styles = StyleSheet.create({
-  block: { backgroundColor: colors.surfaceCard },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    block: { backgroundColor: c.surfaceCard },
+  });

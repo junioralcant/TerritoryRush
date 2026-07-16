@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors, fonts } from '../../theme';
+import { Palette, fonts, useTheme } from '../../theme';
 import { formatNumber, initials } from '../../ui';
 
 export type RankRow = {
@@ -30,42 +31,44 @@ type PodiumStyle = {
   valueColor: string;
 };
 
-const PODIUM: Record<number, PodiumStyle> = {
+const makePodium = (c: Palette): Record<number, PodiumStyle> => ({
   1: {
     height: 78,
-    color: colors.gold,
-    gradient: ['#2A2410', '#1A1608'],
-    border: 'rgba(245,180,0,0.3)',
-    avatarBg: '#2A2410',
+    color: c.gold,
+    gradient: [c.podiumGoldFrom, c.podiumGoldTo],
+    border: c.goldBorder,
+    avatarBg: c.podiumGoldAvatarBg,
     avatarBorder: 3,
     rankSize: 24,
-    valueColor: '#C9A15A',
+    valueColor: c.goldText,
   },
   2: {
     height: 56,
-    color: colors.silver,
-    gradient: ['#1C2431', '#141A24'],
-    border: 'rgba(255,255,255,0.06)',
-    avatarBg: '#26303D',
+    color: c.silver,
+    gradient: [c.podiumFrom, c.podiumTo],
+    border: c.stroke,
+    avatarBg: c.avatarMuted,
     avatarBorder: 2.5,
     rankSize: 20,
-    valueColor: colors.textMid,
+    valueColor: c.textMid,
   },
   3: {
     height: 44,
-    color: colors.bronze,
-    gradient: ['#1C2431', '#141A24'],
-    border: 'rgba(255,255,255,0.06)',
-    avatarBg: '#26303D',
+    color: c.bronze,
+    gradient: [c.podiumFrom, c.podiumTo],
+    border: c.stroke,
+    avatarBg: c.avatarMuted,
     avatarBorder: 2.5,
     rankSize: 18,
-    valueColor: colors.textMid,
+    valueColor: c.textMid,
   },
-};
+});
 const PODIUM_ORDER = [2, 1, 3];
 
 const PodiumPlace = ({ row, prefix }: { row: RankRow; prefix: string }) => {
-  const place = PODIUM[row.rank];
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const place = makePodium(colors)[row.rank];
   const first = row.rank === 1;
   return (
     <View style={styles.podiumPlace} testID={`${prefix}-rank-${row.rank}`}>
@@ -109,6 +112,8 @@ const ListRow = ({
   accent: string;
   mine: boolean;
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const content = (
     <>
       <Text style={[styles.rowRank, mine && { color: accent }]}>{row.rank}</Text>
@@ -147,6 +152,8 @@ const ListRow = ({
 };
 
 export const RankingLeaderboard = ({ rows, prefix, unit, accent, currentUserId }: RankingLeaderboardProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const podium = PODIUM_ORDER.map((rank) => rows.find((row) => row.rank === rank)).filter((row): row is RankRow => Boolean(row));
   const list = rows.filter((row) => row.rank > 3);
   const mine = currentUserId ? rows.find((row) => row.userId === currentUserId) : undefined;
@@ -187,41 +194,42 @@ export const RankingLeaderboard = ({ rows, prefix, unit, accent, currentUserId }
   );
 };
 
-const styles = StyleSheet.create({
-  podium: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginVertical: 16 },
-  podiumPlace: { flex: 1, alignItems: 'center', gap: 6 },
-  podiumAvatar: { alignItems: 'center', justifyContent: 'center' },
-  podiumInitials: { fontFamily: fonts.sairaExtraBold, fontSize: 16, color: colors.textHi },
-  podiumName: { fontFamily: fonts.manropeBold, fontSize: 11, color: colors.textHi, textAlign: 'center' },
-  pedestal: {
-    width: '100%',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pedestalRank: { fontFamily: fonts.sairaExtraBold },
-  pedestalValue: { fontFamily: fonts.manrope, fontSize: 10.5 },
-  list: { gap: 8 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 13,
-    backgroundColor: colors.surfaceCard,
-  },
-  rowMine: { backgroundColor: 'transparent', borderWidth: 1.5 },
-  rowRank: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: colors.textMid, width: 26 },
-  rowAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#26303D', alignItems: 'center', justifyContent: 'center' },
-  rowAvatarText: { fontFamily: fonts.sairaExtraBold, fontSize: 13, color: colors.textSoft },
-  rowName: { flex: 1, fontFamily: fonts.manropeBold, fontSize: 14, color: colors.textHi },
-  youTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11 },
-  rowValue: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: colors.textHi },
-  rowUnit: { fontFamily: fonts.manrope, fontSize: 11, color: colors.textMid },
-  separator: { textAlign: 'center', color: '#4C5563', fontSize: 16, letterSpacing: 3, paddingVertical: 2 },
-  empty: { fontFamily: fonts.manrope, color: colors.textMid, textAlign: 'center', marginTop: 40 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    podium: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginVertical: 16 },
+    podiumPlace: { flex: 1, alignItems: 'center', gap: 6 },
+    podiumAvatar: { alignItems: 'center', justifyContent: 'center' },
+    podiumInitials: { fontFamily: fonts.sairaExtraBold, fontSize: 16, color: c.textHi },
+    podiumName: { fontFamily: fonts.manropeBold, fontSize: 11, color: c.textHi, textAlign: 'center' },
+    pedestal: {
+      width: '100%',
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+      borderWidth: 1,
+      borderBottomWidth: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pedestalRank: { fontFamily: fonts.sairaExtraBold },
+    pedestalValue: { fontFamily: fonts.manrope, fontSize: 10.5 },
+    list: { gap: 8 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 13,
+      backgroundColor: c.surfaceCard,
+    },
+    rowMine: { backgroundColor: 'transparent', borderWidth: 1.5 },
+    rowRank: { fontFamily: fonts.sairaExtraBold, fontSize: 15, color: c.textMid, width: 26 },
+    rowAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: c.avatarMuted, alignItems: 'center', justifyContent: 'center' },
+    rowAvatarText: { fontFamily: fonts.sairaExtraBold, fontSize: 13, color: c.textSoft },
+    rowName: { flex: 1, fontFamily: fonts.manropeBold, fontSize: 14, color: c.textHi },
+    youTag: { fontFamily: fonts.manropeSemiBold, fontSize: 11 },
+    rowValue: { fontFamily: fonts.sairaExtraBold, fontSize: 14, color: c.textHi },
+    rowUnit: { fontFamily: fonts.manrope, fontSize: 11, color: c.textMid },
+    separator: { textAlign: 'center', color: c.textLo, fontSize: 16, letterSpacing: 3, paddingVertical: 2 },
+    empty: { fontFamily: fonts.manrope, color: c.textMid, textAlign: 'center', marginTop: 40 },
+  });

@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { NotificationItem } from '../../services/api/types';
-import { colors, fonts, radii } from '../../theme';
+import { Palette, fonts, radii, useTheme } from '../../theme';
 import { notificationView, relativeTime } from './notificationView';
 
 export type NotificationRowProps = {
@@ -10,7 +11,9 @@ export type NotificationRowProps = {
 };
 
 export const NotificationRow = ({ item, onMarkRead }: NotificationRowProps) => {
-  const visual = notificationView(item);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const visual = notificationView(item, colors);
   const unread = item.readAt === null;
 
   const content = (
@@ -54,15 +57,16 @@ export const NotificationRow = ({ item, onMarkRead }: NotificationRowProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  card: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, borderRadius: radii.box, padding: 12 },
-  unread: { backgroundColor: 'rgba(46,139,255,0.07)', borderWidth: 1, borderColor: 'rgba(46,139,255,0.18)' },
-  read: { opacity: 0.72 },
-  icon: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  body: { flex: 1, minWidth: 0 },
-  title: { fontFamily: fonts.manropeBold, fontSize: 13.5, color: colors.textHi },
-  message: { fontFamily: fonts.manrope, fontSize: 12, color: colors.textMid, marginTop: 2, lineHeight: 16 },
-  meta: { alignItems: 'flex-end', gap: 6 },
-  time: { fontFamily: fonts.manrope, fontSize: 10.5, color: colors.textLo },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    card: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, borderRadius: radii.box, padding: 12 },
+    unread: { backgroundColor: c.primarySurface, borderWidth: 1, borderColor: c.primaryBorderSoft },
+    read: { opacity: 0.72 },
+    icon: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+    body: { flex: 1, minWidth: 0 },
+    title: { fontFamily: fonts.manropeBold, fontSize: 13.5, color: c.textHi },
+    message: { fontFamily: fonts.manrope, fontSize: 12, color: c.textMid, marginTop: 2, lineHeight: 16 },
+    meta: { alignItems: 'flex-end', gap: 6 },
+    time: { fontFamily: fonts.manrope, fontSize: 10.5, color: c.textLo },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.primary },
+  });

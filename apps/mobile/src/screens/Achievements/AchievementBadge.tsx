@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { AchievementView } from '../../services/api/types';
-import { colors, fonts } from '../../theme';
+import { Palette, fonts, useTheme } from '../../theme';
 import { HexBadge } from '../../ui';
 import { achievementVisual } from './achievementVisual';
 
@@ -26,7 +27,9 @@ const subtitleFor = (achievement: AchievementView): string => {
 };
 
 export const AchievementBadge = ({ achievement, size = 62, width = 62, testID }: AchievementBadgeProps) => {
-  const visual = achievementVisual(achievement);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const visual = achievementVisual(achievement, colors);
   const iconColor = achievement.unlocked ? visual.color : colors.textMid;
   const icon =
     visual.family === 'feather' ? (
@@ -52,15 +55,16 @@ export const AchievementBadge = ({ achievement, size = 62, width = 62, testID }:
   );
 };
 
-const styles = StyleSheet.create({
-  item: { alignItems: 'center', gap: 7 },
-  title: {
-    fontFamily: fonts.manropeBold,
-    fontSize: 11.5,
-    color: colors.textHi,
-    textAlign: 'center',
-    lineHeight: 14,
-  },
-  lockedTitle: { color: colors.textMid },
-  subtitle: { fontFamily: fonts.manrope, fontSize: 9.5, color: colors.textLo, textAlign: 'center' },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    item: { alignItems: 'center', gap: 7 },
+    title: {
+      fontFamily: fonts.manropeBold,
+      fontSize: 11.5,
+      color: c.textHi,
+      textAlign: 'center',
+      lineHeight: 14,
+    },
+    lockedTitle: { color: c.textMid },
+    subtitle: { fontFamily: fonts.manrope, fontSize: 9.5, color: c.textLo, textAlign: 'center' },
+  });

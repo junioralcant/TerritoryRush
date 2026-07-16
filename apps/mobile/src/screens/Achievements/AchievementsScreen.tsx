@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
-import { colors, fonts } from '../../theme';
+import { Palette, fonts, useTheme } from '../../theme';
 import { EmptyView, ErrorView, LoadingView, PrimaryButton, Screen, ScreenHeader } from '../../ui';
 import { AchievementBadge } from './AchievementBadge';
 
@@ -16,6 +16,8 @@ export type AchievementsScreenProps = {
 export const AchievementsScreen = ({ api, onBack, onStartRun }: AchievementsScreenProps) => {
   const loader = useCallback(() => api.getAchievements(), [api]);
   const { data: achievements, loading, error, reload } = useApiResource(loader);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   if (loading) {
     return (
@@ -86,14 +88,15 @@ export const AchievementsScreen = ({ api, onBack, onStartRun }: AchievementsScre
   );
 };
 
-const styles = StyleSheet.create({
-  progressBlock: { paddingHorizontal: 18, paddingTop: 4, paddingBottom: 10 },
-  progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  progressText: { fontFamily: fonts.manrope, fontSize: 12.5, color: colors.textMid },
-  progressStrong: { fontFamily: fonts.manropeBold, color: colors.textHi },
-  progressPct: { fontFamily: fonts.manropeBold, fontSize: 12.5, color: colors.purple },
-  track: { marginTop: 7, height: 7, borderRadius: 4, backgroundColor: '#222A37', overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 4, backgroundColor: colors.purple },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingTop: 6, paddingBottom: 24 },
-  cell: { width: '33.33%', alignItems: 'center', marginBottom: 16 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    progressBlock: { paddingHorizontal: 18, paddingTop: 4, paddingBottom: 10 },
+    progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    progressText: { fontFamily: fonts.manrope, fontSize: 12.5, color: c.textMid },
+    progressStrong: { fontFamily: fonts.manropeBold, color: c.textHi },
+    progressPct: { fontFamily: fonts.manropeBold, fontSize: 12.5, color: c.purple },
+    track: { marginTop: 7, height: 7, borderRadius: 4, backgroundColor: c.divider, overflow: 'hidden' },
+    fill: { height: '100%', borderRadius: 4, backgroundColor: c.purple },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingTop: 6, paddingBottom: 24 },
+    cell: { width: '33.33%', alignItems: 'center', marginBottom: 16 },
+  });

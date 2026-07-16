@@ -1,9 +1,9 @@
-import { ComponentProps } from 'react';
+import { ComponentProps, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { colors, fonts } from '../theme';
+import { Palette, fonts, useTheme } from '../theme';
 import { Hexagon } from './Hexagon';
 
 type FeatherName = ComponentProps<typeof Feather>['name'];
@@ -26,6 +26,8 @@ const TabItem = ({
   focused: boolean;
   onPress: () => void;
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const meta = TABS[routeName];
   if (!meta) return null;
   const color = focused ? colors.primary : colors.textLo;
@@ -58,6 +60,8 @@ export type AppTabBarProps = BottomTabBarProps & { onStartRun?: () => void };
  */
 export const AppTabBar = ({ state, navigation, onStartRun }: AppTabBarProps) => {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const go = (index: number, name: string) => {
     const focused = state.index === index;
     const event = navigation.emit({ type: 'tabPress', target: state.routes[index].key, canPreventDefault: true });
@@ -93,18 +97,19 @@ export const AppTabBar = ({ state, navigation, onStartRun }: AppTabBarProps) => 
   );
 };
 
-const styles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    backgroundColor: '#0C1017',
-    borderTopWidth: 1,
-    borderTopColor: colors.stroke,
-    paddingTop: 9,
-    paddingHorizontal: 22,
-  },
-  item: { flex: 1, alignItems: 'center', gap: 4 },
-  label: { fontSize: 10 },
-  fab: { width: 56, alignItems: 'center', marginTop: -30 },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    bar: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      backgroundColor: c.tabBar,
+      borderTopWidth: 1,
+      borderTopColor: c.stroke,
+      paddingTop: 9,
+      paddingHorizontal: 22,
+    },
+    item: { flex: 1, alignItems: 'center', gap: 4 },
+    label: { fontSize: 10 },
+    fab: { width: 56, alignItems: 'center', marginTop: -30 },
+  });

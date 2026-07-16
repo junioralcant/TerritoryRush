@@ -1,5 +1,5 @@
 import { NotificationItem } from '../../services/api/types';
-import { colors } from '../../theme';
+import { Palette } from '../../theme';
 
 export type NotificationVisual = {
   title: string;
@@ -16,7 +16,7 @@ const num = (value: unknown): number | undefined => (typeof value === 'number' ?
  * Maps a notification to the handoff's type → colour/icon language and builds a
  * human message from whatever the payload provides (falling back to generic copy).
  */
-export const notificationView = (item: NotificationItem): NotificationVisual => {
+export const notificationView = (item: NotificationItem, colors: Palette): NotificationVisual => {
   const type = item.type.toLowerCase();
   const p = item.payload;
   const street = str(p.streetName) ?? str(p.street);

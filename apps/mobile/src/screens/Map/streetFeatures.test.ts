@@ -19,7 +19,7 @@ describe('toStreetFeatureCollection', () => {
     ]);
 
     expect(collection.type).toBe('FeatureCollection');
-    expect(collection.features.map((f) => f.properties.color)).toEqual(['#7A8492', '#2E8BFF', '#E23B3B']);
+    expect(collection.features.map((f) => f.properties.color)).toEqual(['#9AA4B2', '#1E6FE0', '#D62F2F']);
     expect(collection.features.map((f) => f.properties.ownership)).toEqual(['unclaimed', 'mine', 'other']);
     expect(collection.features[0].geometry.type).toBe('MultiLineString');
   });

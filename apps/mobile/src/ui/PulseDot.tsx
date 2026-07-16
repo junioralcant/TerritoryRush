@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
-import { colors } from '../theme';
+import { useTheme } from '../theme';
 
 export type PulseDotProps = {
   size?: number;
@@ -11,7 +11,9 @@ export type PulseDotProps = {
 /**
  * The "AO VIVO" pulsing dot (opacity 0.35 ↔ 0.9, ~1.6s ease-in-out).
  */
-export const PulseDot = ({ size = 7, color = colors.green, testID }: PulseDotProps) => {
+export const PulseDot = ({ size = 7, color, testID }: PulseDotProps) => {
+  const { colors } = useTheme();
+  const dotColor = color ?? colors.green;
   const pulse = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export const PulseDot = ({ size = 7, color = colors.green, testID }: PulseDotPro
   return (
     <Animated.View
       testID={testID}
-      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color, opacity: pulse }}
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: dotColor, opacity: pulse }}
     />
   );
 };

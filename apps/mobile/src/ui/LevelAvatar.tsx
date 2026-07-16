@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, fonts } from '../theme';
+import { Palette, fonts, useTheme } from '../theme';
 import { Hexagon } from './Hexagon';
 import { initials } from './initials';
 
@@ -18,10 +19,13 @@ export type LevelAvatarProps = {
  * level badge overlapping the bottom edge. Uses the real photo when available,
  * falling back to initials (per the handoff fidelity note).
  */
-export const LevelAvatar = ({ size, photoUrl, name, level, borderColor = colors.bgApp, testID }: LevelAvatarProps) => {
+export const LevelAvatar = ({ size, photoUrl, name, level, borderColor, testID }: LevelAvatarProps) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const ring = Math.max(3, size * 0.04);
   const inner = size - ring * 2;
   const badgeSize = size * 0.31;
+  const badgeBorderColor = borderColor ?? colors.bgApp;
 
   return (
     <View testID={testID} style={{ width: size, height: size }}>
@@ -46,7 +50,7 @@ export const LevelAvatar = ({ size, photoUrl, name, level, borderColor = colors.
       </LinearGradient>
       {level != null ? (
         <View style={[styles.badge, { left: size / 2 - badgeSize / 2, bottom: -badgeSize * 0.18 }]}>
-          <Hexagon size={badgeSize} color={borderColor} innerColor={colors.primary} innerScale={0.82}>
+          <Hexagon size={badgeSize} color={badgeBorderColor} innerColor={colors.primary} innerScale={0.82}>
             <Text style={[styles.badgeText, { fontSize: badgeSize * 0.42 }]}>{level}</Text>
           </Hexagon>
         </View>
@@ -55,10 +59,11 @@ export const LevelAvatar = ({ size, photoUrl, name, level, borderColor = colors.
   );
 };
 
-const styles = StyleSheet.create({
-  ring: { alignItems: 'center', justifyContent: 'center' },
-  initials: { backgroundColor: colors.avatarFrom, alignItems: 'center', justifyContent: 'center' },
-  initialsText: { fontFamily: fonts.sairaExtraBold, color: colors.textHi },
-  badge: { position: 'absolute' },
-  badgeText: { fontFamily: fonts.sairaExtraBold, color: colors.white },
-});
+const makeStyles = (c: Palette) =>
+  StyleSheet.create({
+    ring: { alignItems: 'center', justifyContent: 'center' },
+    initials: { backgroundColor: c.avatarFrom, alignItems: 'center', justifyContent: 'center' },
+    initialsText: { fontFamily: fonts.sairaExtraBold, color: c.textHi },
+    badge: { position: 'absolute' },
+    badgeText: { fontFamily: fonts.sairaExtraBold, color: c.white },
+  });

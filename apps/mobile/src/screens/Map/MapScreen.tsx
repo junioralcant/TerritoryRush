@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../../theme';
 import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
 import { useStravaSync } from '../../services/useStravaSync';
@@ -26,6 +27,7 @@ const SAO_MATEUS_CENTER: Coordinate = [-44.4689, -4.0361];
 
 export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const { streets, selected, loading, error, selectStreet, clearSelection, reload: reloadStreets } = useStreets(
     api,
     bboxAround(SAO_MATEUS_CENTER),
@@ -72,7 +74,7 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
 
   return (
     <Screen edges={[]}>
-      <View style={styles.map}>
+      <View style={[styles.map, { backgroundColor: colors.bgApp }]}>
         <TerritoryMap
           streets={streets}
           initialCenter={SAO_MATEUS_CENTER}
@@ -119,7 +121,7 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  map: { flex: 1, backgroundColor: '#0A0E15' },
+  map: { flex: 1 },
   topBar: { position: 'absolute', left: 14, right: 14 },
   legend: { position: 'absolute', right: 14 },
   streetCard: { position: 'absolute', left: 14, right: 14, bottom: 16 },

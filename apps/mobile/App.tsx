@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -21,16 +21,11 @@ import { NotificationsCenter } from './src/screens/Notifications/NotificationsCe
 import { usePushRegistration } from './src/screens/Notifications/usePushRegistration';
 import { getExpoPushToken } from './src/screens/Notifications/getExpoPushToken';
 import { AppTabBar, BrandIcon, Wordmark } from './src/ui';
-import { colors } from './src/theme';
+import { ThemeProvider, useTheme } from './src/theme';
 import { useAppFonts } from './src/theme/useAppFonts';
 
 const RootStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-const navTheme = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: colors.bgApp, card: colors.bgApp, primary: colors.primary },
-};
 
 const Tabs = ({ api }: { api: ApiClient }) => (
   <Tab.Navigator
@@ -54,6 +49,11 @@ const Tabs = ({ api }: { api: ApiClient }) => (
 
 const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId: string }) => {
   usePushRegistration(api, getExpoPushToken, Platform.OS);
+  const { colors, isDark } = useTheme();
+  const navTheme = useMemo(() => {
+    const base = isDark ? DarkTheme : DefaultTheme;
+    return { ...base, colors: { ...base.colors, background: colors.bgApp, card: colors.bgApp, primary: colors.primary } };
+  }, [colors, isDark]);
   return (
     <NavigationContainer theme={navTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
@@ -78,17 +78,20 @@ const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId
   );
 };
 
-const Splash = () => (
-  <View style={styles.splash}>
-    <StatusBar style="light" />
-    <BrandIcon size={96} />
-    <View style={styles.splashWord}>
-      <Wordmark size={30} />
+const Splash = () => {
+  const { colors, statusBarStyle } = useTheme();
+  return (
+    <View style={[styles.splash, { backgroundColor: colors.bgApp }]}>
+      <StatusBar style={statusBarStyle} />
+      <BrandIcon size={96} />
+      <View style={styles.splashWord}>
+        <Wordmark size={30} />
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
-export default function App() {
+const AppContent = () => {
   const fontsLoaded = useAppFonts();
   const { session, authenticating, signInWith } = useSession();
   const config = useMemo(() => loadConfig(), []);
@@ -98,29 +101,31 @@ export default function App() {
   );
 
   if (!fontsLoaded) {
-    return (
-      <SafeAreaProvider>
-        <Splash />
-      </SafeAreaProvider>
-    );
+    return <Splash />;
   }
 
+  return !session ? (
+    <AuthScreen
+      authenticating={authenticating}
+      onSignInWithGoogle={() => void signInWith('google')}
+      onSignInWithApple={() => void signInWith('apple')}
+    />
+  ) : (
+    <MainNavigator api={api} stravaClientId={config.stravaClientId} />
+  );
+};
+
+export default function App() {
   return (
     <SafeAreaProvider>
-      {!session ? (
-        <AuthScreen
-          authenticating={authenticating}
-          onSignInWithGoogle={() => void signInWith('google')}
-          onSignInWithApple={() => void signInWith('apple')}
-        />
-      ) : (
-        <MainNavigator api={api} stravaClientId={config.stravaClientId} />
-      )}
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  splash: { flex: 1, backgroundColor: colors.bgApp, alignItems: 'center', justifyContent: 'center', gap: 24 },
+  splash: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24 },
   splashWord: { alignItems: 'center' },
 });

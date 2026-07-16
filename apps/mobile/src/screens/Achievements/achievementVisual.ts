@@ -1,13 +1,11 @@
 import { AchievementView } from '../../services/api/types';
-import { colors } from '../../theme';
+import { Palette } from '../../theme';
 
 export type AchievementVisual = {
   color: string;
   family: 'feather' | 'mc';
   icon: string;
 };
-
-const PALETTE = [colors.primary, colors.green, colors.purple, colors.gold, colors.danger, colors.teal];
 
 const hash = (value: string): number => {
   let acc = 0;
@@ -21,7 +19,8 @@ const hash = (value: string): number => {
  * buildings/purple, streak → flame/red, etc.). Unknown categories get a stable
  * colour from the brand palette so the grid stays varied.
  */
-export const achievementVisual = (achievement: AchievementView): AchievementVisual => {
+export const achievementVisual = (achievement: AchievementView, colors: Palette): AchievementVisual => {
+  const palette = [colors.primary, colors.green, colors.purple, colors.gold, colors.danger, colors.teal];
   const key = `${achievement.category} ${achievement.code}`.toLowerCase();
 
   if (/(explor|visit|unique|única)/.test(key)) return { color: colors.green, family: 'feather', icon: 'map' };
@@ -31,5 +30,5 @@ export const achievementVisual = (achievement: AchievementView): AchievementVisu
   if (/(domin|owned|dominad|500|1000|100)/.test(key)) return { color: colors.gold, family: 'mc', icon: 'crown' };
   if (/(street|rua|first|primeir|milestone)/.test(key)) return { color: colors.primary, family: 'feather', icon: 'flag' };
 
-  return { color: PALETTE[hash(key) % PALETTE.length], family: 'feather', icon: 'award' };
+  return { color: palette[hash(key) % palette.length], family: 'feather', icon: 'award' };
 };
