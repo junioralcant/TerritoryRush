@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform } from 'react-native';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
 import { AuthScreen } from './src/auth/AuthScreen';
 import { useSession } from './src/auth/useSession';
 import { startStravaOAuth } from './src/auth/stravaOAuth';
@@ -20,7 +19,7 @@ import { AchievementsScreen } from './src/screens/Achievements/AchievementsScree
 import { NotificationsCenter } from './src/screens/Notifications/NotificationsCenter';
 import { usePushRegistration } from './src/screens/Notifications/usePushRegistration';
 import { getExpoPushToken } from './src/screens/Notifications/getExpoPushToken';
-import { AppTabBar, BrandIcon, Wordmark } from './src/ui';
+import { AppTabBar, SplashScreen } from './src/ui';
 import { ThemeProvider, useTheme } from './src/theme';
 import { useAppFonts } from './src/theme/useAppFonts';
 
@@ -78,19 +77,6 @@ const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId
   );
 };
 
-const Splash = () => {
-  const { colors, statusBarStyle } = useTheme();
-  return (
-    <View style={[styles.splash, { backgroundColor: colors.bgApp }]}>
-      <StatusBar style={statusBarStyle} />
-      <BrandIcon size={96} />
-      <View style={styles.splashWord}>
-        <Wordmark size={30} />
-      </View>
-    </View>
-  );
-};
-
 const AppContent = () => {
   const fontsLoaded = useAppFonts();
   const { session, authenticating, signInWith } = useSession();
@@ -101,7 +87,7 @@ const AppContent = () => {
   );
 
   if (!fontsLoaded) {
-    return <Splash />;
+    return <SplashScreen />;
   }
 
   return !session ? (
@@ -124,8 +110,3 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  splash: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24 },
-  splashWord: { alignItems: 'center' },
-});
