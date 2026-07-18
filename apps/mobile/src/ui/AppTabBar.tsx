@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Palette, fonts, useTheme } from '../theme';
-import { Hexagon } from './Hexagon';
 
 type FeatherName = ComponentProps<typeof Feather>['name'];
 
@@ -52,13 +51,12 @@ const TabItem = ({
   );
 };
 
-export type AppTabBarProps = BottomTabBarProps & { onStartRun?: () => void };
+export type AppTabBarProps = BottomTabBarProps;
 
 /**
- * Custom tab bar: Mapa · Atividades · central hexagonal FAB (start run) ·
- * Ranking · Perfil, matching TabBar.dc.html.
+ * Custom tab bar: Mapa · Atividades · Ranking · Perfil, matching TabBar.dc.html.
  */
-export const AppTabBar = ({ state, navigation, onStartRun }: AppTabBarProps) => {
+export const AppTabBar = ({ state, navigation }: AppTabBarProps) => {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -68,30 +66,15 @@ export const AppTabBar = ({ state, navigation, onStartRun }: AppTabBarProps) => 
     if (!focused && !event.defaultPrevented) navigation.navigate(name);
   };
 
-  const order = state.routes.map((r, i) => ({ name: r.name, index: i }));
-  const left = order.slice(0, 2);
-  const right = order.slice(2);
-
   return (
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-      {left.map((r) => (
-        <TabItem key={r.name} routeName={r.name} focused={state.index === r.index} onPress={() => go(r.index, r.name)} />
-      ))}
-
-      <Pressable
-        style={styles.fab}
-        onPress={onStartRun ?? (() => navigation.navigate('Activities'))}
-        accessibilityRole="button"
-        accessibilityLabel="Iniciar corrida"
-        testID="tab-start-run"
-      >
-        <Hexagon size={56} color={colors.primaryDeep} glowColor={colors.primary}>
-          <Feather name="plus" size={26} color={colors.white} />
-        </Hexagon>
-      </Pressable>
-
-      {right.map((r) => (
-        <TabItem key={r.name} routeName={r.name} focused={state.index === r.index} onPress={() => go(r.index, r.name)} />
+      {state.routes.map((route, index) => (
+        <TabItem
+          key={route.name}
+          routeName={route.name}
+          focused={state.index === index}
+          onPress={() => go(index, route.name)}
+        />
       ))}
     </View>
   );
@@ -111,5 +94,4 @@ const makeStyles = (c: Palette) =>
     },
     item: { flex: 1, alignItems: 'center', gap: 4 },
     label: { fontSize: 10 },
-    fab: { width: 56, alignItems: 'center', marginTop: -30 },
   });

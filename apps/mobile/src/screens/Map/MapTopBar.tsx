@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Palette, fonts, useTheme } from '../../theme';
 import { Wordmark, formatNumber } from '../../ui';
@@ -9,8 +9,6 @@ export type MapTopBarProps = {
   totalPoints: number;
   unreadCount: number;
   onOpenNotifications?: () => void;
-  onSync?: () => void;
-  syncing?: boolean;
 };
 
 /**
@@ -22,8 +20,6 @@ export const MapTopBar = ({
   totalPoints,
   unreadCount,
   onOpenNotifications,
-  onSync,
-  syncing,
 }: MapTopBarProps) => {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -39,21 +35,6 @@ export const MapTopBar = ({
           <MaterialCommunityIcons name="crown" size={13} color={colors.gold} />
           <Text style={styles.pointsValue}>{formatNumber(totalPoints)}</Text>
         </View>
-        <Pressable
-          onPress={onSync}
-          disabled={syncing}
-          accessibilityRole="button"
-          accessibilityLabel="Atualizar atividades"
-          testID="map-sync"
-          hitSlop={8}
-          style={styles.bell}
-        >
-          {syncing ? (
-            <ActivityIndicator size="small" color={colors.textSofter} />
-          ) : (
-            <Feather name="refresh-cw" size={18} color={colors.textSofter} />
-          )}
-        </Pressable>
         <Pressable
           onPress={onOpenNotifications}
           accessibilityRole="button"

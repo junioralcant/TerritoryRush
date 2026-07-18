@@ -6,10 +6,9 @@ import { ApiClient } from '../../services/api/api-client.port';
 import { useApiResource } from '../../services/useApiResource';
 import { useStravaSync } from '../../services/useStravaSync';
 import { ErrorView, Screen } from '../../ui';
-import { MapControls } from './MapControls';
 import { MapSkeleton } from './MapSkeleton';
+import { MapSyncButton } from './MapSyncButton';
 import { MapTopBar } from './MapTopBar';
-import { RecenterButton } from './RecenterButton';
 import { SelectedStreetCard } from './SelectedStreetCard';
 import { StreetDetailDrawer } from './StreetDetailDrawer';
 import { StreetStateLegend } from './StreetStateLegend';
@@ -33,7 +32,6 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
     bboxAround(SAO_MATEUS_CENTER),
   );
   const [detailOpen, setDetailOpen] = useState(false);
-  const [recenterToken, setRecenterToken] = useState(0);
 
   const profileLoader = useCallback(() => api.getProfile(), [api]);
   const notificationsLoader = useCallback(() => api.getNotifications(), [api]);
@@ -78,7 +76,6 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
         <TerritoryMap
           streets={streets}
           initialCenter={SAO_MATEUS_CENTER}
-          recenterToken={recenterToken}
           onSelectStreet={(id) => void selectStreet(id)}
         />
 
@@ -88,18 +85,14 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
             totalPoints={runner.totalPoints}
             unreadCount={unread}
             onOpenNotifications={onOpenNotifications}
-            onSync={onSync}
-            syncing={syncing}
           />
         </View>
 
-        <MapControls top={insets.top + 64} />
+        <MapSyncButton top={insets.top + 64} onPress={onSync} syncing={syncing} />
 
         <View style={[styles.legend, { top: insets.top + 64 }]}>
           <StreetStateLegend />
         </View>
-
-        <RecenterButton bottom={selected ? 118 : 24} onPress={() => setRecenterToken((token) => token + 1)} />
 
         {selected ? (
           <View style={styles.streetCard}>
