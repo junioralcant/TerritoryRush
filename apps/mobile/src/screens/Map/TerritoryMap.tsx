@@ -36,6 +36,8 @@ export const TerritoryMap = ({ streets, onSelectStreet, initialCenter, recenterT
       testID="territory-map"
       style={{ flex: 1 }}
       mapStyle={mapStyleUrl}
+      attributionEnabled={false}
+      logoEnabled={false}
       onPress={(feature) => {
         const geometry = feature.geometry;
         if (!geometry || geometry.type !== 'Point') {
