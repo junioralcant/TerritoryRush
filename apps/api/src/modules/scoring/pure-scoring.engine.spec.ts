@@ -4,7 +4,6 @@ import { ScoringInput } from './scoring.types';
 const baseInput = (overrides: Partial<ScoringInput> = {}): ScoringInput => ({
   streets: [],
   newNeighborhoods: 0,
-  newCities: 0,
   streakDays: 0,
   streakBonusAwardedTier: 0,
   ...overrides,
@@ -31,11 +30,11 @@ describe('PureScoringEngine', () => {
   });
 
   describe('region', () => {
-    it('awards 500 per new neighborhood and 2000 per new city', () => {
-      const result = engine.compute(baseInput({ newNeighborhoods: 2, newCities: 1 }));
+    it('awards 500 per new neighborhood', () => {
+      const result = engine.compute(baseInput({ newNeighborhoods: 2 }));
 
-      expect(result.regionPoints).toBe(2 * 500 + 2000);
-      expect(result.totalPoints).toBe(3000);
+      expect(result.regionPoints).toBe(2 * 500);
+      expect(result.totalPoints).toBe(1000);
     });
   });
 
@@ -92,12 +91,12 @@ describe('PureScoringEngine', () => {
     const result = engine.compute(
       baseInput({
         streets: [{ streetId: 's1', isFirstVisit: true, ownershipDays: 7, defenseTierAwarded: 0 }],
-        newCities: 1,
+        newNeighborhoods: 1,
         streakDays: 7,
         streakBonusAwardedTier: 0,
       }),
     );
 
-    expect(result.totalPoints).toBe(100 + 100 + 2000 + 500);
+    expect(result.totalPoints).toBe(100 + 100 + 500 + 500);
   });
 });

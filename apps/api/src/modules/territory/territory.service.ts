@@ -71,19 +71,6 @@ export class TerritoryService {
       ).rows.map((row) => [row.street_id, row]),
     );
 
-    const matchedCities = [...new Set(input.streets.map((street) => street.cityId))];
-    const knownCities = new Set(
-      (
-        await client.query<{ city_id: string }>(
-          `select distinct s.city_id
-           from public.street_score ss join public.street s on s.id = ss.street_id
-           where ss.user_id = $1 and s.city_id = any($2::uuid[])`,
-          [input.userId, matchedCities],
-        )
-      ).rows.map((row) => row.city_id),
-    );
-    const newCities = matchedCities.filter((cityId) => !knownCities.has(cityId)).length;
-
     const nowMs = Date.parse(input.now);
     const scoringStreets: StreetScoringContext[] = input.streets.map((street) => {
       const existing = existingScores.get(street.streetId);
@@ -104,7 +91,6 @@ export class TerritoryService {
       // model has cities, not neighborhoods. Wire newNeighborhoods when suburb
       // boundaries land in geo (see infra/geo/import).
       newNeighborhoods: 0,
-      newCities,
       streakDays: streak.streakDays,
       streakBonusAwardedTier: profile.streak_bonus_tier,
     });

@@ -1,6 +1,5 @@
 export type MatchedStreetInput = {
   streetId: string;
-  cityId: string;
   isFirstVisit: boolean;
 };
 

@@ -1,4 +1,4 @@
-import { Bbox, StreetRow } from '../geo.types';
+import { Bbox, StreetRow, TraceCoverage } from '../geo.types';
 
 export const STREET_REPOSITORY = Symbol('STREET_REPOSITORY');
 
@@ -13,14 +13,16 @@ export interface StreetRepository {
   findCityIdContaining(lng: number, lat: number): Promise<string | null>;
   /**
    * For each street id, the length (m) of its geometry lying within `radiusMeters`
-   * of the raw GPS trace. Used to reject OSRM over-matches — streets the runner did
-   * not actually cover. Streets absent from the result cover zero.
+   * of the raw GPS trace (`coveredM`) alongside the street's full length (`totalM`).
+   * Callers turn this into a coverage *ratio* to reject OSRM over-matches — whole
+   * named streets grazed only at an intersection, where a few metres near the corner
+   * fall inside the trace buffer. Streets absent from the result cover zero.
    */
   coveredLengthByTrace(
     streetIds: string[],
     trace: Array<{ lat: number; lng: number }>,
     radiusMeters: number,
-  ): Promise<Map<string, number>>;
+  ): Promise<Map<string, TraceCoverage>>;
   /**
    * For each `[lng, lat]` point, the nearest street within `maxMeters` (or null).
    * Resolves matched edges to a street by geometry, so segments the runner ran

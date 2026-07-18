@@ -40,6 +40,16 @@ describe('HttpOsrmClient', () => {
     expect(edges).toEqual([{ streetName: 'Rua Maranhão', lengthM: 120, coordinate: [-46.63, -23.55] }]);
   });
 
+  it('constrains snapping with a per-point radius and tidies the trace', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(okResponse({ code: 'Ok', matchings: [] }));
+
+    await makeClient().match(TRACE);
+
+    const url = fetchSpy.mock.calls[0][0] as string;
+    expect(url).toContain('tidy=true');
+    expect(url).toContain('radiuses=25;25');
+  });
+
   it('treats a 200 response with a non-Ok code as an unmatchable trace', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(okResponse({ code: 'NoMatch' }));
 

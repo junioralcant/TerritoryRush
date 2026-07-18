@@ -6,7 +6,6 @@ import { milestonePointsBetween, tierForDays } from './tiers';
 const FIRST_VISIT_POINTS = 100;
 const KNOWN_VISIT_POINTS = 10;
 const NEW_NEIGHBORHOOD_POINTS = 500;
-const NEW_CITY_POINTS = 2000;
 const CONSISTENCY_POINTS_BY_TIER: Readonly<Record<number, number>> = { 1: 500, 2: 2000, 3: 10_000 };
 const DEFENSE_POINTS_BY_TIER: Readonly<Record<number, number>> = { 1: 100, 2: 500, 3: 2000 };
 
@@ -31,8 +30,7 @@ export class PureScoringEngine implements ScoringEngine {
       };
     });
 
-    const regionPoints =
-      input.newNeighborhoods * NEW_NEIGHBORHOOD_POINTS + input.newCities * NEW_CITY_POINTS;
+    const regionPoints = input.newNeighborhoods * NEW_NEIGHBORHOOD_POINTS;
 
     const streakTier = tierForDays(input.streakDays);
     const newStreakTier = Math.max(input.streakBonusAwardedTier, streakTier);

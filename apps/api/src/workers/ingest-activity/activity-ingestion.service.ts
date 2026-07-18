@@ -102,7 +102,6 @@ export class ActivityIngestionService {
       now,
       streets: resolvedStreets.map((street) => ({
         streetId: street.streetId,
-        cityId: street.cityId,
         isFirstVisit: street.isFirstVisit,
       })),
     });

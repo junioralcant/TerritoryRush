@@ -18,7 +18,9 @@ const makeStreets = (): jest.Mocked<StreetRepository> => ({
   findInBbox: jest.fn(),
   findByNameAndCity: jest.fn(),
   findCityIdContaining: jest.fn(),
-  coveredLengthByTrace: jest.fn().mockImplementation(async (ids: string[]) => new Map(ids.map((id) => [id, 1000]))),
+  coveredLengthByTrace: jest
+    .fn()
+    .mockImplementation(async (ids: string[]) => new Map(ids.map((id) => [id, { coveredM: 1000, totalM: 1000 }]))),
   findNearestStreets: jest.fn().mockResolvedValue([]),
   resolveCitiesForOsmRoads: jest.fn(),
   deriveStreetsFromOsmRoads: jest.fn(),
@@ -156,7 +158,7 @@ describe('MapMatchingService', () => {
     const activityStreets = makeActivityStreets();
     streets.findCityIdContaining.mockResolvedValue('city-a');
     streets.findByNameAndCity.mockResolvedValue(streetRow());
-    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', 3]]));
+    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', { coveredM: 3, totalM: 200 }]]));
 
     const resolved = await new MapMatchingService(
       makeOsrm([{ streetName: 'Rua Maranhão', lengthM: 140, coordinate: [0, 0] }]),
@@ -166,5 +168,54 @@ describe('MapMatchingService', () => {
 
     expect(resolved).toEqual([]);
     expect(activityStreets.upsert).not.toHaveBeenCalled();
+  });
+
+  it('drops a cross street grazed only at the intersection (below the coverage ratio)', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockResolvedValue('city-a');
+    streets.findByNameAndCity.mockResolvedValue(streetRow());
+    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', { coveredM: 18, totalM: 150 }]]));
+
+    const resolved = await new MapMatchingService(
+      makeOsrm([{ streetName: 'Rua Maranhão', lengthM: 40, coordinate: [0, 0] }]),
+      streets,
+      activityStreets,
+    ).matchActivityStreets(INPUT);
+
+    expect(resolved).toEqual([]);
+    expect(activityStreets.upsert).not.toHaveBeenCalled();
+  });
+
+  it('claims a street the runner covered most of', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockResolvedValue('city-a');
+    streets.findByNameAndCity.mockResolvedValue(streetRow());
+    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', { coveredM: 90, totalM: 150 }]]));
+
+    const resolved = await new MapMatchingService(
+      makeOsrm([{ streetName: 'Rua Maranhão', lengthM: 90, coordinate: [0, 0] }]),
+      streets,
+      activityStreets,
+    ).matchActivityStreets(INPUT);
+
+    expect(resolved).toHaveLength(1);
+  });
+
+  it('claims a long avenue via the absolute distance fallback even below the ratio', async () => {
+    const streets = makeStreets();
+    const activityStreets = makeActivityStreets();
+    streets.findCityIdContaining.mockResolvedValue('city-a');
+    streets.findByNameAndCity.mockResolvedValue(streetRow());
+    streets.coveredLengthByTrace.mockResolvedValue(new Map([['street-1', { coveredM: 350, totalM: 2000 }]]));
+
+    const resolved = await new MapMatchingService(
+      makeOsrm([{ streetName: 'Rua Maranhão', lengthM: 350, coordinate: [0, 0] }]),
+      streets,
+      activityStreets,
+    ).matchActivityStreets(INPUT);
+
+    expect(resolved).toHaveLength(1);
   });
 });

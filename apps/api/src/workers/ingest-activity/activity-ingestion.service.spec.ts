@@ -113,7 +113,7 @@ describe('ActivityIngestionService', () => {
       expect.objectContaining({
         activityId: 'activity-1',
         userId: 'user-1',
-        streets: [{ streetId: 'street-1', cityId: 'city-a', isFirstVisit: true }],
+        streets: [{ streetId: 'street-1', isFirstVisit: true }],
       }),
     );
     expect(repo.updateStatus).toHaveBeenNthCalledWith(2, 'activity-1', 'processed');

@@ -8,7 +8,6 @@ export type StreetScoringContext = {
 export type ScoringInput = {
   streets: StreetScoringContext[];
   newNeighborhoods: number;
-  newCities: number;
   streakDays: number;
   streakBonusAwardedTier: number;
 };

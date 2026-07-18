@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../../../database/database.constants';
-import { Bbox, StreetRow } from '../geo.types';
+import { Bbox, StreetRow, TraceCoverage } from '../geo.types';
 import { StreetRepository } from '../ports/street-repository.port';
 
 const SELECT_SUMMARY = `s.id, s.osm_name, s.city_id, s.owner_user_id, ST_AsGeoJSON(s.geom) as geojson`;
@@ -52,21 +52,25 @@ export class PgStreetRepository implements StreetRepository {
     streetIds: string[],
     trace: Array<{ lat: number; lng: number }>,
     radiusMeters: number,
-  ): Promise<Map<string, number>> {
+  ): Promise<Map<string, TraceCoverage>> {
     if (streetIds.length === 0 || trace.length === 0) {
       return new Map();
     }
-    const result = await this.pool.query<{ id: string; covered_m: string }>(
+    const result = await this.pool.query<{ id: string; covered_m: string; total_m: string }>(
       `with trace as (
          select ST_Buffer(ST_Collect(ST_SetSRID(ST_MakePoint(lng, lat), 4326))::geography, $2)::geometry as g
          from unnest($3::float8[], $4::float8[]) as t(lng, lat)
        )
-       select s.id, coalesce(ST_Length(ST_Intersection(s.geom, trace.g)::geography), 0) as covered_m
+       select s.id,
+              coalesce(ST_Length(ST_Intersection(s.geom, trace.g)::geography), 0) as covered_m,
+              ST_Length(s.geom::geography) as total_m
        from public.street s, trace
        where s.id = any($1::uuid[])`,
       [streetIds, radiusMeters, trace.map((p) => p.lng), trace.map((p) => p.lat)],
     );
-    return new Map(result.rows.map((row) => [row.id, Number(row.covered_m)]));
+    return new Map(
+      result.rows.map((row) => [row.id, { coveredM: Number(row.covered_m), totalM: Number(row.total_m) }]),
+    );
   }
 
   async findNearestStreets(points: Array<[number, number]>, maxMeters: number): Promise<Array<StreetRow | null>> {

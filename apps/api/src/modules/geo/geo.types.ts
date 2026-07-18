@@ -43,3 +43,8 @@ export type StreetRow = {
   owner_user_id: string | null;
   geojson: string;
 };
+
+export type TraceCoverage = {
+  coveredM: number;
+  totalM: number;
+};

@@ -13,6 +13,7 @@ const OSRM_TIMEOUT_MS = 4000;
 const CIRCUIT_THRESHOLD = 5;
 const CIRCUIT_COOLDOWN_MS = 30_000;
 const MAX_MATCH_POINTS = 1000;
+const OSRM_MATCH_RADIUS_M = 25;
 
 const isTransientStatus = (status: number): boolean => status >= 500 || status === 429;
 
@@ -59,10 +60,10 @@ export class HttpOsrmClient implements OsrmClient {
   }
 
   private async requestMatch(trace: GpsPoint[]): Promise<MatchedEdge[]> {
-    const coordinates = downsampleTrace(trace, MAX_MATCH_POINTS)
-      .map((point) => `${point.lng},${point.lat}`)
-      .join(';');
-    const url = `${this.baseUrl}/match/v1/foot/${coordinates}?steps=true&geometries=geojson&overview=false`;
+    const points = downsampleTrace(trace, MAX_MATCH_POINTS);
+    const coordinates = points.map((point) => `${point.lng},${point.lat}`).join(';');
+    const radiuses = points.map(() => OSRM_MATCH_RADIUS_M).join(';');
+    const url = `${this.baseUrl}/match/v1/foot/${coordinates}?steps=true&geometries=geojson&overview=false&tidy=true&radiuses=${radiuses}`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), OSRM_TIMEOUT_MS);

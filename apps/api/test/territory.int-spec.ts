@@ -34,7 +34,7 @@ describe('Scoring + territory flow (integration)', () => {
       userId,
       activityDate: '2026-07-09T10:00:00.000Z',
       now: '2026-07-09T10:00:00.000Z',
-      streets: [{ streetId: STREET, cityId: CITY_A, isFirstVisit }],
+      streets: [{ streetId: STREET, isFirstVisit }],
     });
 
   beforeAll(async () => {
@@ -68,7 +68,7 @@ describe('Scoring + territory flow (integration)', () => {
     await container?.stop();
   });
 
-  it('first activity: runner A claims the street with exploration + new-city points', async () => {
+  it('first activity: runner A claims the street with exploration points', async () => {
     await seedActivity('00000000-0000-0000-0000-0000000000a1', USER_A, '9001');
     const changes = await apply('00000000-0000-0000-0000-0000000000a1', USER_A, true);
 
@@ -85,7 +85,7 @@ describe('Scoring + territory flow (integration)', () => {
     expect(Number(activityStreet.rows[0].points_awarded)).toBe(100);
 
     const profile = await pool.query(`select total_points from public.runner_profile where user_id = $1`, [USER_A]);
-    expect(Number(profile.rows[0].total_points)).toBe(100 + 2000);
+    expect(Number(profile.rows[0].total_points)).toBe(100);
   });
 
   it('tie keeps the current owner', async () => {

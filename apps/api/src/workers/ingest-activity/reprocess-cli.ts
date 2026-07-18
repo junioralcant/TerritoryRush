@@ -94,7 +94,6 @@ const run = async (): Promise<void> => {
           now,
           streets: resolved.map((street) => ({
             streetId: street.streetId,
-            cityId: street.cityId,
             isFirstVisit: street.isFirstVisit,
           })),
         });

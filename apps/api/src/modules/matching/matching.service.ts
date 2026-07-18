@@ -7,9 +7,18 @@ import { AnnotatedEdge, MatchActivityInput, MatchedEdge, ResolvedStreet } from '
 import { ACTIVITY_STREET_REPOSITORY, ActivityStreetRepository } from './ports/activity-street-repository.port';
 import { OSRM_CLIENT, OsrmClient } from './ports/osrm-client.port';
 
-const TRACE_COVERAGE_RADIUS_M = 15;
-const MIN_TRACE_COVERAGE_M = 20;
+const TRACE_COVERAGE_RADIUS_M = 10;
+const MIN_COVERAGE_RATIO = 0.5;
+const MIN_COVERAGE_FLOOR_M = 25;
+const LONG_STREET_ABSOLUTE_M = 300;
 const UNNAMED_SNAP_RADIUS_M = 20;
+
+const isStreetActuallyRun = (coveredM: number, totalM: number): boolean => {
+  if (coveredM >= LONG_STREET_ABSOLUTE_M) {
+    return true;
+  }
+  return coveredM >= MIN_COVERAGE_FLOOR_M && totalM > 0 && coveredM / totalM >= MIN_COVERAGE_RATIO;
+};
 
 type StreetMatch = { street: StreetRow; matchedLengthM: number };
 
@@ -96,7 +105,10 @@ export class MapMatchingService {
       trace,
       TRACE_COVERAGE_RADIUS_M,
     );
-    return candidates.filter((candidate) => (covered.get(candidate.street.id) ?? 0) >= MIN_TRACE_COVERAGE_M);
+    return candidates.filter((candidate) => {
+      const coverage = covered.get(candidate.street.id);
+      return coverage ? isStreetActuallyRun(coverage.coveredM, coverage.totalM) : false;
+    });
   }
 
   private async annotateWithCity(edges: MatchedEdge[]): Promise<AnnotatedEdge[]> {
