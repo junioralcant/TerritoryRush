@@ -14,6 +14,7 @@ export type TerritoryMapProps = {
 };
 
 const INITIAL_ZOOM = 14;
+const PLACE_LABELS_LAYER_ID = 'place_hamlet';
 
 export const TerritoryMap = ({ streets, onSelectStreet, initialCenter, recenterToken = 0 }: TerritoryMapProps) => {
   const { mapStyleUrl, ownership } = useTheme();
@@ -54,6 +55,7 @@ export const TerritoryMap = ({ streets, onSelectStreet, initialCenter, recenterT
       <ShapeSource id="streets" testID="streets-source" shape={features}>
         <LineLayer
           id="streets-line"
+          belowLayerID={PLACE_LABELS_LAYER_ID}
           style={{
             lineColor: ['get', 'color'],
             lineWidth: ['case', ['==', ['get', 'ownership'], 'unclaimed'], 3, 8],
