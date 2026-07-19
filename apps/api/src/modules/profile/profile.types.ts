@@ -18,6 +18,7 @@ export type CreateRunnerProfileInput = {
 
 export type RunnerProfileAggregates = {
   totalPoints: number;
+  totalDistanceM: number;
   streetsOwned: number;
   streetsExplored: number;
   cityId: string | null;

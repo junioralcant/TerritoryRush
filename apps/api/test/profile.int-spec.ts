@@ -107,4 +107,23 @@ describe('Profile flow (integration)', () => {
     const distinct = await pool.query('select count(distinct user_id)::int as count from public.runner_profile');
     expect(distinct.rows[0].count).toBeGreaterThanOrEqual(3);
   });
+
+  it('derives totalDistanceM from processed activities only', async () => {
+    const userId = '44444444-4444-4444-4444-444444444444';
+    await pool.query(
+      `insert into public.activity (user_id, provider, provider_activity_id, status, distance_m)
+       values ($1, 'strava', 'act-processed-1', 'processed', 5200),
+              ($1, 'strava', 'act-processed-2', 'processed', 3300),
+              ($1, 'strava', 'act-imported-1', 'imported', 9999),
+              ($1, 'strava', 'act-rejected-1', 'rejected', 8888)`,
+      [userId],
+    );
+
+    const response = await request(app.getHttpServer())
+      .get('/me/profile')
+      .set('Authorization', `Bearer ${tokenFor(userId, 'runner44@example.com')}`)
+      .expect(200);
+
+    expect(response.body.totalDistanceM).toBe(8500);
+  });
 });

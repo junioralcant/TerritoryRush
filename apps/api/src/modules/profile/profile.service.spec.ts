@@ -22,6 +22,7 @@ const makeRepository = (): jest.Mocked<ProfileRepository> => ({
   create: jest.fn(),
   loadAggregates: jest.fn().mockResolvedValue({
     totalPoints: 0,
+    totalDistanceM: 0,
     streetsOwned: 0,
     streetsExplored: 0,
     cityId: null,

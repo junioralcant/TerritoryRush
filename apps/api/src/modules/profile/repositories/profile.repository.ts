@@ -69,7 +69,7 @@ export class PgProfileRepository implements ProfileRepository {
   }
 
   async loadAggregates(userId: string): Promise<RunnerProfileAggregates> {
-    const [owned, explored, total, national, primaryCity] = await Promise.all([
+    const [owned, explored, total, national, primaryCity, distance] = await Promise.all([
       this.pool.query<{ count: number }>(
         `select count(*)::int as count from public.street where owner_user_id = $1`,
         [userId],
@@ -94,6 +94,13 @@ export class PgProfileRepository implements ProfileRepository {
          where owner_user_id = $1 group by city_id order by count desc, city_id asc limit 1`,
         [userId],
       ),
+      // total_distance_m is derived from processed activities (source of truth),
+      // not the vestigial runner_profile counter, so it self-heals and cannot drift.
+      this.pool.query<{ total_distance_m: string }>(
+        `select coalesce(sum(distance_m), 0)::bigint as total_distance_m
+         from public.activity where user_id = $1 and status = 'processed'`,
+        [userId],
+      ),
     ]);
 
     let cityRank: number | null = null;
@@ -112,6 +119,7 @@ export class PgProfileRepository implements ProfileRepository {
 
     return {
       totalPoints: Number(total.rows[0]?.total_points ?? 0),
+      totalDistanceM: Number(distance.rows[0]?.total_distance_m ?? 0),
       streetsOwned: owned.rows[0].count,
       streetsExplored: explored.rows[0].count,
       cityId,
