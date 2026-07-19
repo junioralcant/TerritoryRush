@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { ApiClient } from '../../services/api/api-client.port';
 import { RunnerProfileDetail, StreetSummary } from '../../services/api/types';
 import { MapScreen } from './MapScreen';
@@ -51,5 +51,26 @@ describe('MapScreen', () => {
 
     await waitFor(() => expect(screen.getByTestId('map-notifications')).toBeOnTheScreen());
     expect(screen.getByText('14')).toBeOnTheScreen();
+  });
+
+  it('reloads the streets when the error retry is pressed', async () => {
+    const failingApi = {
+      ...api,
+      getStreets: jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Request /streets failed with status 500'))
+        .mockResolvedValue(streets),
+      getProfile: jest.fn().mockResolvedValue(profile),
+      getNotifications: jest.fn().mockResolvedValue([]),
+    } as unknown as ApiClient;
+
+    render(<MapScreen api={failingApi} />);
+
+    await waitFor(() => expect(screen.getByTestId('map-error')).toBeOnTheScreen());
+
+    fireEvent.press(screen.getByTestId('error-retry'));
+
+    await waitFor(() => expect(screen.getByTestId('territory-map')).toBeOnTheScreen());
+    expect(failingApi.getStreets).toHaveBeenCalledTimes(2);
   });
 });

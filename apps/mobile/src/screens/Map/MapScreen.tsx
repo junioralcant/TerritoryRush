@@ -56,7 +56,14 @@ export const MapScreen = ({ api, onOpenNotifications }: MapScreenProps) => {
   if (error || profile.error || !profile.data) {
     return (
       <Screen>
-        <ErrorView testID="map-error" onRetry={() => profile.reload()} />
+        <ErrorView
+          testID="map-error"
+          onRetry={() => {
+            reloadStreets();
+            profile.reload();
+            notifications.reload();
+          }}
+        />
       </Screen>
     );
   }
