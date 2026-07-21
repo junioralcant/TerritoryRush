@@ -24,6 +24,7 @@ export interface ApiClient {
   disconnectStrava(): Promise<void>;
   syncStrava(): Promise<StravaSyncResult>;
   getProfile(): Promise<RunnerProfileDetail>;
+  updateProfileName(name: string): Promise<RunnerProfileDetail>;
   getCityRanking(cityId: string): Promise<CityRankingEntry[]>;
   getExplorerRanking(): Promise<ExplorerRankingEntry[]>;
   getActivities(): Promise<Activity[]>;

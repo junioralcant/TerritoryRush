@@ -56,6 +56,20 @@ export class PgProfileRepository implements ProfileRepository {
     return existing;
   }
 
+  async updateName(userId: string, name: string): Promise<RunnerProfile> {
+    const updated = await this.pool.query<RunnerProfileRow>(
+      `update public.runner_profile
+       set name = $2, updated_at = now()
+       where user_id = $1
+       returning ${SELECT_COLUMNS}`,
+      [userId, name],
+    );
+    if (!updated.rows[0]) {
+      throw new Error(`Runner profile not found for user ${userId}`);
+    }
+    return toDomain(updated.rows[0]);
+  }
+
   async ensureSignedUpAt(userId: string): Promise<string> {
     await this.pool.query(
       `insert into public.runner_profile (user_id) values ($1) on conflict (user_id) do nothing`,

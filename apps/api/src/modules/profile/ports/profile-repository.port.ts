@@ -10,6 +10,7 @@ export const PROFILE_REPOSITORY = Symbol('PROFILE_REPOSITORY');
 export interface ProfileRepository {
   findByUserId(userId: string): Promise<RunnerProfile | null>;
   create(input: CreateRunnerProfileInput): Promise<RunnerProfile>;
+  updateName(userId: string, name: string): Promise<RunnerProfile>;
   loadAggregates(userId: string): Promise<RunnerProfileAggregates>;
   /**
    * Ensures the runner profile exists and returns its `signed_up_at` (ISO). Used

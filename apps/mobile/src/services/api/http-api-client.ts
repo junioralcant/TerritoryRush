@@ -51,6 +51,11 @@ export const createHttpApiClient = (baseUrl: string, getToken: TokenProvider): A
       request<void>('/integrations/strava/disconnect', { method: 'DELETE' }),
     syncStrava: () => request<StravaSyncResult>('/integrations/strava/sync', { method: 'POST' }),
     getProfile: () => request<RunnerProfileDetail>('/me/profile'),
+    updateProfileName: (name) =>
+      request<RunnerProfileDetail>('/me/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      }),
     getCityRanking: (cityId) => request<CityRankingEntry[]>(`/rankings/city/${cityId}`),
     getExplorerRanking: () => request<ExplorerRankingEntry[]>('/rankings/explorers'),
     getActivities: () => request<Activity[]>('/activities'),

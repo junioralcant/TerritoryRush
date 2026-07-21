@@ -31,6 +31,13 @@ export class ProfileService {
     return { ...profile, ...aggregates };
   }
 
+  async updateName(user: AuthUser, name: string): Promise<RunnerProfileDetail> {
+    await this.ensureProfileForUser(user);
+    const profile = await this.profiles.updateName(user.id, name);
+    const aggregates = await this.profiles.loadAggregates(user.id);
+    return { ...profile, ...aggregates };
+  }
+
   ensureSignedUpAt(userId: string): Promise<string> {
     return this.profiles.ensureSignedUpAt(userId);
   }

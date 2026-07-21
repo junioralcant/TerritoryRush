@@ -20,6 +20,7 @@ const makeProfile = (overrides: Partial<RunnerProfile> = {}): RunnerProfile => (
 const makeRepository = (): jest.Mocked<ProfileRepository> => ({
   findByUserId: jest.fn(),
   create: jest.fn(),
+  updateName: jest.fn(),
   loadAggregates: jest.fn().mockResolvedValue({
     totalPoints: 0,
     totalDistanceM: 0,
@@ -79,5 +80,29 @@ describe('ProfileService', () => {
 
     expect(repository.create).not.toHaveBeenCalled();
     expect(repository.findByUserId).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates the display name and returns the detail with aggregates', async () => {
+    const repository = makeRepository();
+    repository.findByUserId.mockResolvedValue(makeProfile());
+    repository.updateName.mockResolvedValue(makeProfile({ name: 'Novo Nome' }));
+
+    const result = await new ProfileService(repository).updateName(USER, 'Novo Nome');
+
+    expect(repository.updateName).toHaveBeenCalledWith('user-1', 'Novo Nome');
+    expect(result.name).toBe('Novo Nome');
+    expect(result.nationalRank).toBe(1);
+  });
+
+  it('ensures the profile exists before updating the name', async () => {
+    const repository = makeRepository();
+    repository.findByUserId.mockResolvedValue(null);
+    repository.create.mockResolvedValue(makeProfile());
+    repository.updateName.mockResolvedValue(makeProfile({ name: 'Novo Nome' }));
+
+    await new ProfileService(repository).updateName(USER, 'Novo Nome');
+
+    expect(repository.create).toHaveBeenCalledTimes(1);
+    expect(repository.updateName).toHaveBeenCalledWith('user-1', 'Novo Nome');
   });
 });

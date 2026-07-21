@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +14,7 @@ import { ActivitiesScreen } from './src/screens/Activities/ActivitiesScreen';
 import { ConnectionsScreen } from './src/screens/Connections/ConnectionsScreen';
 import { MapScreen } from './src/screens/Map/MapScreen';
 import { ProfileScreen } from './src/screens/Profile/ProfileScreen';
+import { EditProfileScreen } from './src/screens/Profile/EditProfileScreen';
 import { RankingRoute } from './src/screens/Ranking/RankingRoute';
 import { AchievementsScreen } from './src/screens/Achievements/AchievementsScreen';
 import { NotificationsCenter } from './src/screens/Notifications/NotificationsCenter';
@@ -26,7 +27,7 @@ import { useAppFonts } from './src/theme/useAppFonts';
 const RootStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const Tabs = ({ api }: { api: ApiClient }) => (
+const Tabs = ({ api, profileVersion }: { api: ApiClient; profileVersion: number }) => (
   <Tab.Navigator
     screenOptions={{ headerShown: false }}
     tabBar={(props) => <AppTabBar {...props} />}
@@ -41,7 +42,14 @@ const Tabs = ({ api }: { api: ApiClient }) => (
     </Tab.Screen>
     <Tab.Screen name="Ranking">{() => <RankingRoute api={api} />}</Tab.Screen>
     <Tab.Screen name="Profile">
-      {({ navigation }) => <ProfileScreen api={api} onOpenSettings={() => navigation.navigate('Connections')} />}
+      {({ navigation }) => (
+        <ProfileScreen
+          key={profileVersion}
+          api={api}
+          onOpenSettings={() => navigation.navigate('Connections')}
+          onEditProfile={() => navigation.navigate('EditProfile')}
+        />
+      )}
     </Tab.Screen>
   </Tab.Navigator>
 );
@@ -49,6 +57,7 @@ const Tabs = ({ api }: { api: ApiClient }) => (
 const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId: string }) => {
   usePushRegistration(api, getExpoPushToken, Platform.OS);
   const { colors, isDark } = useTheme();
+  const [profileVersion, setProfileVersion] = useState(0);
   const navTheme = useMemo(() => {
     const base = isDark ? DarkTheme : DefaultTheme;
     return { ...base, colors: { ...base.colors, background: colors.bgApp, card: colors.bgApp, primary: colors.primary } };
@@ -56,7 +65,19 @@ const MainNavigator = ({ api, stravaClientId }: { api: ApiClient; stravaClientId
   return (
     <NavigationContainer theme={navTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Tabs">{() => <Tabs api={api} />}</RootStack.Screen>
+        <RootStack.Screen name="Tabs">{() => <Tabs api={api} profileVersion={profileVersion} />}</RootStack.Screen>
+        <RootStack.Screen name="EditProfile">
+          {({ navigation }) => (
+            <EditProfileScreen
+              api={api}
+              onSaved={() => {
+                setProfileVersion((version) => version + 1);
+                navigation.goBack();
+              }}
+              onCancel={() => navigation.goBack()}
+            />
+          )}
+        </RootStack.Screen>
         <RootStack.Screen name="Notifications">
           {({ navigation }) => <NotificationsCenter api={api} onBack={() => navigation.goBack()} />}
         </RootStack.Screen>

@@ -11,6 +11,7 @@ import { levelFromPoints } from './level';
 export type ProfileScreenProps = {
   api: ApiClient;
   onOpenSettings?: () => void;
+  onEditProfile?: () => void;
 };
 
 const MILESTONES = [7, 30, 90];
@@ -57,7 +58,7 @@ const StatTile = ({ label, value, color, testID }: { label: string; value: React
   );
 };
 
-export const ProfileScreen = ({ api, onOpenSettings }: ProfileScreenProps) => {
+export const ProfileScreen = ({ api, onOpenSettings, onEditProfile }: ProfileScreenProps) => {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const loader = useCallback(() => api.getProfile(), [api]);
@@ -106,9 +107,19 @@ export const ProfileScreen = ({ api, onOpenSettings }: ProfileScreenProps) => {
       >
         <View style={styles.identity}>
           <LevelAvatar testID="profile-avatar" size={96} photoUrl={runner.photoUrl} name={runner.name} level={level} />
-          <Text testID="profile-name" style={styles.name}>
-            {runner.name ?? 'Corredor'}
-          </Text>
+          <Pressable
+            testID="profile-edit"
+            onPress={onEditProfile}
+            accessibilityRole="button"
+            accessibilityLabel="Editar perfil"
+            hitSlop={8}
+            style={styles.nameRow}
+          >
+            <Text testID="profile-name" style={styles.name}>
+              {runner.name ?? 'Corredor'}
+            </Text>
+            <Feather name="edit-2" size={15} color={colors.textMid} />
+          </Pressable>
           <View style={styles.cityRow}>
             <Feather name="map-pin" size={13} color={colors.textMid} />
             <Text testID="profile-city" style={styles.city}>
@@ -179,7 +190,8 @@ const makeStyles = (c: Palette) =>
     scroll: { paddingHorizontal: 18, paddingBottom: 24 },
     flex: { flex: 1 },
     identity: { alignItems: 'center' },
-    name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: c.textHi, marginTop: 14 },
+    nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
+    name: { fontFamily: fonts.sairaExtraBold, fontSize: 24, color: c.textHi },
     cityRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
     city: { fontFamily: fonts.manrope, fontSize: 13, color: c.textMid },
     xpBlock: { width: '100%', marginTop: 16 },

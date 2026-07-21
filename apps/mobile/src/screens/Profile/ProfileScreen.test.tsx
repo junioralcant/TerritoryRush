@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { ApiClient } from '../../services/api/api-client.port';
 import { RunnerProfileDetail } from '../../services/api/types';
 import { ProfileScreen } from './ProfileScreen';
@@ -45,5 +45,15 @@ describe('ProfileScreen', () => {
     render(<ProfileScreen api={makeApi(jest.fn().mockRejectedValue(new Error('nope')))} />);
 
     await waitFor(() => expect(screen.getByTestId('profile-error')).toBeOnTheScreen());
+  });
+
+  it('opens the edit screen when the name is tapped', async () => {
+    const onEditProfile = jest.fn();
+    render(<ProfileScreen api={makeApi(jest.fn().mockResolvedValue(profile))} onEditProfile={onEditProfile} />);
+
+    await waitFor(() => expect(screen.getByTestId('profile-edit')).toBeOnTheScreen());
+    fireEvent.press(screen.getByTestId('profile-edit'));
+
+    expect(onEditProfile).toHaveBeenCalledTimes(1);
   });
 });
