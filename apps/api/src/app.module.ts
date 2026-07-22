@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { loadConfiguration } from './config/configuration';
 import { DatabaseModule } from './database/database.module';
+import { HealthModule } from './health/health.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { AchievementsModule } from './modules/achievements/achievements.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
@@ -30,6 +31,7 @@ import { IngestActivityWorkerModule } from './workers/ingest-activity/ingest-act
     ScheduleModule.forRoot(),
     ObservabilityModule,
     DatabaseModule,
+    HealthModule,
     AuthModule,
     ProfileModule,
     GeoModule,

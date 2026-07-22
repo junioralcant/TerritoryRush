@@ -1,0 +1,17 @@
+**/node_modules
+apps/mobile
+apps/api/dist
+apps/api/coverage
+apps/api/e2e
+apps/api/test
+.git
+.claude
+docs
+e2e
+tasks
+templates
+infra/osrm
+*.log
+*.png
+*.md
+Territory Rush_ Conquista de ruas
