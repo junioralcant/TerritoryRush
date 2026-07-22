@@ -10,7 +10,6 @@ docs
 e2e
 tasks
 templates
-infra/osrm
 *.log
 *.png
 *.md
